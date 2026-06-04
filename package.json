@@ -1,0 +1,16 @@
+{
+  "name": "astome-bot",
+  "version": "1.0.0",
+  "description": "ASTOme LINE Bot - 人生に、次の楽しみを。",
+  "main": "api/webhook.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@line/bot-sdk": "^9.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
