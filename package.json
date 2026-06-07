@@ -2,6 +2,7 @@
   "name": "astome-bot",
   "version": "1.0.0",
   "description": "ASTOme LINE Bot - 人生に、次の楽しみを。",
+  "type": "module",
   "main": "api/webhook.js",
   "scripts": {
     "dev": "vercel dev"
