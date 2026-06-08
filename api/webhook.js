@@ -428,17 +428,9 @@ export default async function handler(req, res) {
         max_tokens: 500,
         system: systemPrompt,
         messages: recentMessages,
-        tools: [
-          {
-            type: "web_search_20250305",
-            name: "web_search",
-          }
-        ],
       });
 
-      // web_search使用時はtextブロックを探す
-      const textBlock = response.content.find(b => b.type === "text");
-      const rawReply = textBlock ? textBlock.text : "ちょっと調べてみたんですが、うまく見つからなかったです😅 別の言い方で聞いてみてもらえますか？";
+      const rawReply = response.content[0].text;
 
       // カレンダー・シェアJSONの検知
       let replyText = rawReply;
