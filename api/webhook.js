@@ -24,13 +24,12 @@ const redis = {
     return data.result ? JSON.parse(data.result) : null;
   },
   async set(key, value) {
-    await fetch(`${process.env.KV_REST_API_URL}/set/${encodeURIComponent(key)}`, {
-      method: "POST",
+    const encoded = encodeURIComponent(JSON.stringify(value));
+    await fetch(`${process.env.KV_REST_API_URL}/set/${encodeURIComponent(key)}/${encoded}`, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ value: JSON.stringify(value) }),
     });
   },
 };
