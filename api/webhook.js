@@ -38,6 +38,71 @@ const redis = {
   },
 };
 
+// アフィリエイトリンク
+const BASE_URL = 'https://ck.jp.ap.valuecommerce.com/servlet/referral';
+const SID = '3772859';
+
+const AFFILIATE = {
+  asoview: {
+    pid: '892628806',
+    label: 'アソビュー',
+    searchUrl: 'https://www.asoview.com/search/?keyword=',
+    keywords: ['体験', 'アクティビティ', 'マラソン', 'ハイキング', 'スポーツ', 'ツアー', 'ワークショップ', '料理教室', 'アウトドア', 'キャンプ'],
+  },
+  jalan: {
+    pid: '892628809',
+    label: 'じゃらん',
+    searchUrl: 'https://www.jalan.net/rechercher/srv/hotel/defaultPage.do?screenId=OUW3701&keyword=',
+    keywords: ['温泉', 'ホテル', '旅館', '宿', '旅行', '国内旅行', 'リゾート', '観光', '泊まり'],
+  },
+  expedia: {
+    pid: '892628813',
+    label: 'エクスペディア',
+    searchUrl: 'https://www.expedia.co.jp/Hotel-Search?destination=',
+    keywords: ['海外', '海外旅行', '国際', 'ハワイ', 'グアム', 'ヨーロッパ', 'アジア', '海外ホテル'],
+  },
+  hotpepper: {
+    pid: '892628814',
+    label: 'ホットペッパーグルメ',
+    searchUrl: 'https://www.hotpepper.jp/SA/search/?freeword=',
+    keywords: ['グルメ', 'レストラン', '食事', 'ディナー', 'ランチ', 'カフェ', '居酒屋', '焼肉', 'カレー', 'ラーメン', 'パスタ'],
+  },
+  qoo10: {
+    pid: '892628816',
+    label: 'Qoo10',
+    searchUrl: 'https://www.qoo10.jp/gmkt.inc/Search/Search.aspx?keyword=',
+    keywords: ['ショッピング', 'コスメ', 'ファッション', '韓国', 'スキンケア', 'メイク', 'トレンド'],
+  },
+};
+
+// キーワードからアフィリエイトリンクを生成
+function buildAffiliateLink(service, keyword) {
+  const aff = AFFILIATE[service];
+  if (!aff) return null;
+  const encoded = encodeURIComponent(keyword);
+  const targetUrl = encodeURIComponent(aff.searchUrl + encoded);
+  return ;
+}
+
+// 会話からアフィリエイトを出すべきか判定
+function detectAffiliate(messages) {
+  // 直近10件のユーザー発言を取得
+  const userMessages = messages
+    .filter(m => m.role === 'user')
+    .slice(-10)
+    .map(m => m.content)
+    .join(' ');
+
+  for (const [service, config] of Object.entries(AFFILIATE)) {
+    const matched = config.keywords.filter(kw => userMessages.includes(kw));
+    if (matched.length >= 2) {
+      // 同じジャンルのキーワードが2回以上出たらリンクを出す
+      return { service, keyword: matched[0], label: config.label };
+    }
+  }
+  return null;
+}
+
 // オンボーディング用プロンプト
 const ONBOARDING_PROMPT = (userName) => `## あなたはアストです
 ASTOmeというサービスのマスコット・相棒キャラクターです。
@@ -273,9 +338,31 @@ export default async function handler(req, res) {
         }
       }
 
+      // アフィリエイト判定
+      let affiliateContext = '';
+      if (!userData.isFirstTime) {
+        const aff = detectAffiliate(userData.messages);
+        if (aff) {
+          const link = buildAffiliateLink(aff.service, aff.keyword);
+          affiliateContext = link
+            ? '
+
+【今日のアフィリエイト提案】
+' +
+              'ユーザーの会話に「' + aff.keyword + '」関連のキーワードが複数回出ています。
+' +
+              'プロンプトのアフィリエイト条件A・B・Cが揃ったと判断したら、以下のリンクを自然な流れで提示してください。
+' +
+              'リンクテキスト：' + aff.label + 'で探してみませんか？
+' +
+              'URL：' + link
+            : '';
+        }
+      }
+
       const systemPrompt = userData.isFirstTime
         ? ONBOARDING_PROMPT(userData.userName)
-        : CHECKIN_PROMPT(userData.userName);
+        : CHECKIN_PROMPT(userData.userName) + affiliateContext;
 
       userData.messages.push({
         role: "user",
