@@ -407,8 +407,9 @@ export default async function handler(req, res) {
       await saveUserData(userId, userData);
 
       // チェックインの最初のメッセージにクイックリプライを付ける
+      // messages.lengthが2 = ユーザー1発目 + アスト返答1回目のタイミング
       const isFirstCheckinMessage =
-        !userData.isFirstTime && userData.messages.length <= 2;
+        !userData.isFirstTime && userData.messages.length === 2;
 
       const quickReply = isFirstCheckinMessage
         ? {
