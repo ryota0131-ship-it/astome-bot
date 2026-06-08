@@ -180,23 +180,30 @@ async function saveUserData(userId, data) {
 
 // ユーザーが名前を教えてくれたか検出してセッションに保存
 function extractName(message, previousMessages) {
-  // 直近のASTOの発言に「何てお呼びしたら」が含まれていたら名前を受け取る
   const msgs = Array.isArray(previousMessages) ? previousMessages : [];
   const lastAssistantMsg = [...msgs].reverse().find(m => m.role === "assistant");
-  if (lastAssistantMsg && lastAssistantMsg.content.includes("お呼びしたら")) {
-    // 短いメッセージ（20文字以内）なら名前として扱う
-    const trimmed = message.trim();
-    if (trimmed.length <= 20 && !trimmed.includes("？") && !trimmed.includes("?")) {
-      // 「〇〇です」「〇〇と申します」などを除去
-      return trimmed
-        .replace(/です$/, "")
-        .replace(/と申します$/, "")
-        .replace(/といいます$/, "")
-        .replace(/だよ$/, "")
-        .replace(/だ$/, "")
-        .trim();
-    }
+  const isNameQuestion = lastAssistantMsg && (
+    lastAssistantMsg.content.includes("お呼びしたら") ||
+    lastAssistantMsg.content.includes("お名前") ||
+    lastAssistantMsg.content.includes("名前を")
+  );
+  if (!isNameQuestion) return null;
+
+  const trimmed = message.trim();
+
+  // 「〇〇って呼んで」「〇〇と呼んで」パターン
+  const callMeMatch = trimmed.match(/^(.+?)(?:って|と)呼んで/);
+  if (callMeMatch) return callMeMatch[1].trim();
+
+  // 「〇〇です」「〇〇だよ」パターン
+  const isMatch = trimmed.match(/^(.+?)(?:です|だよ|だ|といいます|と申します)$/);
+  if (isMatch) return isMatch[1].trim();
+
+  // 短いメッセージ（15文字以内）はそのまま名前として扱う
+  if (trimmed.length <= 15 && !trimmed.includes("？") && !trimmed.includes("?")) {
+    return trimmed;
   }
+
   return null;
 }
 
