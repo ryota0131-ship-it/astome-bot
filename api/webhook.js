@@ -244,6 +244,33 @@ OK：「何気ない動画から嫁さんとの秋の時間が浮かんでくる
 ・長文を一度に送らない
 ・Markdown記法は絶対に使わない`;
 
+// アフィリエイトリンクをプロンプト用に生成
+function buildAffiliateSection() {
+  const BASE = "https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3772859";
+  return `
+## 使えるアフィリエイトリンク
+条件A・B・Cが揃ったタイミングで、以下の中から最も合うリンクをひとつだけ、ユーザー自身の言葉を引用して自然に提示する。
+
+・体験・アクティビティ・マラソン・アウトドア系 → アソビュー
+  ${BASE}&pid=892628806
+
+・国内温泉・ホテル・旅館・旅行系 → じゃらん
+  ${BASE}&pid=892628809
+
+・海外旅行・海外ホテル系 → エクスペディア
+  ${BASE}&pid=892628813
+
+・グルメ・レストラン・ランチ・ディナー系 → ホットペッパーグルメ
+  ${BASE}&pid=892628814
+
+・ファッション・コスメ・韓国系 → Qoo10
+  ${BASE}&pid=892628816
+
+出し方の例：「りょうたさんが温泉に行きたいって言ってたじゃないですか😊 じゃらんで探してみませんか？ → [URL]」
+リンクを出した後は押しつけない。「もし気が向いたら」のトーンで。
+`;
+}
+
 // ユーザーデータをRedisから取得（なければ初期値）
 async function getUserData(userId) {
   const raw = await redis.get(`user:${userId}`);
@@ -338,21 +365,9 @@ export default async function handler(req, res) {
         }
       }
 
-      // アフィリエイト判定
-      let affiliateContext = '';
-      if (!userData.isFirstTime) {
-        const aff = detectAffiliate(userData.messages);
-        if (aff) {
-          const link = buildAffiliateLink(aff.service, aff.keyword);
-          affiliateContext = link
-            ? `\n\n【今日のアフィリエイト提案】\nユーザーの会話に「${aff.keyword}」関連のキーワードが複数回出ています。\nプロンプトのアフィリエイト条件A・B・Cが揃ったと判断したら、以下のリンクを自然な流れで提示してください。\nリンクテキスト：${aff.label}で探してみませんか？\nURL：${link}`
-            : '';
-        }
-      }
-
       const systemPrompt = userData.isFirstTime
         ? ONBOARDING_PROMPT(userData.userName)
-        : CHECKIN_PROMPT(userData.userName) + affiliateContext;
+        : CHECKIN_PROMPT(userData.userName) + buildAffiliateSection();
 
       userData.messages.push({
         role: "user",
