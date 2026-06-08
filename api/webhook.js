@@ -179,7 +179,8 @@ async function saveUserData(userId, data) {
 // ユーザーが名前を教えてくれたか検出してセッションに保存
 function extractName(message, previousMessages) {
   // 直近のASTOの発言に「何てお呼びしたら」が含まれていたら名前を受け取る
-  const lastAssistantMsg = [...previousMessages].reverse().find(m => m.role === "assistant");
+  const msgs = Array.isArray(previousMessages) ? previousMessages : [];
+  const lastAssistantMsg = [...msgs].reverse().find(m => m.role === "assistant");
   if (lastAssistantMsg && lastAssistantMsg.content.includes("お呼びしたら")) {
     // 短いメッセージ（20文字以内）なら名前として扱う
     const trimmed = message.trim();
