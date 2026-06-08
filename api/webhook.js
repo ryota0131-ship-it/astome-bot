@@ -406,9 +406,50 @@ export default async function handler(req, res) {
       // Redisに保存
       await saveUserData(userId, userData);
 
+      // チェックインの最初のメッセージにクイックリプライを付ける
+      const isFirstCheckinMessage =
+        !userData.isFirstTime && userData.messages.length <= 2;
+
+      const quickReply = isFirstCheckinMessage
+        ? {
+            items: [
+              {
+                type: "action",
+                action: {
+                  type: "message",
+                  label: "昨日の続きを育てる",
+                  text: "昨日の続きを育てたい",
+                },
+              },
+              {
+                type: "action",
+                action: {
+                  type: "message",
+                  label: "今の種を見てみる",
+                  text: "今の種を見てみたい",
+                },
+              },
+              {
+                type: "action",
+                action: {
+                  type: "message",
+                  label: "新しい種を探す",
+                  text: "新しい種を探したい",
+                },
+              },
+            ],
+          }
+        : undefined;
+
       await client.replyMessage({
         replyToken: replyToken,
-        messages: [{ type: "text", text: replyText }],
+        messages: [
+          {
+            type: "text",
+            text: replyText,
+            ...(quickReply ? { quickReply } : {}),
+          },
+        ],
       });
 
     } catch (error) {
