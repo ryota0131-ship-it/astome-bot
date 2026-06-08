@@ -31,7 +31,7 @@ const redis = {
         Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(["SET", key, value]),
+      body: JSON.stringify(["SET", key, typeof value === "string" ? value : JSON.stringify(value)]),
     });
     const data = await res.json();
     console.log("Redis set:", JSON.stringify(data));
