@@ -226,6 +226,20 @@ OK：「何気ない動画から嫁さんとの秋の時間が浮かんでくる
 同じ種を10往復以上掘り続けていたら、種に名前をつけて締める。名前はユーザー自身が使った言葉から取る。造語にしない。
 例：「今日の種、『日常から離れたい』って呼んでおきますね🌱 また明日続きを話しましょう。」
 
+【カレンダー提案】
+会話の中で具体的な予定（月・場所・イベント名など）が出てきて、締めのタイミングになったら、以下のように聞く：
+「カレンダーに入れてみますか？」
+ユーザーが「うん」「はい」「お願い」などYESを返したら、以下のJSON形式だけを返す（他のテキストは一切含めない）：
+{"calendar": true, "title": "予定のタイトル", "date": "YYYY-MM（日付が不明な場合は月まで）", "description": "簡単な説明"}
+例：{"calendar": true, "title": "鬼怒川温泉 嫁さんと", "date": "2026-09", "description": "温泉・プール・食べ放題"}
+
+【LINEシェア提案】
+一緒に行く人（嫁さん・友達など）が会話に出てきて、具体的な計画が見えてきたら、以下のように聞く：
+「嫁さんにも送ってみますか？」（一人の場合は「誰かに共有してみますか？」）
+ユーザーがYESを返したら、以下のJSON形式だけを返す（他のテキストは一切含めない）：
+{"share": true, "text": "共有するメッセージ内容（アストが考えた自然な文章）"}
+例：{"share": true, "text": "9月に鬼怒川温泉行こうと思ってるんだけど、一緒にどう？温泉もプールも食べ放題もあるよ🌱"}
+
 ## アフィリエイトリンクを出すタイミング
 条件A：同じテーマが複数回の会話に渡って出てきている
 条件B：ユーザーが具体的な言葉で未来を語れるようになっている
@@ -391,7 +405,40 @@ export default async function handler(req, res) {
         messages: recentMessages,
       });
 
-      const replyText = response.content[0].text;
+      const rawReply = response.content[0].text;
+
+      // カレンダー・シェアJSONの検知
+      let replyText = rawReply;
+      let calendarUrl = null;
+      let shareUrl = null;
+      try {
+        const jsonMatch = rawReply.match(/\{[\s\S]*?("calendar"|"share")[\s\S]*?\}/);
+        if (jsonMatch) {
+          const data = JSON.parse(jsonMatch[0]);
+
+          // カレンダー
+          if (data.calendar) {
+            const title = encodeURIComponent(data.title || "予定");
+            const desc = encodeURIComponent(data.description || "");
+            let dates = "";
+            if (data.date) {
+              const d = data.date.replace("-", "");
+              dates = d.length === 6 ? `${d}01/${d}28` : "";
+            }
+            calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${desc}${dates ? `&dates=${dates}` : ""}`;
+            replyText = "カレンダーリンクを作りました😊 タップして追加してみてください🌱";
+          }
+
+          // LINEシェア
+          if (data.share) {
+            const text = encodeURIComponent(data.text || "");
+            shareUrl = `https://social-plugins.line.me/lineit/share?text=${text}`;
+            replyText = "シェア用のメッセージを作りました😊 タップして送ってみてください🌱";
+          }
+        }
+      } catch (e) {
+        // JSON解析失敗はそのままテキストとして扱う
+      }
 
       userData.messages.push({
         role: "assistant",
@@ -442,15 +489,41 @@ export default async function handler(req, res) {
           }
         : undefined;
 
-      await client.replyMessage({
-        replyToken: replyToken,
-        messages: [
+      // カレンダー・シェアボタンの組み立て
+      let replyMessages;
+      if (calendarUrl || shareUrl) {
+        const actions = [];
+        if (calendarUrl) {
+          actions.push({ type: "uri", label: "📅 カレンダーに追加", uri: calendarUrl });
+        }
+        if (shareUrl) {
+          actions.push({ type: "uri", label: "📤 LINEでシェア", uri: shareUrl });
+        }
+        replyMessages = [
+          { type: "text", text: replyText },
+          {
+            type: "template",
+            altText: "アクションボタン",
+            template: {
+              type: "buttons",
+              text: "こちらからどうぞ",
+              actions,
+            },
+          },
+        ];
+      } else {
+        replyMessages = [
           {
             type: "text",
             text: replyText,
             ...(quickReply ? { quickReply } : {}),
           },
-        ],
+        ];
+      }
+
+      await client.replyMessage({
+        replyToken: replyToken,
+        messages: replyMessages,
       });
 
     } catch (error) {
