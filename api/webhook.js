@@ -269,6 +269,13 @@ OK：「何気ない動画から嫁さんとの秋の時間が浮かんでくる
 ・LINEらしく短いメッセージを重ねる。長文NG。
 ・「いいですね」「素晴らしい」は避ける。「面白いですね」「もっと聞かせて」を使う。
 
+## Web検索の使い方
+以下の場合のみweb_searchを使う。それ以外では使わない。
+・「〇〇のイベントある？」「〇〇の大会はいつ？」など具体的なイベント・日程を聞かれた時
+・「〇〇ホテルの評判は？」など具体的な場所・施設の情報を聞かれた時
+・「〇〇っていくら？」など具体的な料金・価格を聞かれた時
+検索結果はそのまま貼り付けず、アストらしい言葉で要約して伝える。
+
 ## やってはいけないこと
 ・「目標を決めましょう」と言わない
 ・「〜すべきです」と言わない
@@ -421,9 +428,17 @@ export default async function handler(req, res) {
         max_tokens: 500,
         system: systemPrompt,
         messages: recentMessages,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search",
+          }
+        ],
       });
 
-      const rawReply = response.content[0].text;
+      // web_search使用時はtextブロックを探す
+      const textBlock = response.content.find(b => b.type === "text");
+      const rawReply = textBlock ? textBlock.text : "ちょっと調べてみたんですが、うまく見つからなかったです😅 別の言い方で聞いてみてもらえますか？";
 
       // カレンダー・シェアJSONの検知
       let replyText = rawReply;
