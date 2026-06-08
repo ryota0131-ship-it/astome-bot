@@ -546,9 +546,32 @@ export default async function handler(req, res) {
 
     } catch (error) {
       console.error("Error:", error);
+
+      // エラーの種類に応じてメッセージを変える
+      let errorMessage = "ごめんね、ちょっとうまく聞き取れなかった😅 もう一度話しかけてみて！";
+
+      const errorStr = error?.message || error?.toString() || "";
+      const status = error?.status || error?.statusCode || 0;
+
+      if (
+        status === 429 ||
+        errorStr.includes("rate_limit") ||
+        errorStr.includes("overloaded") ||
+        errorStr.includes("529")
+      ) {
+        errorMessage = "ただいまたくさんの方にご利用いただいていて、少し混み合っています😊 しばらくしてからもう一度話しかけてみてください🌱";
+      } else if (
+        status === 402 ||
+        errorStr.includes("credit") ||
+        errorStr.includes("billing") ||
+        errorStr.includes("quota")
+      ) {
+        errorMessage = "ただいまメンテナンス中です🌱 しばらくお待ちください😊";
+      }
+
       await client.replyMessage({
         replyToken: replyToken,
-        messages: [{ type: "text", text: "ごめんね、ちょっとうまく聞き取れなかった😅 もう一度話しかけてみて！" }],
+        messages: [{ type: "text", text: errorMessage }],
       });
     }
   }
