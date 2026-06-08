@@ -345,17 +345,7 @@ export default async function handler(req, res) {
         if (aff) {
           const link = buildAffiliateLink(aff.service, aff.keyword);
           affiliateContext = link
-            ? '
-
-【今日のアフィリエイト提案】
-' +
-              'ユーザーの会話に「' + aff.keyword + '」関連のキーワードが複数回出ています。
-' +
-              'プロンプトのアフィリエイト条件A・B・Cが揃ったと判断したら、以下のリンクを自然な流れで提示してください。
-' +
-              'リンクテキスト：' + aff.label + 'で探してみませんか？
-' +
-              'URL：' + link
+            ? `\n\n【今日のアフィリエイト提案】\nユーザーの会話に「${aff.keyword}」関連のキーワードが複数回出ています。\nプロンプトのアフィリエイト条件A・B・Cが揃ったと判断したら、以下のリンクを自然な流れで提示してください。\nリンクテキスト：${aff.label}で探してみませんか？\nURL：${link}`
             : '';
         }
       }
