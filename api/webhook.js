@@ -175,9 +175,18 @@ async function getUserData(userId) {
 
 // ユーザーデータをRedisに保存
 async function saveUserData(userId, data) {
-  // 会話履歴は直近30件だけ保持（コスト節約）
-  data.messages = data.messages.slice(-30);
-  await redis.set(`user:${userId}`, data);
+  // 会話履歴は直近10件だけ保持
+  const trimmedMessages = data.messages.slice(-10).map(m => ({
+    role: m.role,
+    // contentは500文字に切り詰め
+    content: m.content.slice(0, 500),
+  }));
+  const payload = {
+    userName: data.userName,
+    isFirstTime: data.isFirstTime,
+    messages: trimmedMessages,
+  };
+  await redis.set(`user:${userId}`, payload);
 }
 
 // ユーザーが名前を教えてくれたか検出してセッションに保存
