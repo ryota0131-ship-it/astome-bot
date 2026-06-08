@@ -346,7 +346,14 @@ export default async function handler(req, res) {
   const events = req.body.events;
 
   for (const event of events) {
-    if (event.type !== "message" || event.message.type !== "text") {
+    if (event.type !== "message") continue;
+
+    if (event.message.type !== "text") {
+      // 画像・動画・音声など非テキストへの返答
+      await client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{ type: "text", text: "ごめんね、今は画像や動画を見ることができないんだ😅 言葉で教えてもらえると、一緒に考えられるよ！" }],
+      });
       continue;
     }
 
