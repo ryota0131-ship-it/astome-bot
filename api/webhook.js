@@ -312,6 +312,7 @@ async function saveUserData(userId, data) {
     isFirstTime: data.isFirstTime,
     messages: trimmedMessages,
     seeds: Array.isArray(data.seeds) ? data.seeds : [],
+    lastMessageAt: Date.now(),
   };
   await redis.set(`user:${userId}`, payload);
 }
