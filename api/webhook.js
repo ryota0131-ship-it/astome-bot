@@ -816,7 +816,8 @@ export default async function handler(req, res) {
           }
 
 // 未来イベントのstatus更新
-if (data.futureEventStatusUpdate && (data.title || data.id)) {
+if (data.futureEventStatusUpdate && (data.title || data.id))
+{  if (Array.isArray(userData.futureEvents)) {
   const event = userData.futureEvents.find(e =>
     (data.id ? e.id === data.id : e.title === data.title) &&
     e.status !== "harvest" &&
