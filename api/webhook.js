@@ -792,93 +792,67 @@ export default async function handler(req, res) {
             // harvestedSeedsに独立保存（同じ種の重複追加を防止）
             if (!Array.isArray(userData.harvestedSeeds)) userData.harvestedSeeds = [];
             const alreadyHarvested = userData.harvestedSeeds.some(h => h.name === data.seed);
-            if (!alreadyHarvested) {
-            // 関連する未来イベントの日付を「未来だった日」として取得
-            const relatedEvent = Array.isArray(userData.futureEvents)
-              ? userData.futureEvents.find(e => e.sourceSeed === data.seed)
-              : null;
-            const futureDate = relatedEvent ? relatedEvent.date : null;
-            // 元の種の「最初の言葉」を取得（発見時のoriginalWish）
-            const originalSeed = userData.seeds[seedIdx];
-            userData.harvestedSeeds.push({
-              name: data.seed,
-              harvestNote: data.result || "",
-              harvestedAt,
-              futureTitle: relatedFutureTitle,
-              futureDate,
-              originalWish: originalSeed ? (originalSeed.originalWish || null) : null,
-              nextSeed: null,
-            });
-            } // end if (!alreadyHarvested)
+            if (alreadyHarvested) {
+              replyText = replyText.replace(match[0], "").trim();
+            } else {
+              // 関連する未来イベントの日付を「未来だった日」として取得
+              const relatedEvent = Array.isArray(userData.futureEvents)
+                ? userData.futureEvents.find(e => e.sourceSeed === data.seed)
+                : null;
+              const futureDate = relatedEvent ? relatedEvent.date : null;
+              const originalSeed = userData.seeds[seedIdx];
+              userData.harvestedSeeds.push({
+                name: data.seed,
+                harvestNote: data.result || "",
+                harvestedAt,
+                futureTitle: relatedFutureTitle,
+                futureDate,
+                originalWish: originalSeed ? (originalSeed.originalWish || null) : null,
+                nextSeed: null,
+              });
+              replyText = replyText.replace(match[0], "").trim();
+            }
+          }
 
+          // 未来イベントのstatus更新
+          if (data.futureEventStatusUpdate && (data.title || data.id)) {
+              const event = userData.futureEvents.find(e =>
+                // id優先、なければtitleで検索
+                (data.id ? e.id === data.id : e.title === data.title) &&
+                e.status !== "harvest" &&
+                (data.sourceSeed ? e.sourceSeed === data.sourceSeed : true)
+              );
+              if (event && data.status && data.status !== event.status) {
+                const now = Date.now();
+                // historyに変化を記録
+                if (!Array.isArray(event.history)) event.history = [];
+                event.history.push({ status: data.status, at: now });
+                event.status = data.status;
+                event.updatedAt = now;
+                // futureBalanceHistoryにも記録
+                const STATUS_POINT_SU = { dream:1, interest:2, plan:3, scheduled:5 };
+                const currentBalance = (userData.futureEvents||[])
+                  .filter(e => e.status !== "harvest" && e.status !== "done")
+                  .reduce((s,e) => s+(STATUS_POINT_SU[e.status]||0), 0);
+                const fromStatus = event.history.length >= 2 ? event.history[event.history.length-2].status : null;
+                const delta = (STATUS_POINT_SU[data.status]||0) - (STATUS_POINT_SU[fromStatus]||0);
+                if (!Array.isArray(userData.futureBalanceHistory)) userData.futureBalanceHistory = [];
+                userData.futureBalanceHistory.push({
+                  date: new Date().toISOString().slice(0,10),
+                  balance: currentBalance,
+                  reason: "event_status_updated",
+                  title: event.title, // data.titleでなくevent.titleを使う（id更新時にdata.titleが存在しない場合のため）
+                  fromStatus,
+                  toStatus: data.status,
+                  delta,
+                });
+              }
+            }
             replyText = replyText.replace(match[0], "").trim();
           }
 
-// 未来イベントのstatus更新
-if (data.futureEventStatusUpdate && (data.title || data.id)) {
-  if (Array.isArray(userData.futureEvents)) {
-    const event = userData.futureEvents.find(e =>
-      (data.id ? e.id === data.id : e.title === data.title) &&
-      e.status !== "harvest" &&
-      (data.sourceSeed ? e.sourceSeed === data.sourceSeed : true)
-    );
-
-    if (event && data.status && data.status !== event.status) {
-      const now = Date.now();
-
-      if (!Array.isArray(event.history)) {
-        event.history = [];
-      }
-
-      event.history.push({
-        status: data.status,
-        at: now,
-      });
-
-      const previousStatus = event.status;
-
-      event.status = data.status;
-      event.updatedAt = now;
-
-      const STATUS_POINT_SU = {
-        dream: 1,
-        interest: 2,
-        plan: 3,
-        scheduled: 5,
-      };
-
-      const currentBalance = (userData.futureEvents || [])
-        .filter(e => e.status !== "harvest" && e.status !== "done")
-        .reduce(
-          (sum, e) => sum + (STATUS_POINT_SU[e.status] || 0),
-          0
-        );
-
-      const delta =
-        (STATUS_POINT_SU[data.status] || 0) -
-        (STATUS_POINT_SU[previousStatus] || 0);
-
-      if (!Array.isArray(userData.futureBalanceHistory)) {
-        userData.futureBalanceHistory = [];
-      }
-
-      userData.futureBalanceHistory.push({
-        date: new Date().toISOString().slice(0, 10),
-        balance: currentBalance,
-        reason: "event_status_updated",
-        title: event.title,
-        fromStatus: previousStatus,
-        toStatus: data.status,
-        delta,
-      });
-    }
-  }
-
-  replyText = replyText.replace(match[0], "").trim();
-}
-
-// NextAction完了処理
-if (data.completeAction && data.text) {
+          // NextAction完了処理
+          if (data.completeAction && data.text) {
             if (Array.isArray(userData.nextActions)) {
               const action = userData.nextActions.find(a =>
                 a.status === "pending" && (
@@ -1052,7 +1026,5 @@ if (data.completeAction && data.text) {
         messages: [{ type: "text", text: errorMessage }],
       });
     }
-  }
-
   res.status(200).json({ status: "ok" });
 }
