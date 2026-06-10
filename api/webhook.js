@@ -497,6 +497,27 @@ export default async function handler(req, res) {
 
     const userId = event.source.userId;
     const userMessage = event.message.text;
+    // 未来カレンダー表示リクエストの検知
+const calendarKeywords = ["カレンダー", "種を見", "未来を見", "今の種", "未来イベント", "カレンダー見せて"];
+if (calendarKeywords.some(kw => userMessage.includes(kw))) {
+  await client.replyMessage({
+    replyToken: event.replyToken,
+    messages: [{
+      type: "template",
+      altText: "未来カレンダーを開く",
+      template: {
+        type: "buttons",
+        text: "今の未来カレンダーはこちらから見れますよ🌱",
+        actions: [{
+          type: "uri",
+          label: "📅 未来カレンダーを開く",
+          uri: `https://astome-bot.vercel.app/calendar?userId=${userId}`
+        }]
+      }
+    }]
+  });
+  continue;
+}
     const replyToken = event.replyToken;
 
     try {
