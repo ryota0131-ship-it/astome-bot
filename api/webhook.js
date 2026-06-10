@@ -847,7 +847,7 @@ export default async function handler(req, res) {
                   delta,
                 });
               }
-            }
+            
             replyText = replyText.replace(match[0], "").trim();
           }
 
