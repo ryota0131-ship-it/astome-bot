@@ -816,28 +816,63 @@ export default async function handler(req, res) {
           }
 
 // 未来イベントのstatus更新
-if (data.futureEventStatusUpdate && (data.title || data.id))
-{  if (Array.isArray(userData.futureEvents)) {
-  const event = userData.futureEvents.find(e =>
-    (data.id ? e.id === data.id : e.title === data.title) &&
-    e.status !== "harvest" &&
-    (data.sourceSeed ? e.sourceSeed === data.sourceSeed : true)
-  );
+if (data.futureEventStatusUpdate && (data.title || data.id)) {
+  if (Array.isArray(userData.futureEvents)) {
+    const event = userData.futureEvents.find(e =>
+      (data.id ? e.id === data.id : e.title === data.title) &&
+      e.status !== "harvest" &&
+      (data.sourceSeed ? e.sourceSeed === data.sourceSeed : true)
+    );
 
-  if (event && data.status && data.status !== event.status) {
-    const now = Date.now();
+    if (event && data.status && data.status !== event.status) {
+      const now = Date.now();
 
-    if (!Array.isArray(event.history)) event.history = [];
+      if (!Array.isArray(event.history)) {
+        event.history = [];
+      }
 
-    event.history.push({
-      status: data.status,
-      at: now,
-    });
+      event.history.push({
+        status: data.status,
+        at: now,
+      });
 
-    event.status = data.status;
-    event.updatedAt = now;
+      const previousStatus = event.status;
 
-    ...
+      event.status = data.status;
+      event.updatedAt = now;
+
+      const STATUS_POINT_SU = {
+        dream: 1,
+        interest: 2,
+        plan: 3,
+        scheduled: 5,
+      };
+
+      const currentBalance = (userData.futureEvents || [])
+        .filter(e => e.status !== "harvest" && e.status !== "done")
+        .reduce(
+          (sum, e) => sum + (STATUS_POINT_SU[e.status] || 0),
+          0
+        );
+
+      const delta =
+        (STATUS_POINT_SU[data.status] || 0) -
+        (STATUS_POINT_SU[previousStatus] || 0);
+
+      if (!Array.isArray(userData.futureBalanceHistory)) {
+        userData.futureBalanceHistory = [];
+      }
+
+      userData.futureBalanceHistory.push({
+        date: new Date().toISOString().slice(0, 10),
+        balance: currentBalance,
+        reason: "event_status_updated",
+        title: event.title,
+        fromStatus: previousStatus,
+        toStatus: data.status,
+        delta,
+      });
+    }
   }
 
   replyText = replyText.replace(match[0], "").trim();
