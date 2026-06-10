@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTOme</title>
+<style>
+  :root {
+    --dark: #0E1D2B;
+    --sage: #7E9D88;
+    --sage-light: #C6D3C3;
+    --gold: #F3C25B;
+    --ivory: #F4EEDC;
+    --text: #1a2a1a;
+    --muted: #6b7d6b;
+    --r: 16px;
+    --rs: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--ivory); color: var(--text); font-family: -apple-system,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; min-height: 100vh; padding-bottom: 80px; }
+
+  .header { background: var(--dark); padding: 18px 16px 0; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand-name { color: var(--ivory); font-size: 15px; font-weight: 700; }
+
+  /* 未来残高（感情的なコピー付き） */
+  .balance-block { text-align: right; }
+  .balance-main { background: var(--gold); color: var(--dark); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: baseline; gap: 3px; }
+  .balance-num { font-size: 20px; font-weight: 800; line-height: 1; }
+  .balance-copy { color: rgba(255,255,255,0.55); font-size: 10px; margin-top: 4px; line-height: 1.5; }
+  .balance-copy span { color: var(--gold); font-weight: 700; }
+
+  .tabs { display: flex; }
+  .tab { flex: 1; padding: 10px 2px; border: none; background: transparent; color: rgba(255,255,255,0.4); font-size: 10px; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 700; }
+
+  .content { padding: 16px; display: none; }
+  .content.active { display: block; }
+
+  .group-hd { display: flex; align-items: center; gap: 6px; margin: 20px 0 8px; }
+  .group-hd:first-child { margin-top: 4px; }
+  .group-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .event-card { background: white; border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-scheduled { background: #4CAF50; }
+  .dot-plan { background: var(--gold); }
+  .dot-interest { background: var(--sage); }
+  .dot-dream { background: var(--sage-light); }
+  .event-body { flex: 1; }
+  .event-title { font-size: 15px; font-weight: 600; }
+  .event-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .event-badge { font-size: 10px; padding: 3px 8px; border-radius: 20px; background: var(--ivory); color: var(--muted); font-weight: 600; flex-shrink: 0; }
+
+  .seed-card { background: white; border-radius: var(--r); padding: 14px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .seed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .seed-name { font-size: 15px; font-weight: 600; }
+  .seed-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
+  .b-discovered { background: #e8f4e8; color: #2d6a2d; }
+  .b-interested { background: #e8eef8; color: #2d3d6a; }
+  .b-planning { background: #fff8e0; color: #7a5a00; }
+  .b-booked { background: #e0f8e0; color: #1a5a1a; }
+  .progress { height: 3px; background: var(--sage-light); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .progress-bar { height: 100%; background: var(--sage); border-radius: 2px; }
+  .seed-cat { font-size: 11px; color: var(--muted); }
+
+  .harvest-card { background: white; border-radius: var(--r); padding: 18px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 4px solid var(--gold); }
+  .harvest-badge { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .harvest-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  .harvest-items { display: flex; flex-direction: column; gap: 8px; }
+  .harvest-item { background: var(--ivory); border-radius: var(--rs); padding: 10px 12px; }
+  .item-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+  .item-value { font-size: 13px; line-height: 1.5; }
+  .harvest-next { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--sage); font-weight: 600; margin-top: 10px; }
+
+  /* 物語 */
+  .lc-chain { background: white; border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .lc-chain-title { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--ivory); }
+  .lc-steps { display: flex; flex-direction: column; position: relative; }
+  .lc-step { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; position: relative; }
+  .lc-step:not(:last-child)::after { content:''; position: absolute; left: 9px; top: 26px; width: 2px; height: calc(100% - 14px); background: var(--sage-light); }
+  .lc-dot-wrap { flex-shrink: 0; width: 20px; display: flex; justify-content: center; padding-top: 2px; }
+  .lc-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px var(--sage-light); }
+  .lc-dot-seed { background: var(--sage); }
+  .lc-dot-event { background: var(--gold); }
+  .lc-dot-harvest { background: #c07a30; }
+  .lc-dot-nextseed { background: #4CAF50; }
+  .lc-body { flex: 1; }
+  .lc-type { display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 700; margin-bottom: 2px; }
+  .lc-type-seed { background: #e8f4e8; color: #2d6a2d; }
+  .lc-type-event { background: #fff8e0; color: #7a5a00; }
+  .lc-type-harvest { background: #fdf0e0; color: #7a3a00; }
+  .lc-type-nextseed { background: #e0f8e0; color: #1a5a1a; }
+  .lc-title { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .lc-note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* 月次レポート */
+  .month-card { background: white; border-radius: var(--r); padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .month-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+  .month-balance-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--ivory); }
+  .month-balance-num { font-size: 28px; font-weight: 800; color: var(--dark); }
+  .month-balance-arrow { font-size: 16px; color: var(--muted); }
+  .month-balance-change { }
+  .month-balance-from { font-size: 11px; color: var(--muted); }
+  .month-balance-to { font-size: 22px; font-weight: 800; color: var(--sage); }
+  .month-balance-diff { font-size: 11px; color: var(--sage); font-weight: 700; }
+
+  .month-section { margin-bottom: 12px; }
+  .month-section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .month-list { display: flex; flex-direction: column; gap: 4px; }
+  .month-list-item { font-size: 13px; color: var(--text); padding: 6px 10px; background: var(--ivory); border-radius: var(--rs); }
+
+  /* グラフ */
+  .graph-card { background: white; border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .graph-title { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+  .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--sage); min-height: 3px; }
+  .bar-label { font-size: 9px; color: var(--muted); }
+  .bar-event { background: var(--gold); }
+
+  .empty { text-align: center; padding: 60px 16px; color: var(--muted); }
+  .empty-icon { font-size: 44px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; line-height: 1.7; }
+
+  .loading { text-align: center; padding: 60px 16px; color: var(--muted); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--sage-light); border-top-color: var(--sage); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="brand">
+      <span style="font-size:22px">🐋</span>
+      <span class="brand-name">ASTOme</span>
+    </div>
+    <div class="balance-block">
+      <div class="balance-main">🌱 未来残高&nbsp;<span class="balance-num" id="balance-num">0</span><span style="font-size:11px">pt</span></div>
+      <div class="balance-copy" id="balance-copy"></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('calendar')">🗓 未来</button>
+    <button class="tab" onclick="switchTab('seeds')">🌱 種</button>
+    <button class="tab" onclick="switchTab('harvest')">🌾 収穫</button>
+    <button class="tab" onclick="switchTab('story')">📖 物語</button>
+    <button class="tab" onclick="switchTab('report')">📊 月次</button>
+  </div>
+</div>
+
+<div class="content active" id="tab-calendar"></div>
+<div class="content" id="tab-seeds"></div>
+<div class="content" id="tab-harvest"></div>
+<div class="content" id="tab-story"></div>
+<div class="content" id="tab-report"></div>
+
+<script>
+const STATUS_LABEL = {dream:'いつか',interest:'興味あり',plan:'計画中',scheduled:'予約済み'};
+const STAGE_LABEL = {discovered:'発見',interested:'興味',planning:'計画中',booked:'予約済み',experienced:'体験済み'};
+const STAGE_PROGRESS = {discovered:15,interested:35,planning:60,booked:80,experienced:95};
+const STATUS_POINT = {dream:1,interest:2,plan:3,scheduled:5};
+
+const demo = {
+  futureEvents: [
+    {title:'釧路湿原マラソン',status:'scheduled',date:'2026-07',sourceSeed:'釧路マラソン'},
+    {title:'鬼怒川温泉',status:'plan',date:'2026-09',sourceSeed:'鬼怒川でリセット'},
+    {title:'嫁さんと寿司',status:'interest',date:null,sourceSeed:'グルメ探し'},
+    {title:'屋久島',status:'dream',date:null,sourceSeed:null},
+    {title:'スカイダイビング',status:'dream',date:null,sourceSeed:null},
+  ],
+  seeds: [
+    {name:'釧路マラソン',category:'体験',stage:'booked',createdAt:Date.now()-60*86400*1000,originalWish:'釧路で走りたい'},
+    {name:'鬼怒川でリセット',category:'旅行',stage:'planning',createdAt:Date.now()-30*86400*1000,originalWish:'温泉行きたいなー'},
+    {name:'グルメ探し',category:'グルメ',stage:'interested',createdAt:Date.now()-14*86400*1000,originalWish:'美味しいもの食べたい'},
+    {name:'ペペロンチーノ自作',category:'料理',stage:'discovered',createdAt:Date.now()-5*86400*1000,originalWish:'ペペロンチーノってどう作るの'},
+  ],
+  harvestedSeeds: [
+    {name:'カツカレー探し',harvestNote:'蒲田のいっぺこっぺ、最高だった。',harvestedAt:Date.now()-7*86400*1000,futureTitle:'蒲田カツカレー',futureDate:'2026-05',nextSeed:'グルメ探し',originalWish:'美味しいカツカレー探してた'},
+  ],
+  futureBalanceHistory: [
+    {date:'2026-06-01',balance:4},
+    {date:'2026-06-03',balance:7,reason:'futureEventAdded',title:'鬼怒川温泉',addedPt:3},
+    {date:'2026-06-05',balance:9,reason:'futureEventAdded',title:'嫁さんと寿司',addedPt:2},
+    {date:'2026-06-07',balance:12,reason:'futureEventAdded',title:'屋久島',addedPt:1},
+    {date:'2026-06-09',balance:14},
+  ],
+};
+
+const fmtDate = d => {if(!d)return 'いつか';const[y,m]=d.split('-');return`${y}年${parseInt(m)}月`;};
+const fmtTs = ts => {if(!ts)return'';const d=new Date(ts);return`${d.getFullYear()}年${d.getMonth()+1}月`;};
+const calcBal = events => events.filter(e=>e.status!=='harvest'&&e.status!=='done').reduce((s,e)=>s+(STATUS_POINT[e.status]||0),0);
+
+function initBalance(data) {
+  const bal = calcBal(data.futureEvents);
+  document.getElementById('balance-num').textContent = bal;
+
+  const hist = data.futureBalanceHistory || [];
+  const lines = [];
+
+  // 意味のあるコピー
+  lines.push(`今楽しみにしている未来が<span>${bal}pt</span>分あります`);
+
+  // 前回差分
+  if (hist.length >= 2) {
+    const prev = hist[hist.length-2].balance;
+    const diff = bal - prev;
+    if (diff > 0) lines.push(`前回から <span>+${diff}pt</span> 増えた`);
+  }
+
+  // 次のマイルストーン
+  const next = [5,10,15,20,30,50].find(m=>m>bal);
+  if (next) lines.push(`あと<span>${next-bal}pt</span>で${next}pt`);
+
+  document.getElementById('balance-copy').innerHTML = lines.join('<br>');
+}
+
+function renderCalendar(data) {
+  const el = document.getElementById('tab-calendar');
+  const active = data.futureEvents.filter(e=>e.status!=='harvest'&&e.status!=='done');
+  if(!active.length){el.innerHTML=empty('🗓','未来カレンダーはまだ空です<br>アストと話して未来を増やそう🌱');return;}
+  const hot=active.filter(e=>e.status==='scheduled');
+  const warm=active.filter(e=>['plan','interest'].includes(e.status));
+  const dream=active.filter(e=>e.status==='dream');
+  let h='';
+  if(hot.length){h+=ghd('🔥','もうすぐ叶いそう');hot.forEach(e=>h+=ec(e));}
+  if(warm.length){h+=ghd('🌱','育て中');warm.forEach(e=>h+=ec(e));}
+  if(dream.length){h+=ghd('✨','いつか');dream.forEach(e=>h+=ec(e));}
+  el.innerHTML=h;
+}
+const ghd=(em,lb)=>`<div class="group-hd"><span>${em}</span><span class="group-label">${lb}</span></div>`;
+const ec=e=>`<div class="event-card"><div class="dot dot-${e.status}"></div><div class="event-body"><div class="event-title">${e.title}</div><div class="event-date">${fmtDate(e.date)}</div></div><div class="event-badge">${STATUS_LABEL[e.status]||e.status}</div></div>`;
+
+function renderSeeds(data) {
+  const el=document.getElementById('tab-seeds');
+  const active=data.seeds.filter(s=>s.stage!=='harvested');
+  if(!active.length){el.innerHTML=empty('🌱','育っている種がありません');return;}
+  el.innerHTML=active.map(s=>`<div class="seed-card"><div class="seed-header"><div class="seed-name">${s.name}</div><div class="seed-badge b-${s.stage}">${STAGE_LABEL[s.stage]||s.stage}</div></div><div class="progress"><div class="progress-bar" style="width:${STAGE_PROGRESS[s.stage]||15}%"></div></div><div class="seed-cat">${s.category}</div></div>`).join('');
+}
+
+function renderHarvest(data) {
+  const el=document.getElementById('tab-harvest');
+  const h=data.harvestedSeeds||[];
+  if(!h.length){el.innerHTML=empty('🌾','まだ収穫がありません');return;}
+  el.innerHTML=[...h].reverse().map(s=>`<div class="harvest-card"><div class="harvest-badge">🌾 ${fmtTs(s.harvestedAt)}</div><div class="harvest-title">${s.name}</div><div class="harvest-items">${s.futureDate?`<div class="harvest-item"><div class="item-label">未来だった日</div><div class="item-value">${fmtDate(s.futureDate)}</div></div>`:''}${s.originalWish?`<div class="harvest-item"><div class="item-label">あの日の自分</div><div class="item-value">「${s.originalWish}」</div></div>`:''}${s.harvestNote?`<div class="harvest-item"><div class="item-label">収穫</div><div class="item-value">${s.harvestNote}</div></div>`:''}</div>${s.nextSeed?`<div class="harvest-next">🌱 次に生まれた種：${s.nextSeed}</div>`:''}</div>`).join('');
+}
+
+function renderStory(data) {
+  const el=document.getElementById('tab-story');
+  const TYPE_LABEL={seed:'🌱 種の発見',event:'🗓 未来',harvest:'🌾 収穫',nextseed:'🌱 次の種'};
+  const TYPE_CSS={seed:'lc-type-seed',event:'lc-type-event',harvest:'lc-type-harvest',nextseed:'lc-type-nextseed'};
+  const DOT_CSS={seed:'lc-dot-seed',event:'lc-dot-event',harvest:'lc-dot-harvest',nextseed:'lc-dot-nextseed'};
+
+  const chains=[];
+  data.harvestedSeeds.forEach(h=>{
+    const steps=[];
+    const orig=data.seeds.find(s=>s.name===h.name);
+    if(orig)steps.push({type:'seed',title:h.name,note:orig.originalWish||null});
+    const rel=data.futureEvents.find(e=>e.sourceSeed===h.name);
+    if(rel)steps.push({type:'event',title:rel.title,note:fmtDate(rel.date)});
+    steps.push({type:'harvest',title:'収穫',note:h.harvestNote});
+    if(h.nextSeed)steps.push({type:'nextseed',title:h.nextSeed,note:'次に生まれた種'});
+    chains.push({name:h.name,steps});
+  });
+  data.seeds.filter(s=>s.stage!=='harvested').forEach(s=>{
+    const steps=[];
+    steps.push({type:'seed',title:s.name,note:s.originalWish||s.category});
+    const rel=data.futureEvents.find(e=>e.sourceSeed===s.name);
+    if(rel)steps.push({type:'event',title:rel.title,note:fmtDate(rel.date)});
+    chains.push({name:s.name,steps,ongoing:true});
+  });
+  if(!chains.length){el.innerHTML=empty('📖','まだ物語がありません');return;}
+
+  const stepHtml=s=>`<div class="lc-step"><div class="lc-dot-wrap"><div class="lc-dot ${DOT_CSS[s.type]}"></div></div><div class="lc-body"><div class="lc-type ${TYPE_CSS[s.type]}">${TYPE_LABEL[s.type]}</div><div class="lc-title">${s.title}</div>${s.note?`<div class="lc-note">${s.note}</div>`:''}</div></div>`;
+  el.innerHTML=chains.map(c=>`<div class="lc-chain"><div class="lc-chain-title">${c.ongoing?'🌱':'🌾'} ${c.name}</div><div class="lc-steps">${c.steps.map(stepHtml).join('')}</div></div>`).join('');
+}
+
+function renderReport(data) {
+  const el=document.getElementById('tab-report');
+  const hist=data.futureBalanceHistory||[];
+  if(!hist.length){el.innerHTML=empty('📊','まだレポートがありません');return;}
+
+  // グラフ
+  const max=Math.max(...hist.map(h=>h.balance),1);
+  const bars=hist.slice(-8).map(h=>`<div class="bar-item"><div class="bar${h.reason?'  bar-event':''}" style="height:${Math.round((h.balance/max)*50)+8}px"></div><div class="bar-label">${h.date.slice(5)}</div></div>`).join('');
+  const graphHtml=`<div class="graph-card"><div class="graph-title">未来残高の推移 <span style="font-size:9px;color:#a0b0a0">🟡 未来追加</span></div><div class="bar-chart">${bars}</div></div>`;
+
+  // 今月のサマリー
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const monthHist=hist.filter(h=>h.date.startsWith(thisMonth));
+  const startBal=hist.filter(h=>h.date<thisMonth+'‐01').slice(-1)[0]?.balance||0;
+  const endBal=hist.slice(-1)[0]?.balance||0;
+  const diff=endBal-startBal;
+
+  const addedEvents=hist.filter(h=>h.date.startsWith(thisMonth)&&h.reason==='futureEventAdded');
+  const monthHarvest=data.harvestedSeeds.filter(h=>{
+    const d=new Date(h.harvestedAt).toISOString().slice(0,7);
+    return d===thisMonth;
+  });
+  const monthNewSeeds=data.seeds.filter(s=>{
+    if(!s.createdAt)return false;
+    const d=new Date(s.createdAt).toISOString().slice(0,7);
+    return d===thisMonth;
+  });
+
+  const reportHtml=`<div class="month-card">
+    <div class="month-label">📊 ${thisMonth.replace('-','年')}月のレポート</div>
+    <div class="month-balance-row">
+      <div class="month-balance-change">
+        <div class="month-balance-from">${startBal}pt</div>
+        <div style="color:var(--muted);font-size:12px">→</div>
+        <div class="month-balance-to">${endBal}pt</div>
+        <div class="month-balance-diff">${diff>=0?'+':''}${diff}pt</div>
+      </div>
+    </div>
+    ${addedEvents.length?`<div class="month-section"><div class="month-section-title">増えた未来</div><div class="month-list">${addedEvents.map(e=>`<div class="month-list-item">・${e.title}（+${e.addedPt}pt）</div>`).join('')}</div></div>`:''}
+    ${monthHarvest.length?`<div class="month-section"><div class="month-section-title">収穫</div><div class="month-list">${monthHarvest.map(h=>`<div class="month-list-item">・${h.name}</div>`).join('')}</div></div>`:''}
+    ${monthNewSeeds.length?`<div class="month-section"><div class="month-section-title">生まれた種</div><div class="month-list">${monthNewSeeds.map(s=>`<div class="month-list-item">・${s.name}</div>`).join('')}</div></div>`:''}
+  </div>`;
+
+  el.innerHTML=graphHtml+reportHtml;
+}
+
+const empty=(icon,text)=>`<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-text">${text}</div></div>`;
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','seeds','harvest','story','report'][i]===name));
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// URLパラメータからuserIdを取得してAPIからデータを取得
+async function loadData() {
+  const params = new URLSearchParams(location.search);
+  const userId = params.get('userId');
+
+  // userIdがない場合はデモデータ
+  if (!userId) {
+    return demo;
+  }
+
+  try {
+    const res = await fetch(`/api/calendar-data?userId=${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error('API error');
+    return await res.json();
+  } catch (e) {
+    console.error('データ取得失敗:', e);
+    return demo;
+  }
+}
+
+// ローディング表示
+document.querySelectorAll('.content').forEach(el => {
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+});
+
+loadData().then(data => {
+  initBalance(data);
+  renderCalendar(data);
+  renderSeeds(data);
+  renderHarvest(data);
+  renderStory(data);
+  renderReport(data);
+});
+</script>
+</body>
+</html>
