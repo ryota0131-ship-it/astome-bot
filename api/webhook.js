@@ -991,7 +991,7 @@ replyMessages = [
 
 if (activeQuickReply) {
   replyMessages[0].quickReply = activeQuickReply;
-}
+}   //
 
       await client.replyMessage({
         replyToken: replyToken,
