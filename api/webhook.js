@@ -982,23 +982,24 @@ export default async function handler(req, res) {
           },
         ];
       } else {
-replyMessages = [
-  {
-    type: "text",
-    text: replyText,
-  },
-];
+        replyMessages = [
+          {
+            type: "text",
+            text: replyText,
+          },
+        ];
 
-if (activeQuickReply) {
-  replyMessages[0].quickReply = activeQuickReply;
-}   //
+        if (activeQuickReply) {
+          replyMessages[0].quickReply = activeQuickReply;
+        }
+      }   // ← else閉じる
 
       await client.replyMessage({
         replyToken: replyToken,
         messages: replyMessages,
       });
 
-       } catch (error) {
+    } catch (error) {
       console.error("Error:", error);
 
       let errorMessage = "ごめんね、ちょっとうまく聞き取れなかった😅 もう一度話しかけてみて！";
