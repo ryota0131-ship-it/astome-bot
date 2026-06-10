@@ -981,20 +981,29 @@ export default async function handler(req, res) {
             },
           },
         ];
-      } else {
-        replyMessages = [
-          {
-            type: "text",
-            text: replyText,
-          },
-        ];
+} else {
 
-        if (activeQuickReply) {
-          replyMessages[0].quickReply = activeQuickReply;
-        }
-      }   // ← else閉じる
+  replyMessages = [
 
-      await client.replyMessage({
+    {
+
+      type: "text",
+
+      text: replyText,
+
+    },
+
+  ];
+
+  if (activeQuickReply) {
+
+    replyMessages[0].quickReply = activeQuickReply;
+
+  }
+
+}   // ← elseを閉じる
+
+await client.replyMessage({
         replyToken: replyToken,
         messages: replyMessages,
       });
