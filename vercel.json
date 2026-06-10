@@ -6,10 +6,8 @@
     }
   },
   "routes": [
-    {
-      "src": "/webhook",
-      "dest": "/api/webhook.js"
-    }
+    { "src": "/webhook", "dest": "/api/webhook.js" },
+    { "handle": "filesystem" }
   ],
   "crons": [
     {
