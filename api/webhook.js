@@ -996,10 +996,9 @@ export default async function handler(req, res) {
         messages: replyMessages,
       });
 
-    } catch (error) {
+       } catch (error) {
       console.error("Error:", error);
 
-      // エラーの種類に応じてメッセージを変える
       let errorMessage = "ごめんね、ちょっとうまく聞き取れなかった😅 もう一度話しかけてみて！";
 
       const errorStr = error?.message || error?.toString() || "";
@@ -1026,5 +1025,7 @@ export default async function handler(req, res) {
         messages: [{ type: "text", text: errorMessage }],
       });
     }
+  } // ← for (const event of events) を閉じる
+
   res.status(200).json({ status: "ok" });
 }
