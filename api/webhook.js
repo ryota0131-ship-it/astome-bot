@@ -808,7 +808,6 @@ export default async function handler(req, res) {
               futureDate,
               originalWish: originalSeed ? (originalSeed.originalWish || null) : null,
               nextSeed: null,
-              nextSeed: null,
             });
             } // end if (!alreadyHarvested)
 
