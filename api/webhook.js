@@ -511,7 +511,7 @@ if (calendarKeywords.some(kw => userMessage.includes(kw))) {
         actions: [{
           type: "uri",
           label: "📅 未来カレンダーを開く",
-          uri: `https://astome-bot.vercel.app/calendar?userId=${userId}`
+          uri: `https://astome-bot.vercel.app/calendar.html?userId=${userId}`
         }]
       }
     }]
