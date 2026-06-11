@@ -363,6 +363,11 @@ loadData().then(data => {
   renderHarvest(data);
   renderStory(data);
   renderReport(data);
+
+  // ハッシュ対応を追加
+  const hash = location.hash.replace('#', '');
+  const valid = ['calendar', 'seeds', 'story', 'report'];
+  if (valid.includes(hash)) switchTab(hash);
 });
 </script>
 </body>
