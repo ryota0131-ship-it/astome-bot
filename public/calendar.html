@@ -124,9 +124,45 @@
   .empty-icon { font-size: 44px; margin-bottom: 12px; }
   .empty-text { font-size: 14px; line-height: 1.7; }
 
-  .loading { text-align: center; padding: 60px 16px; color: var(--muted); }
-  .spinner { width: 28px; height: 28px; border: 3px solid var(--sage-light); border-top-color: var(--sage); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* 最近のうごきセクション */
+  .recent-card { background: linear-gradient(135deg, #fffbef 0%, #fff8e0 100%); border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 3px solid var(--gold); }
+  .recent-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .recent-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; line-height: 1.4; }
+  .recent-item + .recent-item { border-top: 1px dashed rgba(0,0,0,0.06); }
+  .recent-icon { font-size: 16px; flex-shrink: 0; width: 22px; text-align: center; }
+  .recent-text { flex: 1; }
+  .recent-when { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .recent-empty { font-size: 12px; color: var(--muted); padding: 4px 0; }
+
+  /* 新規/成長中バッジ */
+  .freshness { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+  .fresh-new { background: var(--gold); color: var(--dark); animation: gentlePulse 2s ease-in-out infinite; }
+  .fresh-growing { background: #e0f4ea; color: #1d6e3d; }
+
+  /* 新規カードのソフトグロー */
+  .is-new { box-shadow: 0 0 0 2px rgba(243, 194, 91, 0.4), 0 1px 4px rgba(0,0,0,0.06); animation: gentleGlow 3s ease-in-out infinite; }
+
+  /* progress bar アニメーション */
+  .progress-bar { transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+
+  /* キーフレーム */
+  @keyframes gentlePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.05); }
+  }
+  @keyframes gentleGlow {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(243, 194, 91, 0.3), 0 1px 4px rgba(0,0,0,0.06); }
+    50% { box-shadow: 0 0 0 4px rgba(243, 194, 91, 0.15), 0 1px 6px rgba(0,0,0,0.08); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .recent-item { animation: fadeInUp 0.5s ease-out backwards; }
+  .recent-item:nth-child(2) { animation-delay: 0.1s; }
+  .recent-item:nth-child(3) { animation-delay: 0.2s; }
+  .recent-item:nth-child(4) { animation-delay: 0.3s; }
+  .recent-item:nth-child(5) { animation-delay: 0.4s; }
 </style>
 </head>
 <body>
@@ -165,17 +201,18 @@ const STATUS_POINT = {dream:1,interest:2,plan:3,scheduled:5};
 
 const demo = {
   futureEvents: [
-    {title:'釧路湿原マラソン',status:'scheduled',date:'2026-07',sourceSeed:'釧路マラソン'},
-    {title:'鬼怒川温泉',status:'plan',date:'2026-09',sourceSeed:'鬼怒川でリセット'},
-    {title:'嫁さんと寿司',status:'interest',date:null,sourceSeed:'グルメ探し'},
-    {title:'屋久島',status:'dream',date:null,sourceSeed:null},
-    {title:'スカイダイビング',status:'dream',date:null,sourceSeed:null},
+    {title:'釧路湿原マラソン',status:'scheduled',date:'2026-07',sourceSeed:'釧路マラソン',createdAt:Date.now()-45*86400*1000,
+     history:[{status:'plan',at:Date.now()-45*86400*1000},{status:'scheduled',at:Date.now()-4*86400*1000}]},
+    {title:'鬼怒川温泉',status:'plan',date:'2026-09',sourceSeed:'鬼怒川でリセット',createdAt:Date.now()-10*86400*1000},
+    {title:'嫁さんと寿司',status:'interest',date:null,sourceSeed:'グルメ探し',createdAt:Date.now()-14*86400*1000},
+    {title:'屋久島',status:'dream',date:null,sourceSeed:null,createdAt:Date.now()-2*86400*1000},
+    {title:'スカイダイビング',status:'dream',date:null,sourceSeed:null,createdAt:Date.now()-60*86400*1000},
   ],
   seeds: [
-    {name:'釧路マラソン',category:'体験',stage:'booked',createdAt:Date.now()-60*86400*1000,originalWish:'釧路で走りたい'},
-    {name:'鬼怒川でリセット',category:'旅行',stage:'planning',createdAt:Date.now()-30*86400*1000,originalWish:'温泉行きたいなー'},
+    {name:'釧路マラソン',category:'体験',stage:'booked',createdAt:Date.now()-60*86400*1000,lastMentionAt:Date.now()-3*86400*1000,originalWish:'釧路で走りたい'},
+    {name:'鬼怒川でリセット',category:'旅行',stage:'planning',createdAt:Date.now()-30*86400*1000,lastMentionAt:Date.now()-1*86400*1000,originalWish:'温泉行きたいなー'},
     {name:'グルメ探し',category:'グルメ',stage:'interested',createdAt:Date.now()-14*86400*1000,originalWish:'美味しいもの食べたい'},
-    {name:'ペペロンチーノ自作',category:'料理',stage:'discovered',createdAt:Date.now()-5*86400*1000,originalWish:'ペペロンチーノってどう作るの'},
+    {name:'ペペロンチーノ自作',category:'料理',stage:'discovered',createdAt:Date.now()-1*86400*1000,originalWish:'ペペロンチーノってどう作るの'},
   ],
   harvestedSeeds: [
     {name:'カツカレー探し',harvestNote:'蒲田のいっぺこっぺ、最高だった。',harvestedAt:Date.now()-7*86400*1000,futureTitle:'蒲田カツカレー',futureDate:'2026-05',nextSeed:'グルメ探し',originalWish:'美味しいカツカレー探してた'},
@@ -192,6 +229,97 @@ const demo = {
 const fmtDate = d => {if(!d)return 'いつか';const[y,m]=d.split('-');return`${y}年${parseInt(m)}月`;};
 const fmtTs = ts => {if(!ts)return'';const d=new Date(ts);return`${d.getFullYear()}年${d.getMonth()+1}月`;};
 const calcBal = events => events.filter(e=>e.status!=='harvest'&&e.status!=='done').reduce((s,e)=>s+(STATUS_POINT[e.status]||0),0);
+
+// 経過日数
+const daysSince = ts => ts ? Math.floor((Date.now() - ts) / (24*60*60*1000)) : Infinity;
+// 相対時刻表記
+const relTime = ts => {
+  const d = daysSince(ts);
+  if (d === 0) return '今日';
+  if (d === 1) return '昨日';
+  if (d < 7) return `${d}日前`;
+  if (d < 14) return '先週';
+  if (d < 30) return `${Math.floor(d/7)}週間前`;
+  return `${Math.floor(d/30)}ヶ月前`;
+};
+// 新規判定（3日以内）
+const isNew = ts => daysSince(ts) <= 3;
+// 成長中判定（lastMentionAt or historyの最終stage変化が7日以内）
+const isGrowing = item => {
+  if (item.lastMentionAt && daysSince(item.lastMentionAt) <= 7 && !isNew(item.createdAt)) return true;
+  if (Array.isArray(item.history) && item.history.length >= 2) {
+    const last = item.history[item.history.length - 1];
+    if (last && last.at && daysSince(last.at) <= 7) return true;
+  }
+  return false;
+};
+
+// 最近のうごきタイムライン生成
+function buildRecentActivity(data) {
+  const items = [];
+  const THIRTY = 30 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  // 新規の種
+  (data.seeds || []).forEach(s => {
+    if (s.createdAt && now - s.createdAt < THIRTY) {
+      items.push({
+        ts: s.createdAt,
+        icon: '🌱',
+        text: `<strong>${s.name}</strong> の種が芽吹いた`,
+      });
+    }
+  });
+
+  // 新規の未来イベント
+  (data.futureEvents || []).forEach(e => {
+    if (e.createdAt && now - e.createdAt < THIRTY) {
+      items.push({
+        ts: e.createdAt,
+        icon: '✨',
+        text: `<strong>${e.title}</strong> が未来カレンダーに加わった`,
+      });
+    }
+    // ステージ変化（historyの最後のエントリ）
+    if (Array.isArray(e.history) && e.history.length >= 2) {
+      const last = e.history[e.history.length - 1];
+      if (last && last.at && now - last.at < THIRTY) {
+        const statusLabel = STATUS_LABEL[last.status] || last.status;
+        items.push({
+          ts: last.at,
+          icon: '⤴',
+          text: `<strong>${e.title}</strong> が「${statusLabel}」に進んだ`,
+        });
+      }
+    }
+  });
+
+  // 収穫
+  (data.harvestedSeeds || []).forEach(h => {
+    if (h.harvestedAt && now - h.harvestedAt < THIRTY) {
+      items.push({
+        ts: h.harvestedAt,
+        icon: '🌾',
+        text: `<strong>${h.name}</strong> を収穫した`,
+      });
+    }
+  });
+
+  // 時系列で新しい順、最大5件
+  items.sort((a, b) => b.ts - a.ts);
+  return items.slice(0, 5);
+}
+
+function renderRecentActivity(data) {
+  const items = buildRecentActivity(data);
+  if (items.length === 0) return '';
+  const list = items.map(it => `
+    <div class="recent-item">
+      <div class="recent-icon">${it.icon}</div>
+      <div class="recent-text">${it.text}<div class="recent-when">${relTime(it.ts)}</div></div>
+    </div>`).join('');
+  return `<div class="recent-card"><div class="recent-title">✨ 最近のうごき</div>${list}</div>`;
+}
 
 function initBalance(data) {
   const bal = calcBal(data.futureEvents);
@@ -219,25 +347,45 @@ function initBalance(data) {
 
 function renderCalendar(data) {
   const el = document.getElementById('tab-calendar');
+  const recent = renderRecentActivity(data);
   const active = data.futureEvents.filter(e=>e.status!=='harvest'&&e.status!=='done');
-  if(!active.length){el.innerHTML=empty('🗓','未来カレンダーはまだ空です<br>アストと話して未来を増やそう🌱');return;}
+  if(!active.length){el.innerHTML=recent+empty('🗓','未来カレンダーはまだ空です<br>アストと話して未来を増やそう🌱');return;}
   const hot=active.filter(e=>e.status==='scheduled');
   const warm=active.filter(e=>['plan','interest'].includes(e.status));
   const dream=active.filter(e=>e.status==='dream');
-  let h='';
+  let h=recent;
   if(hot.length){h+=ghd('🔥','もうすぐ叶いそう');hot.forEach(e=>h+=ec(e));}
   if(warm.length){h+=ghd('🌱','育て中');warm.forEach(e=>h+=ec(e));}
   if(dream.length){h+=ghd('✨','いつか');dream.forEach(e=>h+=ec(e));}
   el.innerHTML=h;
 }
 const ghd=(em,lb)=>`<div class="group-hd"><span>${em}</span><span class="group-label">${lb}</span></div>`;
-const ec=e=>`<div class="event-card"><div class="dot dot-${e.status}"></div><div class="event-body"><div class="event-title">${e.title}</div><div class="event-date">${fmtDate(e.date)}</div></div><div class="event-badge">${STATUS_LABEL[e.status]||e.status}</div></div>`;
+const freshnessBadge = item => {
+  if (isNew(item.createdAt)) return `<span class="freshness fresh-new">✨ NEW</span>`;
+  if (isGrowing(item)) return `<span class="freshness fresh-growing">⤴ 成長中</span>`;
+  return '';
+};
+const ec=e=>{
+  const cls = isNew(e.createdAt) ? 'event-card is-new' : 'event-card';
+  return `<div class="${cls}"><div class="dot dot-${e.status}"></div><div class="event-body"><div class="event-title">${e.title}${freshnessBadge(e)}</div><div class="event-date">${fmtDate(e.date)}</div></div><div class="event-badge">${STATUS_LABEL[e.status]||e.status}</div></div>`;
+};
 
 function renderSeeds(data) {
   const el=document.getElementById('tab-seeds');
   const active=data.seeds.filter(s=>s.stage!=='harvested');
   if(!active.length){el.innerHTML=empty('🌱','育っている種がありません');return;}
-  el.innerHTML=active.map(s=>`<div class="seed-card"><div class="seed-header"><div class="seed-name">${s.name}</div><div class="seed-badge b-${s.stage}">${STAGE_LABEL[s.stage]||s.stage}</div></div><div class="progress"><div class="progress-bar" style="width:${STAGE_PROGRESS[s.stage]||15}%"></div></div><div class="seed-cat">${s.category}</div></div>`).join('');
+  el.innerHTML=active.map(s=>{
+    const cls = isNew(s.createdAt) ? 'seed-card is-new' : 'seed-card';
+    const progress = STAGE_PROGRESS[s.stage]||15;
+    // 初期幅0%でレンダリング → 描画後にanimateで目標値へ
+    return `<div class="${cls}"><div class="seed-header"><div class="seed-name">${s.name}${freshnessBadge(s)}</div><div class="seed-badge b-${s.stage}">${STAGE_LABEL[s.stage]||s.stage}</div></div><div class="progress"><div class="progress-bar" style="width:0%" data-target="${progress}"></div></div><div class="seed-cat">${s.category}</div></div>`;
+  }).join('');
+  // 次フレームで目標幅にアニメーション
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.progress-bar').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  });
 }
 
 function renderHarvest(data) {
@@ -331,44 +479,12 @@ function switchTab(name) {
   document.getElementById(`tab-${name}`).classList.add('active');
 }
 
-// URLパラメータからuserIdを取得してAPIからデータを取得
-async function loadData() {
-  const params = new URLSearchParams(location.search);
-  const userId = params.get('userId');
-
-  // userIdがない場合はデモデータ
-  if (!userId) {
-    return demo;
-  }
-
-  try {
-    const res = await fetch(`/api/calendar-data?userId=${encodeURIComponent(userId)}`);
-    if (!res.ok) throw new Error('API error');
-    return await res.json();
-  } catch (e) {
-    console.error('データ取得失敗:', e);
-    return demo;
-  }
-}
-
-// ローディング表示
-document.querySelectorAll('.content').forEach(el => {
-  el.innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
-});
-
-loadData().then(data => {
-  initBalance(data);
-  renderCalendar(data);
-  renderSeeds(data);
-  renderHarvest(data);
-  renderStory(data);
-  renderReport(data);
-
-  // ハッシュ対応を追加
-  const hash = location.hash.replace('#', '');
-  const valid = ['calendar', 'seeds', 'story', 'report'];
-  if (valid.includes(hash)) switchTab(hash);
-});
+initBalance(demo);
+renderCalendar(demo);
+renderSeeds(demo);
+renderHarvest(demo);
+renderStory(demo);
+renderReport(demo);
 </script>
 </body>
 </html>
