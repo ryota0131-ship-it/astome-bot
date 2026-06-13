@@ -498,8 +498,52 @@ export default async function handler(req, res) {
     const userId = event.source.userId;
     const userMessage = event.message.text;
     // 未来カレンダー表示リクエストの検知
+// リッチメニューキーワードの処理
+const richMenuActions = {
+  "カレンダーを見る": "calendar",
+  "種を見る": "seeds",
+  "記録を見る": "story",
+  "使い方を見る": null, // howto.html
+};
+
+const richMenuTab = richMenuActions[userMessage];
+const isRichMenuAction = richMenuTab !== undefined;
+
 const calendarKeywords = ["カレンダー", "種を見", "未来を見", "今の種", "未来イベント", "カレンダー見せて"];
+
+if (isRichMenuAction) {
+  const url = richMenuTab
+    ? `https://astome-bot.vercel.app/calendar.html?userId=${userId}#${richMenuTab}`
+    : `https://astome-bot.vercel.app/howto.html`;
+
+  const labels = {
+    "カレンダーを見る": "📅 未来カレンダーを開く",
+    "種を見る": "🌱 育てている種を見る",
+    "記録を見る": "📖 これまでの記録を見る",
+    "使い方を見る": "💡 使い方を見る",
+  };
+
+  await client.replyMessage({
+    replyToken: event.replyToken,
+    messages: [{
+      type: "template",
+      altText: labels[userMessage],
+      template: {
+        type: "buttons",
+        text: "こちらから見てみてください🌱",
+        actions: [{
+          type: "uri",
+          label: labels[userMessage],
+          uri: url,
+        }],
+      },
+    }],
+  });
+  continue;
+}
+
 if (calendarKeywords.some(kw => userMessage.includes(kw))) {
+  // 既存の処理
   await client.replyMessage({
     replyToken: event.replyToken,
     messages: [{
