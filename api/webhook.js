@@ -497,7 +497,21 @@ export default async function handler(req, res) {
 
     const userId = event.source.userId;
     const userMessage = event.message.text;
-    // 未来カレンダー表示リクエストの検知
+    const replyToken = event.replyToken;
+
+    try {
+      // Redisからユーザーデータ取得
+      const userData = await getUserData(userId);
+
+      // 名前がまだ未設定なら抽出を試みる
+      if (!userData.userName) {
+        const detectedName = extractName(userMessage, userData.messages);
+        if (detectedName) {
+          userData.userName = detectedName;
+        }
+      }
+
+      // カレンダー表示リクエストの検知（フラグのみ。実際の返答はClaude側で行う）
 // リッチメニューキーワードの処理
 const richMenuActions = {
   "カレンダーを見る": "calendar",
@@ -544,37 +558,6 @@ if (isRichMenuAction) {
 
 if (calendarKeywords.some(kw => userMessage.includes(kw))) {
   // 既存の処理
-  await client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [{
-      type: "template",
-      altText: "未来カレンダーを開く",
-      template: {
-        type: "buttons",
-        text: "今の未来カレンダーはこちらから見れますよ🌱",
-        actions: [{
-          type: "uri",
-          label: "📅 未来カレンダーを開く",
-          uri: `https://astome-bot.vercel.app/calendar.html?userId=${userId}`
-        }]
-      }
-    }]
-  });
-  continue;
-}
-    const replyToken = event.replyToken;
-
-    try {
-      // Redisからユーザーデータ取得
-      const userData = await getUserData(userId);
-
-      // 名前がまだ未設定なら抽出を試みる
-      if (!userData.userName) {
-        const detectedName = extractName(userMessage, userData.messages);
-        if (detectedName) {
-          userData.userName = detectedName;
-        }
-      }
 
       // 種・目標・見立てのコンテキストを生成
       function buildUserContext(data) {
@@ -623,7 +606,7 @@ if (calendarKeywords.some(kw => userMessage.includes(kw))) {
         // 希望スコア（補助指標：参考程度に）
         // メイン指標はfutureEvents.length
 
-        if (parts.length === 0) return "";
+        if (parts.length === 0 && !isCalendarRequest) return "";
 
         // 未来イベント数をコンテキストに追加
         const activeEventCount = Array.isArray(data.futureEvents) ? data.futureEvents.filter(e => e.status !== "harvest").length : 0;
@@ -644,6 +627,20 @@ if (calendarKeywords.some(kw => userMessage.includes(kw))) {
           );
         }
 
+        const calendarRequestInstruction = isCalendarRequest
+          ? [
+              "【⚠️ 最優先：今のメッセージは未来カレンダーの確認リクエストです】",
+              "上記の「ユーザーの未来カレンダー」の内容を読んで、そのまま箇条書きで伝えてください。",
+              "リンクを送ってはいけません。カレンダーの中身を言葉で説明する。",
+              "カレンダーが空の場合：「まだ未来カレンダーは空です🌱 一緒に最初の未来を探しましょう！」と返す。",
+              "カレンダーに内容がある場合の例：",
+              "「見てみると、こんな未来が入っていますよ😊",
+              "・2026-07 釧路マラソン（scheduled）",
+              "・2026-09 鬼怒川温泉（plan）",
+              "どれか気になるものはありますか？🌱」",
+            ].join("\n")
+          : "";
+
         const instruction = [
           "【Memory Context - 最重要】",
           "ASTOの最優先目的は「未来への期待を育てること」です。",
@@ -652,7 +649,21 @@ if (calendarKeywords.some(kw => userMessage.includes(kw))) {
           "未来カレンダーが存在する場合は、その未来を積極的に育ててください。",
           "種同士に共通テーマが見えたら月1回程度「〇〇な気がします」と仮説を伝える（断言禁止）。",
           "体験済みの種があれば収穫を促し次の種探しへつなげる。",
+          "",
+          "【禁止事項 - 必ず守る】",
+          "・直前の会話履歴に既に出てきた話題を、知らないふりして再質問しない。",
+          "・未来カレンダーや種に書いてある内容を「それはどんな内容ですか？」と再質問しない。",
+          "・同じ質問を2回以上繰り返さない。ユーザーに「それはもう話した」と言わせない。",
+          "・ユーザーが「走ってない」「もう話した」「それは聞いた」と言ったら、その話題はすぐ終わらせて別の角度へ。",
+          "",
+          "【会話履歴の使い方】",
+          "返信前に必ず直近の会話履歴を確認し、既知の情報は引用して話す。",
+          "例：「前に『最近走れてない』って話してましたよね😊 走ることより当日の雰囲気がワクワクしてますか？」",
         ].join("\n");
+
+        if (calendarRequestInstruction) {
+          return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + calendarRequestInstruction + "\n\n---\n\n" + instruction;
+        }
 
         return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + instruction;
       }
