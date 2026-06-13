@@ -257,6 +257,12 @@ OK：「何気ない動画から嫁さんとの秋の時間が浮かんでくる
 同じ種を10往復以上掘り続けていたら、種に名前をつけて締める。名前はユーザー自身が使った言葉から取る。造語にしない。
 例：「今日の種、『日常から離れたい』って呼んでおきますね🌱 また明日続きを話しましょう。」
 
+【種の保存タイミング - 最重要】
+ユーザーが具体的なことを話したら、2往復以内に必ず<ASTO_JSON>で種を保存する。
+「完璧な名前が見つかってから」ではなく、「なんとなくテーマが見えてきたら」すぐ保存する。
+名前はあとで育てればいい。まず保存することが最優先。
+1回の会話で新しいテーマが出たら必ず1つ以上保存して会話を終える。
+
 【種の命名・保存】
 会話の中で種に名前をつける時（テキストと組み合わせてOK）：
 <ASTO_JSON>{"seed":true,"name":"種の名前","category":"旅行/グルメ/体験/学び/休養/その他","stage":"discovered/interested/planning/booked/experienced/harvested","originalWish":"ユーザーが最初に言った言葉をそのまま"}</ASTO_JSON>
@@ -415,11 +421,11 @@ async function getUserData(userId) {
 
 // ユーザーデータをRedisに保存
 async function saveUserData(userId, data) {
-  // 会話履歴は直近10件だけ保持
-  const trimmedMessages = data.messages.slice(-10).map(m => ({
+  // 会話履歴は直近20件保持（1件あたり300文字に圧縮して文脈を広げる）
+  const trimmedMessages = data.messages.slice(-20).map(m => ({
     role: m.role,
-    // contentは500文字に切り詰め
-    content: m.content.slice(0, 500),
+    // contentは300文字に切り詰め（件数増加分を圧縮で相殺）
+    content: m.content.slice(0, 300),
   }));
   const payload = {
     userName: data.userName,
@@ -486,7 +492,12 @@ export default async function handler(req, res) {
   for (const event of events) {
     if (event.type !== "message") continue;
 
-    if (event.message.type !== "text") {
+    if (event.message.type === "sticker") {
+      // スタンプはリアクションとして受け取り、会話を続ける
+      // スタンプを送った場合はテキストとして「😊」に変換して処理を継続
+      event.message.type = "text";
+      event.message.text = "😊";
+    } else if (event.message.type !== "text") {
       // 画像・動画・音声など非テキストへの返答
       await client.replyMessage({
         replyToken: event.replyToken,
