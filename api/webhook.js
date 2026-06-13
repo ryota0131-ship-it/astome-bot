@@ -501,6 +501,16 @@ export default async function handler(req, res) {
       let replyText = rawReply;
       let calendarUrl = null;
       let shareUrl = null;
+
+      // === 変化追跡（種・未来イベント新規追加、残高変化のサマリを返信末尾に付ける） ===
+      const STATUS_POINT_BEFORE = { dream:1, interest:2, plan:3, scheduled:5 };
+      const calcBalance = (events) => (Array.isArray(events) ? events : [])
+        .filter(e => e.status !== "harvest" && e.status !== "done")
+        .reduce((sum, e) => sum + (STATUS_POINT_BEFORE[e.status] || 0), 0);
+      const balanceBefore = calcBalance(userData.futureEvents);
+      const newSeedsAdded = [];   // 新規追加された種名
+      const newEventsAdded = [];  // 新規追加された未来イベント名
+
       try {
         const jsonMatches = [...rawReply.matchAll(/<ASTO_JSON>(.*?)<\/ASTO_JSON>/gs)];
         for (const match of jsonMatches) {
@@ -537,6 +547,7 @@ export default async function handler(req, res) {
               confidence: data.confidence || 30,
               createdAt: Date.now(),
               lastMentionAt: Date.now(),
+              mentionCount: 1,
             };
             // originalWishを追加
             if (data.originalWish) newSeed.originalWish = data.originalWish;
@@ -545,6 +556,7 @@ export default async function handler(req, res) {
             const existing = userData.seeds.findIndex(s => s.name === data.name);
             if (existing >= 0) {
               userData.seeds[existing].lastMentionAt = Date.now();
+              userData.seeds[existing].mentionCount = (userData.seeds[existing].mentionCount || 1) + 1;
               if (data.stage) userData.seeds[existing].stage = data.stage;
               if (data.confidence) userData.seeds[existing].confidence = data.confidence;
               // originalWishは最初の言葉のみ保存（解像度が上がっても上書きしない）
@@ -553,6 +565,7 @@ export default async function handler(req, res) {
               }
             } else {
               userData.seeds.push(newSeed);
+              newSeedsAdded.push(data.name);
               // 直前の収穫にnextSeedを自動接続
               if (Array.isArray(userData.harvestedSeeds) && userData.harvestedSeeds.length > 0) {
                 const latest = userData.harvestedSeeds[userData.harvestedSeeds.length - 1];
@@ -661,6 +674,7 @@ export default async function handler(req, res) {
               ev.updatedAt = now;
             } else {
               userData.futureEvents.push(newEvent);
+              newEventsAdded.push(newEvent.title);
             }
             // 新規追加時のみ残高変化をreason付きで記録
             if (isNew) {
@@ -812,6 +826,48 @@ export default async function handler(req, res) {
         }
       } catch (e) {
         // JSON解析失敗はそのままテキストとして扱う
+      }
+
+      // === 種のステージ自動昇格 ===
+      // データの状態から自動算出（AIに任せず確実に動かす）
+      if (Array.isArray(userData.seeds)) {
+        userData.seeds.forEach(s => {
+          if (s.stage === "harvested") return;
+          // 関連する未来イベント
+          const relatedEvents = (userData.futureEvents || []).filter(e => e.sourceSeed === s.name);
+          const hasScheduled = relatedEvents.some(e => e.status === "scheduled");
+          const hasPlan = relatedEvents.some(e => ["plan", "interest"].includes(e.status));
+          const mentionCount = s.mentionCount || 1;
+
+          // 昇格ルール（降格はしない）
+          const stageRank = { discovered: 0, interested: 1, planning: 2, booked: 3 };
+          let targetStage = s.stage;
+          if (hasScheduled) targetStage = "booked";
+          else if (hasPlan) targetStage = "planning";
+          else if (mentionCount >= 2) targetStage = "interested";
+
+          if ((stageRank[targetStage] || 0) > (stageRank[s.stage] || 0)) {
+            s.stage = targetStage;
+            s.lastStageUpAt = Date.now();
+          }
+        });
+      }
+
+      // === 変化サマリを返信末尾に付加（種・未来イベントが新規追加された時のみ） ===
+      const balanceAfter = calcBalance(userData.futureEvents);
+      const balanceDelta = balanceAfter - balanceBefore;
+      const summaryLines = [];
+      if (newSeedsAdded.length > 0) {
+        summaryLines.push(`🌱 新しい種：${newSeedsAdded.join("、")}`);
+      }
+      if (newEventsAdded.length > 0) {
+        summaryLines.push(`✨ 未来カレンダーに追加：${newEventsAdded.join("、")}`);
+      }
+      if (balanceDelta > 0) {
+        summaryLines.push(`未来残高 +${balanceDelta}pt → ${balanceAfter}pt`);
+      }
+      if (summaryLines.length > 0 && replyText) {
+        replyText = replyText + "\n\n" + summaryLines.join("\n");
       }
 
       userData.messages.push({
