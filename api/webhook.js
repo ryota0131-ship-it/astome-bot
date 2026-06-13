@@ -557,7 +557,7 @@ if (isRichMenuAction) {
 }
 
 if (calendarKeywords.some(kw => userMessage.includes(kw))) {
-  // 既存の処理
+
 
       // 種・目標・見立てのコンテキストを生成
       function buildUserContext(data) {
