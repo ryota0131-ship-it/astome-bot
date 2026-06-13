@@ -123,8 +123,9 @@ status: dream/interest/plan/scheduled/done/harvest
 不変の事実（家族・職業・趣味など）が出た時：
 <ASTO_JSON>{"userFacts":["妻がいる","マラソンが好き"]}</ASTO_JSON>
 
-直近の新しいトピック：
-<ASTO_JSON>{"conversationSummary":["LP改善中"]}</ASTO_JSON>
+直近のトピック（事実だけでなく「何を考えていたか」「何に悩んでいるか」も書く）：
+<ASTO_JSON>{"conversationSummary":["ASTOmeのオンボーディング改善中、種発見速度に課題を感じている","未来残高の体験価値を強化したいと考えている"]}</ASTO_JSON>
+1項目は1〜2文の文章でOK。単語だけでなく「背景」「気持ち」「現状の課題」を含めて書く。
 
 ## アクション系
 「カレンダーに入れますか？」YES → 他のテキストなしで
@@ -458,7 +459,23 @@ export default async function handler(req, res) {
             ].join("\n")
           : "";
 
-        const instruction = "上記の記憶を参照して、既知の話題は引用し、未来を育てることを優先する。";
+        const instruction = [
+          "【返答ルール - 必ず守る】",
+          "返答を作る前に、以下の順で記憶をスキャンする：",
+          "  1. ユーザーの未来カレンダー（あれば最優先）",
+          "  2. 現在の種（特に成長中の種）",
+          "  3. 最近の会話まとめ",
+          "  4. このユーザーについて（永続的事実）",
+          "",
+          "ユーザーの今のメッセージが、上記のいずれかに関連していたら、",
+          "新しい質問をする前に、必ずその記憶を引用してから返す。",
+          "",
+          "例：ユーザー「疲れた」 → 記憶に「鬼怒川温泉(plan)」がある",
+          "NG：「最近気になってることありますか？」（記憶を無視）",
+          "OK：「おつかれさまです😊 そういえば9月の鬼怒川温泉、楽しみですね🌱」（記憶を活用）",
+          "",
+          "関連する記憶が全くない時だけ、新しい話題を振っていい。",
+        ].join("\n");
 
         if (calendarRequestInstruction) {
           return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + calendarRequestInstruction + "\n\n---\n\n" + instruction;
