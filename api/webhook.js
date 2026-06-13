@@ -974,16 +974,14 @@ export default async function handler(req, res) {
       // クイックリプライの判定
       // チェックインで初めて表示する場合のみ（messages.lengthに依存しない）
       const isFirstCheckinMessage =
-        !userData.isFirstTime && !userData.hasShownCheckinQuickReply;
+        !userData.isFirstTime; // 毎回チェックインクイックリプライを表示
 
       // オンボーディングで名前を受け取った直後：messages.length === 4（名前の往復）
       const isAfterNameInOnboarding =
         userData.isFirstTime && userData.messages.length === 4 && userData.userName;
 
       // チェックインクイックリプライを表示したらフラグを立てる
-      if (isFirstCheckinMessage) {
-        userData.hasShownCheckinQuickReply = true;
-      }
+      // hasShownCheckinQuickReply フラグ更新は廃止（毎回表示するため）
       // 未来残高を日次スナップショット（1日1回）
       const STATUS_POINT_MAP = { dream:1, interest:2, plan:3, scheduled:5 };
       const todayStr = new Date().toISOString().slice(0,10);
