@@ -426,9 +426,8 @@ export default async function handler(req, res) {
 
         if (parts.length === 0 && !isCalendarRequest) return "";
 
-        // 未来イベント数をコンテキストに追加
+        // 未来イベント数（月次可視化判定にのみ使用）
         const activeEventCount = Array.isArray(data.futureEvents) ? data.futureEvents.filter(e => e.status !== "harvest").length : 0;
-        parts.push("未来イベント数：" + activeEventCount + "件");
 
         // 未来カレンダーが3件以上かつ30日以上表示していない場合のみ可視化を促す
         const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
@@ -468,9 +467,19 @@ export default async function handler(req, res) {
         return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + instruction;
       }
 
+      // アフィリエイトセクションは「種が育っている時のみ」挿入
+      // 判定：interested以上の種がある or plan/scheduled状態の未来イベントがある
+      const hasGrowingSeed =
+        Array.isArray(userData.seeds) &&
+        userData.seeds.some(s => ["interested", "planning", "booked"].includes(s.stage));
+      const hasPlannedEvent =
+        Array.isArray(userData.futureEvents) &&
+        userData.futureEvents.some(e => ["plan", "scheduled"].includes(e.status));
+      const shouldIncludeAffiliate = hasGrowingSeed || hasPlannedEvent;
+
       const systemPrompt = userData.isFirstTime
         ? ONBOARDING_PROMPT(userData.userName)
-        : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + buildAffiliateSection();
+        : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + (shouldIncludeAffiliate ? buildAffiliateSection() : "");
 
       userData.messages.push({
         role: "user",
@@ -555,18 +564,6 @@ export default async function handler(req, res) {
             replyText = replyText.replace(match[0], "").trim();
           }
 
-          // ゴールの保存
-          if (data.goal && data.text) {
-            const newGoal = {
-              text: data.text,
-              deadline: data.deadline || null,
-              createdAt: Date.now(),
-              status: "active",
-            };
-            if (!Array.isArray(userData.goals)) userData.goals = [];
-            userData.goals.push(newGoal);
-            replyText = replyText.replace(match[0], "").trim();
-          }
 
           // userProfileの更新
           if (data.userProfile) {
