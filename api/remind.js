@@ -29,9 +29,10 @@ const redis = {
 export default async function handler(req, res) {
   // Cron Jobからのリクエストのみ許可
   const authHeader = req.headers["authorization"];
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  console.log("Auth failed. received:", authHeader, "expected:", `Bearer ${process.env.CRON_SECRET}`);
+  return res.status(401).json({ error: "Unauthorized", received: authHeader });
+}
 
   try {
     // 全ユーザーのキーを取得
