@@ -499,6 +499,39 @@ export default async function handler(req, res) {
     const userMessage = event.message.text;
     const replyToken = event.replyToken;
 
+    // リッチメニューキーワードの処理（tryの外でcontinueを使うため）
+    const richMenuActions = {
+      "カレンダーを見る": "calendar",
+      "種を見る": "seeds",
+      "記録を見る": "story",
+      "使い方を見る": null,
+    };
+    const richMenuTab = richMenuActions[userMessage];
+    if (richMenuTab !== undefined) {
+      const url = richMenuTab
+        ? `https://astome-bot.vercel.app/calendar.html?userId=${userId}#${richMenuTab}`
+        : `https://astome-bot.vercel.app/howto.html`;
+      const labels = {
+        "カレンダーを見る": "📅 未来カレンダーを開く",
+        "種を見る": "🌱 育てている種を見る",
+        "記録を見る": "📖 これまでの記録を見る",
+        "使い方を見る": "💡 使い方を見る",
+      };
+      await client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{
+          type: "template",
+          altText: labels[userMessage],
+          template: {
+            type: "buttons",
+            text: "こちらから見てみてください🌱",
+            actions: [{ type: "uri", label: labels[userMessage], uri: url }],
+          },
+        }],
+      });
+      continue;
+    }
+
     try {
       // Redisからユーザーデータ取得
       const userData = await getUserData(userId);
@@ -511,52 +544,8 @@ export default async function handler(req, res) {
         }
       }
 
-      // カレンダー表示リクエストの検知（フラグのみ。実際の返答はClaude側で行う）
-// リッチメニューキーワードの処理
-const richMenuActions = {
-  "カレンダーを見る": "calendar",
-  "種を見る": "seeds",
-  "記録を見る": "story",
-  "使い方を見る": null, // howto.html
-};
-
-const richMenuTab = richMenuActions[userMessage];
-const isRichMenuAction = richMenuTab !== undefined;
-
-const calendarKeywords = ["カレンダー", "種を見", "未来を見", "今の種", "未来イベント", "カレンダー見せて"];
-
-if (isRichMenuAction) {
-  const url = richMenuTab
-    ? `https://astome-bot.vercel.app/calendar.html?userId=${userId}#${richMenuTab}`
-    : `https://astome-bot.vercel.app/howto.html`;
-
-  const labels = {
-    "カレンダーを見る": "📅 未来カレンダーを開く",
-    "種を見る": "🌱 育てている種を見る",
-    "記録を見る": "📖 これまでの記録を見る",
-    "使い方を見る": "💡 使い方を見る",
-  };
-
-  await client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [{
-      type: "template",
-      altText: labels[userMessage],
-      template: {
-        type: "buttons",
-        text: "こちらから見てみてください🌱",
-        actions: [{
-          type: "uri",
-          label: labels[userMessage],
-          uri: url,
-        }],
-      },
-    }],
-  });
-  continue;
-}
-
-if (calendarKeywords.some(kw => userMessage.includes(kw))) {
+      const calendarKeywords = ["カレンダー", "種を見", "未来を見", "今の種", "未来イベント", "カレンダー見せて"];
+      const isCalendarRequest = calendarKeywords.some(kw => userMessage.includes(kw));
 
 
       // 種・目標・見立てのコンテキストを生成
