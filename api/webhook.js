@@ -586,7 +586,7 @@ const response = await anthropic.messages.create({
     {
       type: "web_search_20250305",
       name: "web_search",
-      max_uses: 1, // タイムアウト対策：検索は1回まで
+      max_uses: 2, // タイムアウト対策：検索は2回まで
     }
   ],
 });
