@@ -23,7 +23,14 @@
     --tab-h: 72px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
+  html {
+  min-height: 100%;
+}
+body {
+
+  min-height: 100vh;
+
+}
   body {
     background: var(--cream);
     color: var(--text);
@@ -70,7 +77,10 @@
   .balance-desc span { color: var(--gold-pale); font-weight: 700; }
 
   /* ===== CONTENT AREA ===== */
-  .page { display: none; padding: 16px 16px 8px; }
+  .page {
+  display: none;
+  padding: 16px 16px calc(var(--tab-h) + 24px);
+}
   .page.active { display: block; }
 
   /* ===== 次の楽しみカード ===== */
