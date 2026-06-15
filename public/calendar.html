@@ -523,7 +523,11 @@ function renderHome(data) {
   // ASTOのことば（動的）
   const astoMsg = getAstoMessage(data);
   html += `<div class="asto-word">
-    <div class="asto-icon-fallback">🐋</div>
+   <img src="/asto.png"
+
+     class="asto-icon"
+
+     alt="ASTO">
     <div class="asto-bubble">
       <div class="asto-name">ASTO</div>
       <div class="asto-text">${astoMsg.replace(/\n/g,'<br>')}</div>
