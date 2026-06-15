@@ -296,16 +296,23 @@ body {
   /* 中央タブ（ASTO） */
   .tab-center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; cursor: pointer; padding: 0 4px; margin-top: -18px; }
 .tab-center-img {
+
   width: 52px;
+
   height: 52px;
+
   border-radius: 50%;
 
-  object-fit: cover;
-  object-position: top;
+  background: var(--ivory);
+
+  object-fit: contain;
+
+  padding: 4px;
 
   border: 3px solid var(--gold);
+
   box-shadow: 0 4px 12px rgba(243,194,91,0.4);
-  background: var(--ivory);
+
 }
   .tab-center-fallback { width: 52px; height: 52px; border-radius: 50%; background: var(--dark); border: 3px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 12px rgba(243,194,91,0.4); }
   .tab-center-label { font-size: 10px; color: var(--muted); font-weight: 600; font-family: inherit; }
