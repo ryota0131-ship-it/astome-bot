@@ -1012,11 +1012,8 @@ const rawReply = response.content
       }
 
       // Redisに保存
-      // クイックリプライの判定：最後の表示から3日以上経過した場合のみ表示
-      const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
-      const lastShown = userData.lastQuickReplyShownAt || 0;
-      const isFirstCheckinMessage =
-        !userData.isFirstTime && (Date.now() - lastShown > THREE_DAYS);
+      // クイックリプライの判定
+const isFirstCheckinMessage = !userData.isFirstTime;
 
       // オンボーディングで名前を受け取った直後：messages.length === 4（名前の往復）
       const isAfterNameInOnboarding =
