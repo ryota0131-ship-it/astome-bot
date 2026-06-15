@@ -479,12 +479,30 @@ function switchTab(name) {
   document.getElementById(`tab-${name}`).classList.add('active');
 }
 
-initBalance(demo);
-renderCalendar(demo);
-renderSeeds(demo);
-renderHarvest(demo);
-renderStory(demo);
-renderReport(demo);
+async function loadData() {
+  const params = new URLSearchParams(location.search);
+  const userId = params.get('userId');
+  
+  // userIdがない場合はdemoデータ
+  if (!userId) {
+    initBalance(demo); renderCalendar(demo); renderSeeds(demo);
+    renderHarvest(demo); renderStory(demo); renderReport(demo);
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/calendar-data?userId=${userId}`);
+    const data = await res.json();
+    initBalance(data); renderCalendar(data); renderSeeds(data);
+    renderHarvest(data); renderStory(data); renderReport(data);
+  } catch(e) {
+    // 失敗時はdemoにフォールバック
+    initBalance(demo); renderCalendar(demo); renderSeeds(demo);
+    renderHarvest(demo); renderStory(demo); renderReport(demo);
+  }
+}
+
+loadData();
 </script>
 </body>
 </html>
