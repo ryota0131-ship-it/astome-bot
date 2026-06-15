@@ -1044,7 +1044,7 @@ const isFirstCheckinMessage = !userData.isFirstTime;
       const quickReply = isFirstCheckinMessage
         ? {
             items: [
-              { type: "action", action: { type: "message", label: "昨日の続きを育てる", text: "昨日の続きを育てたい" } },
+              { type: "action", action: { type: "message", label: "前の続きを育てる", text: "前回の続きを育てたい" } },
               { type: "action", action: { type: "message", label: "今の種を見てみる", text: "今の種を見てみたい" } },
               { type: "action", action: { type: "message", label: "新しい種を探す", text: "新しい種を探したい" } },
             ],
