@@ -609,7 +609,7 @@ export default async function handler(req, res) {
       const recentMessages = userData.messages.slice(-20);
 
 const response = await anthropic.messages.create({
-  model: "claude-sonnet-4-6",
+  model: "claude-haiku-4-5-20251001",
   max_tokens: 800, // 検索結果を含むため少し増やす
   system: systemPrompt,
   messages: recentMessages,
