@@ -577,14 +577,25 @@ export default async function handler(req, res) {
 
       const recentMessages = userData.messages.slice(-20);
 
-      const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-6",
-        max_tokens: 500,
-        system: systemPrompt,
-        messages: recentMessages,
-      });
+const response = await anthropic.messages.create({
+  model: "claude-sonnet-4-6",
+  max_tokens: 800, // 検索結果を含むため少し増やす
+  system: systemPrompt,
+  messages: recentMessages,
+  tools: [
+    {
+      type: "web_search_20250305",
+      name: "web_search",
+      max_uses: 1, // タイムアウト対策：検索は1回まで
+    }
+  ],
+});
 
-      const rawReply = response.content[0].text;
+// tool_useブロックを除いてテキストだけ抽出
+const rawReply = response.content
+  .filter(block => block.type === "text")
+  .map(block => block.text)
+  .join("");
 
       // JSON検知（カレンダー・シェア・種・ゴール）
       let replyText = rawReply;
