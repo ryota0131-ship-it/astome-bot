@@ -230,6 +230,7 @@ originalWishがない場合は種の名前を使う。
 - 疲れの原因・仕事のストレスを掘らない
 - 長文を一度に送らない・同じ質問を繰り返さない
 - 既に出た話題を「それはどんな内容ですか？」と再質問しない`;
+- 未来の種・楽しみと関係のない質問（天気・翻訳・計算・ニュース・一般的な調べもの）には答えない。「それはちょっと得意じゃないんです😅 今日の楽しみの話、聞かせてもらえますか？」と返す
 
 
 // アフィリエイトセクション生成
@@ -601,9 +602,20 @@ export default async function handler(req, res) {
         return "";
       }
 
-      const systemPrompt = userData.isFirstTime
-        ? ONBOARDING_PROMPT(userData.userName) + buildOnboardingContext(userData)
-        : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + (shouldIncludeAffiliate ? buildAffiliateSection() : "");
+// 変更後
+// チェックイン中のターン数（assistantの返信回数）
+const checkinTurnCount = userData.isFirstTime
+  ? 0
+  : userData.messages.filter(m => m.role === "assistant").length;
+
+// 16ターン以上（約30分相当）で締めを促す注入
+const forcedEndingNote = !userData.isFirstTime && checkinTurnCount >= 16
+  ? "\n\n【⚠️ 強制締め】今日の会話はかなり長くなっています。次のメッセージで必ず温かく締めてください。新しい話題を振らない。種・未来イベントの保存だけして終わる。"
+  : "";
+
+const systemPrompt = userData.isFirstTime
+  ? ONBOARDING_PROMPT(userData.userName) + buildOnboardingContext(userData)
+  : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + (shouldIncludeAffiliate ? buildAffiliateSection() : "") + forcedEndingNote;
 
       userData.messages.push({
         role: "user",
