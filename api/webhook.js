@@ -610,7 +610,7 @@ const checkinTurnCount = userData.isFirstTime
 
 // 16ターン以上（約30分相当）で締めを促す注入
 const forcedEndingNote = !userData.isFirstTime && checkinTurnCount >= 16
-  ? "\n\n【⚠️ 強制締め】今日の会話はかなり長くなっています。次のメッセージで必ず温かく締めてください。新しい話題を振らない。種・未来イベントの保存だけして終わる。"
+  ? "\n\n【強制締め】今日の会話はかなり長くなっています。次のメッセージで必ず温かく締めてください。新しい話題を振らない。種・未来イベントの保存だけして終わる。"
   : "";
 
 const systemPrompt = userData.isFirstTime
