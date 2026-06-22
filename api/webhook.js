@@ -943,25 +943,36 @@ const rawReply = response.content
           }
 
           // 次のアクション（同じテキストのpendingが既にあれば追加しない）
-          if (data.nextAction && data.text) {
+          // LLMが配列形式{"nextAction":["...",""]}で返すケースにも対応
+          if (data.nextAction) {
             if (!Array.isArray(userData.nextActions)) userData.nextActions = [];
-            const exists = userData.nextActions.some(
-              a => a.text === data.text && a.status === "pending"
-            );
-            if (!exists) {
-              userData.nextActions.push({
-                text: data.text,
-                status: "pending",
-                createdAt: Date.now(),
-                completedAt: null, // 完了時に記録
-              });
-            }
+            const actionTexts = Array.isArray(data.nextAction)
+              ? data.nextAction
+              : data.text ? [data.text]
+              : [];
+            actionTexts.forEach(text => {
+              if (!text) return;
+              const exists = userData.nextActions.some(
+                a => a.text === text && a.status === "pending"
+              );
+              if (!exists) {
+                userData.nextActions.push({
+                  text,
+                  status: "pending",
+                  createdAt: Date.now(),
+                  completedAt: null,
+                });
+              }
+            });
             replyText = replyText.replace(match[0], "").trim();
           }
         }
       } catch (e) {
         // JSON解析失敗はそのままテキストとして扱う
       }
+
+      // 最終安全網：パース・処理の成否にかかわらず残留タグを除去
+      replyText = replyText.replace(/<ASTO_JSON>.*?<\/ASTO_JSON>/gs, "").trim();
 
       // === 種のステージ自動昇格 ===
       // データの状態から自動算出（AIに任せず確実に動かす）
