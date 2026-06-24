@@ -403,7 +403,7 @@ export default async function handler(req, res) {
       const userId = event.source.userId;
 
       if (action === "start_yokan") {
-        // Phase1：共鳴 + 覗くボタン
+        // Phase1：共鳴 + 先を見るボタン
         await client.replyMessage({
           replyToken: event.replyToken,
           messages: [{
@@ -411,12 +411,12 @@ export default async function handler(req, res) {
             altText: "少しだけ、未来を覗いてみますね😊",
             template: {
               type: "buttons",
-              text: "少しだけ、未来を覗いてみますね😊\n\n毎日、考えることがたくさんありますよね。\n自分のための予定って、後回しになりがちじゃないですか🌱\n\nパッと思い浮かばなくても全然大丈夫です。",
+              text: "少しだけ、未来を覗いてみますね😊\n\n毎日、考えることがたくさんありますよね。\n「自分が楽しみにできること」って、後回しになりがちじゃないですか🌱\n\nだから今日は、少しだけ自分の未来のことを考えてみましょう😊",
               actions: [{
                 type: "postback",
-                label: "👀 続きを覗いてみる",
+                label: "👀 少し先を見てみる",
                 data: "action=yokan_p2",
-                displayText: "続きを覗いてみる",
+                displayText: "少し先を見てみる",
               }]
             }
           }]
@@ -425,7 +425,7 @@ export default async function handler(req, res) {
       }
 
       if (action === "yokan_p2") {
-        // Phase2：予感 + 覗くボタン
+        // Phase2：予感 + 半年後を覗くボタン
         await client.replyMessage({
           replyToken: event.replyToken,
           messages: [{
@@ -436,9 +436,9 @@ export default async function handler(req, res) {
               text: "もしそうなら…\n\n今のあなたには、「大きな夢」よりも、「小さな楽しみ」が似合う時期なのかもしれません😊",
               actions: [{
                 type: "postback",
-                label: "👀 続きを覗いてみる",
+                label: "✨ 半年後を覗いてみる",
                 data: "action=yokan_p3",
-                displayText: "続きを覗いてみる",
+                displayText: "半年後を覗いてみる",
               }]
             }
           }]
@@ -447,7 +447,7 @@ export default async function handler(req, res) {
       }
 
       if (action === "yokan_p3") {
-        // Phase3：半年後の未来 + 覗くボタン
+        // Phase3：半年後の未来 + 気になる未来を選ぶボタン
         await client.replyMessage({
           replyToken: event.replyToken,
           messages: [{
@@ -455,12 +455,12 @@ export default async function handler(req, res) {
             altText: "半年後のあなたを想像してみました👀",
             template: {
               type: "buttons",
-              text: "半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている",
+              text: "そんな小さな楽しみって、どんなものなんでしょう😊\n\n半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている",
               actions: [{
                 type: "postback",
-                label: "👀 続きを覗いてみる",
+                label: "🌱 気になる未来を選ぶ",
                 data: "action=yokan_p4",
-                displayText: "続きを覗いてみる",
+                displayText: "気になる未来を選ぶ",
               }]
             }
           }]
@@ -513,11 +513,11 @@ export default async function handler(req, res) {
           messages: [
             {
               type: "text",
-              text: `🌱 「${seedName}」\n\nいい種ですね😊\n\n大きな一歩じゃなくて大丈夫。\n「ちょっといいかも」から始まる未来も、たくさんあります🐋\n\nあなたの未来を、あなたのために想像していいんですよ🌱`
+              text: `🌱 「${seedName}」\n\nいい種ですね😊\n\nあなたの未来を、あなたのために想像していいんですよ🌱`
             },
             {
               type: "text",
-              text: "この種、一緒に育てていきましょう😊\n話しかけてくれたら、続きを聞かせてください🌱",
+              text: "この種は、急いで育てなくても大丈夫です😊\nまた未来のことを思い出したくなったら、いつでも話しかけてください🐋",
             }
           ]
         });
