@@ -321,6 +321,7 @@ async function saveUserData(userId, data) {
     conversationSummary: Array.isArray(data.conversationSummary) ? data.conversationSummary.slice(-20) : [],
     userFacts: Array.isArray(data.userFacts) ? data.userFacts : [],
     lastMessageAt: Date.now(),
+    yokanSessionDone: data.yokanSessionDone || false,
   };
   await redis.set(`user:${userId}`, payload);
 }
@@ -369,6 +370,116 @@ export default async function handler(req, res) {
   const events = req.body.events;
 
   for (const event of events) {
+
+    // ── 友達追加イベント：ウェルカムボタンを送る ──
+    if (event.type === "follow") {
+      await client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{
+          type: "template",
+          altText: "アストと、90秒だけ未来を覗いてみる",
+          template: {
+            type: "buttons",
+            imageAspectRatio: "rectangle",
+            imageSize: "cover",
+            title: "はじめまして😊",
+            text: "アストです🐋\nあなたの未来を一緒に思い出す相棒です。",
+            actions: [{
+              type: "postback",
+              label: "🌱 90秒だけ未来を覗いてみる",
+              data: "action=start_yokan",
+              displayText: "🌱 90秒だけ未来を覗いてみる",
+            }]
+          }
+        }]
+      });
+      continue;
+    }
+
+    // ── postbackイベント：予感セッション ──
+    if (event.type === "postback") {
+      const params = new URLSearchParams(event.postback.data);
+      const action = params.get("action");
+      const userId = event.source.userId;
+
+      if (action === "start_yokan") {
+        // 予感セッション本体：5メッセージまとめて送る
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "text",
+              text: "少しだけ、未来を覗いてみますね🐋"
+            },
+            {
+              type: "text",
+              text: "毎日、考えることがたくさんありますよね😊\n自分のための予定って、後回しになりがちじゃないですか🌱\n\nだから、パッと思い浮かばなくても全然大丈夫です。"
+            },
+            {
+              type: "text",
+              text: "もしそうなら…\n今のあなたには、「大きな夢」よりも、「小さな楽しみ」が似合う時期なのかもしれません😊"
+            },
+            {
+              type: "text",
+              text: "半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている"
+            },
+            {
+              type: "template",
+              altText: "ちょっといいかも、を選んでください",
+              template: {
+                type: "buttons",
+                text: "どれか一つでも「ちょっといいかも」があったら嬉しいです😊\n🌱 その気持ちが、未来の種になります。",
+                actions: [
+                  { type: "postback", label: "🏃 海辺を走る", data: "action=pick_seed&seed=海辺を走る", displayText: "🏃 海辺を走る" },
+                  { type: "postback", label: "♨️ 温泉街でのんびり", data: "action=pick_seed&seed=温泉街でのんびり", displayText: "♨️ 温泉街でのんびり" },
+                  { type: "postback", label: "🍜 新しい街でご飯", data: "action=pick_seed&seed=新しい街でご飯", displayText: "🍜 新しい街でご飯" },
+                ]
+              }
+            }
+          ]
+        });
+        continue;
+      }
+
+      if (action === "pick_seed") {
+        const seedName = params.get("seed");
+        const userData = await getUserData(userId);
+
+        // 種を保存
+        if (!Array.isArray(userData.seeds)) userData.seeds = [];
+        userData.seeds.push({
+          name: seedName,
+          category: "体験",
+          stage: "discovered",
+          originalWish: seedName,
+          createdAt: Date.now(),
+          lastMentionAt: Date.now(),
+          mentionCount: 1,
+        });
+        // 予感セッション完了フラグ（isFirstTimeはオンボーディング完了まで残す）
+        userData.yokanSessionDone = true;
+        await saveUserData(userId, userData);
+
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "text",
+              text: `🌱 「${seedName}」\n\nいい種ですね😊\n\n大きな一歩じゃなくて大丈夫。\n「ちょっといいかも」から始まる未来も、たくさんあります🐋\n\nあなたの未来を、あなたのために想像していいんですよ🌱`
+            },
+            {
+              type: "text",
+              text: "この種、一緒に育てていきましょう😊\n話しかけてくれたら、続きを聞かせてください🌱",
+            }
+          ]
+        });
+        continue;
+      }
+
+      // 未知のpostbackは無視
+      continue;
+    }
+
     if (event.type !== "message") continue;
 
     if (event.message.type === "sticker") {
