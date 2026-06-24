@@ -431,7 +431,7 @@ export default async function handler(req, res) {
             altText: "小さな楽しみが似合う時期かもしれません",
             template: {
               type: "buttons",
-              text: "もしそうなら…\n\n今のあなたには、「大きな夢」よりも、「小さな楽しみ」が似合う時期なのかもしれません😊",
+              text: "毎日を誰かのために生きて、少し疲れているなら…\n今は「大きな夢」より「小さな楽しみ」が似合う時期かもしれません😊",
               actions: [{
                 type: "postback",
                 label: "✨ 半年後を覗いてみる",
