@@ -381,7 +381,7 @@ export default async function handler(req, res) {
           template: {
             type: "buttons",
             title: "はじめまして😊",
-            text: "ぼくはアストです🐋\nあなたの未来を、一緒に思い出す相棒です🌱\n\n毎日、考えることってたくさんありますよね。\nだから今日は、90秒だけ。\n少しだけ未来を覗いてみませんか？👀",
+            text: "90秒だけ、少し未来を覗いてみませんか？👀",
             actions: [{
               type: "postback",
               label: "🌱 90秒だけ未来を覗いてみる",
@@ -409,7 +409,7 @@ export default async function handler(req, res) {
             altText: "毎日、考えることがたくさんありますよね",
             template: {
               type: "buttons",
-              text: "毎日、考えることがたくさんありますよね。\n「自分が楽しみにできること」って、後回しになりがちじゃないですか🌱\n\nだから今日は、少しだけ自分の未来のことを考えてみましょう😊",
+              text: "「自分が楽しみにできること」って後回しになりがちじゃないですか🌱\n今日は少しだけ、未来を覗いてみましょう😊",
               actions: [{
                 type: "postback",
                 label: "👀 少し先を見てみる",
@@ -453,7 +453,7 @@ export default async function handler(req, res) {
             altText: "半年後のあなたを想像してみました👀",
             template: {
               type: "buttons",
-              text: "そんな小さな楽しみって、どんなものなんでしょう😊\n\n半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている",
+              text: "半年後のあなたを想像してみました👀\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 新しい街でご飯を食べている",
               actions: [{
                 type: "postback",
                 label: "🌱 気になる未来を選ぶ",
