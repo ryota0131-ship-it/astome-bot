@@ -403,40 +403,88 @@ export default async function handler(req, res) {
       const userId = event.source.userId;
 
       if (action === "start_yokan") {
-        // 予感セッション本体：5メッセージまとめて送る
+        // Phase1：共鳴 + 覗くボタン
         await client.replyMessage({
           replyToken: event.replyToken,
-          messages: [
-            {
-              type: "text",
-              text: "少しだけ、未来を覗いてみますね🐋"
-            },
-            {
-              type: "text",
-              text: "毎日、考えることがたくさんありますよね😊\n自分のための予定って、後回しになりがちじゃないですか🌱\n\nだから、パッと思い浮かばなくても全然大丈夫です。"
-            },
-            {
-              type: "text",
-              text: "もしそうなら…\n今のあなたには、「大きな夢」よりも、「小さな楽しみ」が似合う時期なのかもしれません😊"
-            },
-            {
-              type: "text",
-              text: "半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている"
-            },
-            {
-              type: "template",
-              altText: "ちょっといいかも、を選んでください",
-              template: {
-                type: "buttons",
-                text: "どれか一つでも「ちょっといいかも」があったら嬉しいです😊\n🌱 その気持ちが、未来の種になります。",
-                actions: [
-                  { type: "postback", label: "🏃 海辺を走る", data: "action=pick_seed&seed=海辺を走る", displayText: "🏃 海辺を走る" },
-                  { type: "postback", label: "♨️ 温泉街でのんびり", data: "action=pick_seed&seed=温泉街でのんびり", displayText: "♨️ 温泉街でのんびり" },
-                  { type: "postback", label: "🍜 新しい街でご飯", data: "action=pick_seed&seed=新しい街でご飯", displayText: "🍜 新しい街でご飯" },
-                ]
-              }
+          messages: [{
+            type: "template",
+            altText: "少しだけ、未来を覗いてみますね😊",
+            template: {
+              type: "buttons",
+              text: "少しだけ、未来を覗いてみますね😊\n\n毎日、考えることがたくさんありますよね。\n自分のための予定って、後回しになりがちじゃないですか🌱\n\nパッと思い浮かばなくても全然大丈夫です。",
+              actions: [{
+                type: "postback",
+                label: "👀 続きを覗いてみる",
+                data: "action=yokan_p2",
+                displayText: "続きを覗いてみる",
+              }]
             }
-          ]
+          }]
+        });
+        continue;
+      }
+
+      if (action === "yokan_p2") {
+        // Phase2：予感 + 覗くボタン
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: "template",
+            altText: "小さな楽しみが似合う時期かもしれません",
+            template: {
+              type: "buttons",
+              text: "もしそうなら…\n\n今のあなたには、「大きな夢」よりも、「小さな楽しみ」が似合う時期なのかもしれません😊",
+              actions: [{
+                type: "postback",
+                label: "👀 続きを覗いてみる",
+                data: "action=yokan_p3",
+                displayText: "続きを覗いてみる",
+              }]
+            }
+          }]
+        });
+        continue;
+      }
+
+      if (action === "yokan_p3") {
+        // Phase3：半年後の未来 + 覗くボタン
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: "template",
+            altText: "半年後のあなたを想像してみました👀",
+            template: {
+              type: "buttons",
+              text: "半年後のあなたを、少しだけ想像してみました👀\n\n🏃 海辺を走っている\n♨️ 温泉街でぼーっとしている\n🍜 行ったことのない街でご飯を食べている",
+              actions: [{
+                type: "postback",
+                label: "👀 続きを覗いてみる",
+                data: "action=yokan_p4",
+                displayText: "続きを覗いてみる",
+              }]
+            }
+          }]
+        });
+        continue;
+      }
+
+      if (action === "yokan_p4") {
+        // Phase4：選択
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: "template",
+            altText: "ちょっといいかも、を選んでください",
+            template: {
+              type: "buttons",
+              text: "どれか一つでも、「ちょっといいかも」があったら嬉しいです😊\n\n🌱 その気持ちが、未来の種になります。",
+              actions: [
+                { type: "postback", label: "🏃 海辺を走る", data: "action=pick_seed&seed=海辺を走る", displayText: "🏃 海辺を走る" },
+                { type: "postback", label: "♨️ 温泉街でのんびり", data: "action=pick_seed&seed=温泉街でのんびり", displayText: "♨️ 温泉街でのんびり" },
+                { type: "postback", label: "🍜 新しい街でご飯", data: "action=pick_seed&seed=新しい街でご飯", displayText: "🍜 新しい街でご飯" },
+              ]
+            }
+          }]
         });
         continue;
       }
