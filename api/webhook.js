@@ -377,13 +377,11 @@ export default async function handler(req, res) {
         replyToken: event.replyToken,
         messages: [{
           type: "template",
-          altText: "アストと、90秒だけ未来を覗いてみる",
+          altText: "はじめまして😊 ぼくはアストです🐋",
           template: {
             type: "buttons",
-            imageAspectRatio: "rectangle",
-            imageSize: "cover",
             title: "はじめまして😊",
-            text: "アストです🐋\nあなたの未来を一緒に思い出す相棒です。",
+            text: "ぼくはアストです🐋\nあなたの未来を、一緒に思い出す相棒です🌱\n\n毎日、考えることってたくさんありますよね。\nだから今日は、90秒だけ。\n少しだけ未来を覗いてみませんか？👀",
             actions: [{
               type: "postback",
               label: "🌱 90秒だけ未来を覗いてみる",
@@ -408,10 +406,10 @@ export default async function handler(req, res) {
           replyToken: event.replyToken,
           messages: [{
             type: "template",
-            altText: "少しだけ、未来を覗いてみますね😊",
+            altText: "毎日、考えることがたくさんありますよね",
             template: {
               type: "buttons",
-              text: "少しだけ、未来を覗いてみますね😊\n\n毎日、考えることがたくさんありますよね。\n「自分が楽しみにできること」って、後回しになりがちじゃないですか🌱\n\nだから今日は、少しだけ自分の未来のことを考えてみましょう😊",
+              text: "毎日、考えることがたくさんありますよね。\n「自分が楽しみにできること」って、後回しになりがちじゃないですか🌱\n\nだから今日は、少しだけ自分の未来のことを考えてみましょう😊",
               actions: [{
                 type: "postback",
                 label: "👀 少し先を見てみる",
