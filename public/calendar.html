@@ -5,838 +5,472 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ASTOme</title>
 <style>
-  :root {
-    --dark: #152B3A;
-    --dark2: #152535;
-    --sage: #7E9D88;
-    --sage-light: #C6D3C3;
-    --gold: #F3C25B;
-    --gold-pale: #FFD983;
-    --ivory: #F4EEDC;
-    --cream: #FAFAF7;
-    --card: #FFFFFF;
-    --text: #22312D;
-    --muted: #7E8D86;
-    --white: #ffffff;
-    --r: 18px;
-    --rs: 12px;
-    --tab-h: 72px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html {
-  min-height: 100%;
+:root {
+  --navy: #0E1D2B;
+  --gold: #F3C25B;
+  --gold-d: #c8902f;
+  --cream: #FAFAF7;
+  --ivory: #F4EEDC;
+  --sage: #7E9D88;
+  --sage-d: #5d7a67;
+  --ink: #2b3530;
+  --muted: #8a968e;
+  --line: #e8e2d4;
+  --card: #fbf8f1;
 }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
 body {
-
-  min-height: 100vh;
-
+  background: var(--cream);
+  color: var(--ink);
+  font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  max-width: 390px;
+  margin: 0 auto;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  line-height: 1.8;
 }
-  body {
-    background: var(--cream);
-    color: var(--text);
-    font-family: -apple-system,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
-    min-height: 100vh;
-    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
-    overflow-x: hidden;
-  }
+.serif { font-family: 'Hiragino Mincho ProN', 'Noto Serif JP', Georgia, serif; }
+.screen { display: none; }
+.screen.active { display: block; animation: up .35s ease; }
+@keyframes up { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
-  /* ===== HEADER ===== */
-  .header {
-    background: linear-gradient(160deg, #152535 0%, #152B3A 100%);
-    padding: 44px 20px 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 220px; height: 220px;
-    background: radial-gradient(circle, rgba(243,194,91,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-app { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
-  .header-greeting { font-size: 20px; font-weight: 800; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
-  .header-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+/* ===== ヒーロー ===== */
+.hero {
+  position: relative;
+  padding: 52px 24px 78px;
+  background:
 
-  /* 残高ゲージ */
-  .balance-area { display: flex; align-items: center; gap: 16px; }
-  .gauge-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
-  .gauge-wrap svg { transform: rotate(-90deg); }
-  .gauge-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
-  .gauge-fill { fill: none; stroke: var(--gold); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1); }
-  .gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .gauge-num { font-size: 20px; font-weight: 800; color: var(--white); line-height: 1; }
-  .gauge-unit { font-size: 9px; color: rgba(255,255,255,0.5); font-weight: 600; }
-  .balance-info { flex: 1; }
-  .balance-state { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; margin-bottom: 6px; }
-  .balance-state-icon { font-size: 14px; }
-  .balance-state-text { font-size: 11px; font-weight: 700; color: var(--gold); }
-  .balance-label { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
-  .balance-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.6; }
-  .balance-desc span { color: var(--gold-pale); font-weight: 700; }
+  linear-gradient(
 
-  /* ===== CONTENT AREA ===== */
-  .page {
-  display: none;
-  padding: 16px 16px calc(var(--tab-h) + 24px);
+  180deg,
+
+  #1a2d44 0%,
+
+  #294760 45%,
+
+  #d8b28d 85%,
+
+  #f5e8d8 100%
+
+  );
+  color: var(--cream);
+  overflow: hidden;
 }
-  .page.active { display: block; }
-
-  /* ===== 次の楽しみカード ===== */
-  .next-card {
-    background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 100%);
-    border-radius: var(--r);
-    padding: 24px 20px;
-    margin-bottom: 16px;
-    min-height: 220px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 8px 24px rgba(14,29,43,0.18);
-  }
-  .next-card::after {
-    content: '';
-    position: absolute;
-    top: -40px; right: -30px;
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(243,194,91,0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .next-label { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-  .next-title { font-size: 28px; font-weight: 800; color: var(--white); margin-bottom: 6px; line-height: 1.2; }
-  .next-date { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 16px; }
-  .next-bottom { display: flex; align-items: center; justify-content: space-between; }
-  .next-countdown {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: rgba(243,194,91,0.12);
-    border: 1.5px solid rgba(243,194,91,0.25);
-  }
-  .next-countdown-num { font-size: 34px; font-weight: 800; color: var(--gold); line-height: 1; }
-  .next-countdown-unit { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-  .next-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(76,175,80,0.2); color: #4CAF50; font-weight: 700; align-self: flex-start; }
-
-  /* ===== 育っている未来リスト ===== */
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; }
-  .section-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
-  .section-count { font-size: 11px; color: var(--dark); font-weight: 700; }
-  .see-all { font-size: 11px; color: var(--muted); }
-
-  .future-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .future-row {
-    background: var(--card);
-    border-radius: var(--rs);
-    padding: 12px 14px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .future-emoji { font-size: 20px; width: 32px; text-align: center; }
-  .future-body { flex: 1; }
-  .future-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .future-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .future-status { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 700; flex-shrink: 0; }
-  .s-scheduled { background: rgba(76,175,80,0.12); color: #2e7d32; }
-  .s-plan { background: rgba(243,194,91,0.2); color: #8a6800; }
-  .s-interest { background: rgba(126,157,136,0.15); color: #3d6b52; }
-  .s-dream { background: rgba(0,0,0,0.05); color: var(--muted); }
-
-  /* ===== ASTOのことば ===== */
-  .asto-word {
-    background: var(--card);
-    border-radius: var(--r);
-    padding: 18px;
-    margin-bottom: 16px;
-    display: flex; align-items: flex-start; gap: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .asto-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: var(--ivory); }
-  .asto-icon-fallback { width: 52px; height: 52px; border-radius: 50%; background: var(--ivory); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .asto-bubble { flex: 1; }
-  .asto-name { font-size: 10px; font-weight: 700; color: var(--sage); margin-bottom: 5px; letter-spacing: 0.08em; }
-  .asto-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
-
-  /* ===== 今日の一粒 ===== */
-  .seed-today {
-    background: linear-gradient(135deg, #f0f7f3 0%, #fdfbf4 100%);
-    border-radius: var(--r);
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(126,157,136,0.2);
-  }
-  .seed-today-label { font-size: 10px; font-weight: 700; color: var(--sage); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-  .seed-today-text { font-size: 14px; color: var(--text); line-height: 1.7; }
-
-  /* ===== タイムライン（最近のうごき） ===== */
-  .timeline { margin-bottom: 16px; }
-  .tl-day { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; margin: 12px 0 6px; }
-  .tl-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; position: relative; }
-  .tl-item + .tl-item { border-top: 1px solid rgba(0,0,0,0.04); }
-  .tl-icon { font-size: 14px; width: 22px; text-align: center; flex-shrink: 0; padding-top: 1px; }
-  .tl-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
-  .tl-text strong { color: var(--text); font-weight: 600; }
-
-  /* ===== 育ちタブ ===== */
-  .grow-card {
-    background: var(--card);
-    border-radius: var(--r);
-    padding: 18px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .grow-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .grow-name { font-size: 16px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .grow-cat { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .grow-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
-  .gb-discovered { background: rgba(126,157,136,0.12); color: #3d6b52; }
-  .gb-interested { background: rgba(100,140,220,0.12); color: #2d4d8a; }
-  .gb-planning { background: rgba(243,194,91,0.2); color: #8a6800; }
-  .gb-booked { background: rgba(76,175,80,0.12); color: #2e7d32; }
-
-  /* 育成ステップ */
-  .grow-steps { display: flex; align-items: center; gap: 0; margin-bottom: 12px; }
-  .grow-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .grow-step-icon { font-size: 18px; opacity: 0.3; transition: all 0.5s; }
-  .grow-step-icon.active { opacity: 1; transform: scale(1.2); }
-  .grow-step-icon.done { opacity: 0.7; }
-  .grow-step-line { height: 2px; background: rgba(0,0,0,0.08); flex: 1; margin-bottom: 20px; }
-  .grow-step-line.done { background: var(--sage); }
-  .grow-step-label { font-size: 9px; color: var(--muted); }
-  .grow-step-label.active { color: var(--dark); font-weight: 700; }
-
-  .grow-hint { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-  .grow-hint-next { color: var(--sage); font-weight: 600; }
-  .grow-wish { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; opacity: 0.7; }
-
-  .grow-add-btn {
-    width: 100%;
-    background: rgba(126,157,136,0.08);
-    border: 1.5px dashed rgba(126,157,136,0.3);
-    border-radius: var(--r);
-    padding: 16px;
-    color: var(--sage);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-top: 4px;
-  }
-
-  /* ===== 人生タブ ===== */
-  .life-toggle { display: flex; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 3px; margin-bottom: 16px; }
-  .life-toggle-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
-  .life-toggle-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-
-  /* 物語チェーン */
-  .story-chain { background: var(--card); border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .story-chain-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.06); }
-  .story-steps { display: flex; flex-direction: column; gap: 0; }
-  .story-step { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; position: relative; }
-  .story-step:not(:last-child)::after { content: ''; position: absolute; left: 9px; top: 28px; width: 2px; bottom: -2px; background: rgba(0,0,0,0.08); }
-  .story-dot-wrap { flex-shrink: 0; width: 20px; display: flex; justify-content: center; padding-top: 3px; }
-  .story-dot { width: 12px; height: 12px; border-radius: 50%; }
-  .sd-seed { background: var(--sage); }
-  .sd-event { background: var(--gold); }
-  .sd-harvest { background: #c07a30; }
-  .sd-next { background: #4CAF50; }
-  .story-body { flex: 1; }
-  .story-type { font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 700; display: inline-block; margin-bottom: 3px; }
-  .st-seed { background: rgba(126,157,136,0.12); color: #3d6b52; }
-  .st-event { background: rgba(243,194,91,0.2); color: #8a6800; }
-  .st-harvest { background: rgba(192,122,48,0.15); color: #8a4a00; }
-  .st-next { background: rgba(76,175,80,0.12); color: #2e7d32; }
-  .story-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .story-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* 月次レポート */
-  .report-card { background: var(--card); border-radius: var(--r); padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .report-title { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 14px; letter-spacing: 0.08em; }
-  .report-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .report-num { background: var(--cream); border-radius: var(--rs); padding: 12px; }
-  .report-num-val { font-size: 22px; font-weight: 800; color: var(--text); }
-  .report-num-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .report-num-diff { font-size: 11px; color: var(--sage); font-weight: 700; }
-
-  /* グラフ */
-  .graph-wrap { margin-top: 8px; }
-  .graph-label { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
-  .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 56px; }
-  .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--sage-light); min-height: 4px; transition: height 1s ease; }
-  .bar.highlight { background: var(--gold); }
-  .bar-lbl { font-size: 8px; color: var(--muted); }
-
-  /* ===== 下タブ ===== */
-  .bottom-tab {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: calc(var(--tab-h) + env(safe-area-inset-bottom));
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(0,0,0,0.08);
-    display: flex;
-    align-items: flex-start;
-    padding-top: 8px;
-    z-index: 100;
-  }
-  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; cursor: pointer; padding: 6px 4px; }
-  .tab-icon { font-size: 22px; transition: transform 0.2s; }
-  .tab-label { font-size: 10px; color: var(--muted); font-weight: 600; font-family: inherit; }
-  .tab-btn.active .tab-label { color: var(--dark); }
-  .tab-btn.active .tab-icon { transform: scale(1.1); }
-
-  /* 中央タブ（ASTO） */
-  .tab-center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; cursor: pointer; padding: 0 4px; margin-top: -12px; }
-.tab-center-img {
-
-  width: 58px;
-
-  height: 58px;
-
-  border-radius: 50%;
-
-  background: var(--ivory);
-
-  object-fit: cover;
-  object-position: center top;
-
-  padding: 4px;
-
-  border: 3px solid var(--gold);
-
-  box-shadow: 0 4px 12px rgba(243,194,91,0.4);
-
+.star { position: absolute; background: #fff; border-radius: 50%; animation: tw 4s ease-in-out infinite; }
+@keyframes tw { 0%, 100% { opacity: .15; } 50% { opacity: .85; } }
+.shoot {
+  position: absolute; top: 48px; left: 58%;
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, #fff);
+  transform: rotate(22deg); opacity: .6;
 }
-  .tab-center-fallback { width: 52px; height: 52px; border-radius: 50%; background: var(--dark); border: 3px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 12px rgba(243,194,91,0.4); }
-  .tab-center-label { font-size: 10px; color: var(--muted); font-weight: 600; font-family: inherit; }
-  .tab-center.active .tab-center-label { color: var(--dark); }
+.hero-brand { font-size: 16px; font-weight: 700; letter-spacing: .18em; opacity: .65; }
+.hero-brand b { color: var(--gold); }
+.hero-name { font-size: 27px; font-weight: 700; line-height: 1.4; margin-top: 22px; }
+.hero-sub { font-size: 14px; opacity: .68; margin-top: 8px; }
+.hero-asto {
+  position: absolute; right: 18px; bottom: 60px;
+  width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #2a4660, #0b1822);
+  box-shadow: 0 0 0 2px rgba(243,194,91,.35), 0 10px 28px -10px rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 43px;
+  animation: bob 5s ease-in-out infinite;
+}
+/* ASTO画像を使う場合は .hero-asto img { width:100%; height:100%; border-radius:50%; object-fit:cover; } */
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-  /* empty */
-  .empty { text-align: center; padding: 48px 16px; color: var(--muted); }
-  .empty-icon { font-size: 40px; margin-bottom: 10px; }
-  .empty-text { font-size: 13px; line-height: 1.7; }
+/* ===== シート ===== */
+.sheet { margin-top: -44px; padding: 0 16px; position: relative; z-index: 2; }
 
-  /* ===== LINE導線ボタン ===== */
-  .chat-card {
-    background: var(--dark);
-    border-radius: var(--r);
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 12px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(14,29,43,0.12);
-  }
-  .chat-card-body { flex: 1; }
-  .chat-card-title { font-size: 14px; font-weight: 700; color: var(--white); }
-  .chat-card-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-  .chat-card-arrow { font-size: 20px; color: rgba(255,255,255,0.3); }
+/* ASTOの一言 */
+.asto-say {
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+  padding: 14px 16px 18px 18px;
+  display: flex; align-items: flex-start; gap: 13px;
+  box-shadow: 0 6px 24px -14px rgba(40,53,48,.5);
+  margin-bottom: 18px;
+}
+.asto-ico {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: radial-gradient(circle at 38% 32%, #2a4660, #0b1822);
+  box-shadow: 0 0 0 1.5px rgba(243,194,91,.28);
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+}
+/* ASTO画像を使う場合は .asto-ico img { width:100%; height:100%; border-radius:50%; object-fit:cover; } */
+.asto-say-text { font-size: 15px; line-height: 1.95; padding-top: 1px; }
 
-  /* 次の楽しみ・空状態 */
-  .next-card-empty { justify-content: flex-start; gap: 12px; min-height: 180px; }
-  .next-empty-title { font-size: 22px; font-weight: 800; color: rgba(255,255,255,0.6); }
-  .next-empty-sub { font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.7; margin-top: 4px; }
-  .next-empty-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(243,194,91,0.15);
-    border: 1px solid rgba(243,194,91,0.3);
-    color: var(--gold);
-    font-size: 14px; font-weight: 700;
-    padding: 10px 18px; border-radius: 20px;
-    cursor: pointer; margin-top: 8px;
-  }
+/* いちばん楽しみな未来 */
+.hero-future {
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+  padding: 22px 22px 24px;
+  box-shadow: 0 6px 24px -14px rgba(40,53,48,.5);
+  margin-bottom: 18px;
+}
+.hf-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .12em; margin-bottom: 14px; }
+.hf-emoji { font-size: 24px; line-height: 1; }
+.hf-name { font-size: 30px; font-weight: 700; line-height: 1.25; margin-top: 6px; }
+.hf-days { font-size: 15px; color: var(--gold-d); font-weight: 700; margin-top: 8px; }
+.hf-scene { font-size: 14px; color: var(--sage-d); line-height: 1.85; margin-top: 14px; font-style: italic; }
+
+/* これから楽しみなこと */
+.sec-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .12em; margin: 0 4px 10px; }
+.coming-list {
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px -14px rgba(40,53,48,.5);
+  margin-bottom: 26px;
+}
+.coming-row { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.coming-row:last-child { border-bottom: none; }
+.coming-emo { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+.coming-name { font-size: 15px; font-weight: 600; }
+.coming-when { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ASTOと話す */
+.talk-btn {
+  width: 100%; background: var(--navy); color: var(--cream); border: none;
+  border-radius: 999px; padding: 17px; font-size: 16px; font-weight: 700;
+  font-family: inherit; letter-spacing: .04em; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 12px 30px -12px rgba(14,29,43,.65);
+  transition: transform .15s;
+}
+.talk-btn:active { transform: scale(0.98); }
+
+/* ===== 育てる ===== */
+.sodate-screen { padding: 30px 16px 20px; }
+.sodate-head { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.sodate-asto {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #2a4660, #0b1822);
+  box-shadow: 0 0 0 1.5px rgba(243,194,91,.28);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+  animation: bob 5s ease-in-out infinite;
+}
+.sodate-intro { font-size: 15.5px; line-height: 1.85; }
+.seed-simple {
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  overflow: hidden; margin-bottom: 18px;
+  box-shadow: 0 4px 16px -10px rgba(40,53,48,.4);
+}
+.seed-row2 { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.seed-row2:last-child { border-bottom: none; }
+.seed-emo2 { font-size: 20px; flex-shrink: 0; }
+.seed-name2 { font-size: 15px; font-weight: 600; }
+
+/* ===== 人生 ===== */
+.jinsei-screen { padding: 32px 16px 20px; }
+.jinsei-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.jinsei-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+.leaf {
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  padding: 15px 17px; display: flex; align-items: center; gap: 13px;
+  box-shadow: 0 4px 14px -10px rgba(40,53,48,.4);
+}
+.leaf-ico { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.i-seed { background: #e4efe1; }
+.i-ev   { background: #fdf0dc; }
+.i-done { background: #f0f4e8; }
+.leaf-label { font-size: 14.5px; font-weight: 600; }
+.leaf-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.spine { height: 18px; margin-left: 30px; border-left: 1.5px solid var(--sage); opacity: .45; position: relative; }
+.spine::after { content: '↓'; position: absolute; left: -7px; top: -1px; color: var(--sage); font-size: 12px; opacity: .8; }
+
+/* ===== タブ ===== */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  max-width: 390px; margin: 0 auto;
+  background: rgba(250,250,247,.95); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line); display: flex;
+  padding: 6px 0 calc(10px + env(safe-area-inset-bottom));
+  z-index: 60;
+}
+.tab {
+  flex: 1; border: none; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px 0; font-family: inherit; color: var(--muted);
+  transition: color .2s; position: relative;
+}
+.tab.active { color: var(--navy); }
+.tab.active::before { content: ''; position: absolute; top: 0; width: 18px; height: 2.5px; border-radius: 0 0 3px 3px; background: var(--gold); }
+.tab-ico { font-size: 20px; line-height: 1; }
+.tab-lbl { font-size: 10px; font-weight: 700; letter-spacing: .04em; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-app">ASTOme</div>
-  <div class="header-greeting" id="greeting">おかえり</div>
-  <div class="header-sub">今日はどんな未来を楽しみにする？</div>
-  <div class="balance-area">
-    <div class="gauge-wrap">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-        <circle class="gauge-fill" id="gauge-fill" cx="40" cy="40" r="32"
-          stroke-dasharray="201"
-          stroke-dashoffset="201"/>
-      </svg>
-      <div class="gauge-center">
-        <div class="gauge-num" id="gauge-num">0</div>
-        <div class="gauge-unit">pt</div>
-      </div>
-    </div>
-    <div class="balance-info">
-      <div class="balance-label">未来のエネルギー</div>
-      <div class="balance-state">
-        <span class="balance-state-icon" id="state-icon">🌙</span>
-        <span class="balance-state-text" id="state-text">まだ空</span>
-      </div>
-      <div class="balance-desc" id="balance-desc"></div>
-    </div>
+<!-- ========== 🗓 未来 ========== -->
+<section class="screen active" id="s-mirai">
+  <div class="hero" id="hero">
+    <div class="shoot"></div>
+    <div class="hero-brand serif">ASTO <b>✦</b></div>
+    <div class="hero-name" id="hero-name"></div>
+    <div class="hero-sub">今日も未来を楽しみにいこう。</div>
+    <!-- ASTO画像: <img> に差し替える場合は下記を使用
+    <div class="hero-asto"><img src="assets/asto/asto_wave.png" alt="ASTO"></div>
+    -->
+    <div class="hero-asto">🐋</div>
   </div>
-</div>
 
-<!-- PAGES -->
-<div class="page active" id="page-home"></div>
-<div class="page" id="page-grow"></div>
-<div class="page" id="page-life"></div>
+  <div class="sheet">
+    <div class="asto-say">
+      <!-- ASTO画像: <img> に差し替える場合は下記を使用
+      <div class="asto-ico"><img src="assets/asto/asto_smile.png" alt="ASTO"></div>
+      -->
+      <div class="asto-ico">🐋</div>
+      <div class="asto-say-text" id="asto-say-text"></div>
+    </div>
 
-<!-- BOTTOM TAB -->
-<div class="bottom-tab">
-  <button class="tab-btn active" onclick="switchPage('home')" id="tab-home">
-    <span class="tab-icon">🗓</span>
-    <span class="tab-label">未来</span>
-  </button>
-  <button class="tab-center" onclick="switchPage('grow')" id="tab-grow">
-    <img src="/asto.png"
+    <div class="hero-future" id="hero-future"></div>
 
-     class="tab-center-img"
+    <div class="sec-label">これから楽しみなこと</div>
+    <div class="coming-list" id="coming-list"></div>
 
-     id="asto-tab-icon"
+    <button class="talk-btn" onclick="switchTab('sodate')">🤍&nbsp;&nbsp;ASTOと話す</button>
+  </div>
+</section>
 
-     alt="ASTO">
-    <span class="tab-center-label">育てる</span>
-  </button>
-  <button class="tab-btn" onclick="switchPage('life')" id="tab-life">
-    <span class="tab-icon">📖</span>
-    <span class="tab-label">人生</span>
-  </button>
-</div>
+<!-- ========== 🐋 育てる ========== -->
+<section class="screen" id="s-sodate">
+  <div class="sodate-screen">
+    <div class="sodate-head">
+      <!-- ASTO画像: <img> に差し替える場合は下記を使用
+      <div class="sodate-asto"><img src="assets/asto/asto_peek.png" alt="ASTO"></div>
+      -->
+      <div class="sodate-asto">🐋</div>
+      <div class="sodate-intro" id="sodate-intro"></div>
+    </div>
+    <div class="seed-simple" id="seed-list"></div>
+    <button class="talk-btn" onclick="openLine()">💬&nbsp;&nbsp;ASTOに話しかける</button>
+  </div>
+</section>
+
+<!-- ========== 📖 人生 ========== -->
+<section class="screen" id="s-jinsei">
+  <div class="jinsei-screen">
+    <div class="jinsei-title serif">人生</div>
+    <div class="jinsei-sub">種が繋がっていく場所</div>
+    <div id="jinsei-wrap"></div>
+  </div>
+</section>
+
+<!-- ========== タブ ========== -->
+<nav class="tabbar">
+  <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">🗓</span><span class="tab-lbl">未来</span></button>
+  <button class="tab"        data-s="sodate" onclick="switchTab('sodate')"><span class="tab-ico">🐋</span><span class="tab-lbl">育てる</span></button>
+  <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">人生</span></button>
+</nav>
 
 <script>
-// ===== データ =====
-const STATUS_LABEL = {dream:'いつか',interest:'興味あり',plan:'計画中',scheduled:'予約済み'};
-const STAGE_LABEL = {discovered:'発見',interested:'興味',planning:'計画中',booked:'予約済み'};
-const STATUS_POINT = {dream:1,interest:2,plan:3,scheduled:5};
-const STAGE_STEPS = ['discovered','interested','planning','booked'];
-const STEP_ICONS = ['🌱','🌿','🍀','🌳'];
-const STEP_LABELS = ['種','芽','育ち中','未来へ'];
-
-const ASTO_WORDS = [
-  '未来って、大きな夢じゃなくていい。\n「来月ここ行きたいな」それだけでも十分だよ。',
-  '楽しみがひとつあるだけで、\n今日の疲れは少し軽くなるよ。',
-  '種は消えない。\n見えなくなることはあっても、なくなりはしないから。',
-  'やりたいことを覚えていてくれる人が\n いるだけで、少し前を向けるよね。',
-  '小さな「気になる」が、\n 一番大切な種になることが多いんだよね。',
-];
-
-const SEED_TODAY = [
-  '今週、少しでも楽しみなことある？\nなかったら、一緒に探そう。',
-  '最近「いいな」って思ったこと、\nひとつだけ教えてほしいな。',
-  '来月、何かひとつだけ\n楽しみを作るとしたら？',
-];
-
-const demo = {
+/* ==========================================================
+   データ
+   - 本番では /api/calendar-data?userId=xxx から取得
+   - userId がない場合はデモデータを使用
+   - futureBalanceHistory は使用しない
+   ========================================================== */
+const DEMO = {
   userName: 'りょうた',
   futureEvents: [
-    {title:'釧路湿原マラソン',status:'scheduled',date:'2026-07',sourceSeed:'釧路マラソン',createdAt:Date.now()-45*86400*1000,history:[{status:'plan',at:Date.now()-45*86400*1000},{status:'scheduled',at:Date.now()-4*86400*1000}]},
-    {title:'鬼怒川温泉旅行',status:'plan',date:'2026-09',sourceSeed:'鬼怒川でリセット',createdAt:Date.now()-10*86400*1000},
-    {title:'嫁さんと寿司',status:'interest',date:null,sourceSeed:'グルメ探し',createdAt:Date.now()-14*86400*1000},
-    {title:'屋久島',status:'dream',date:null,sourceSeed:null,createdAt:Date.now()-2*86400*1000},
+    {
+      title: '釧路湿原マラソン',
+      status: 'scheduled',
+      date: '2026-11',
+      emoji: '🏃',
+      daysLeft: 139,
+      scene: '11月の海風が気持ちよさそうだね😊',
+    },
+    {
+      title: '鬼怒川温泉',
+      status: 'plan',
+      date: '2026-09',
+      emoji: '♨️',
+      scene: '温泉に浸かってるとこ、想像するだけでほっとするね😊',
+    },
+    {
+      title: '嫁さんと寿司',
+      status: 'interest',
+      date: null,
+      emoji: '🍣',
+      scene: '二人でカウンターに座ってるところが目に浮かぶ😊',
+    },
+    {
+      title: '屋久島',
+      status: 'dream',
+      date: null,
+      emoji: '🏝',
+      scene: '縄文杉の前に立つ自分が楽しみだね😊',
+    },
   ],
   seeds: [
-    {name:'釧路マラソン',category:'体験',stage:'booked',createdAt:Date.now()-60*86400*1000,lastMentionAt:Date.now()-3*86400*1000,originalWish:'釧路で走りたい'},
-    {name:'鬼怒川でリセット',category:'旅行',stage:'planning',createdAt:Date.now()-30*86400*1000,lastMentionAt:Date.now()-1*86400*1000,originalWish:'温泉行きたいなー'},
-    {name:'グルメ探し',category:'グルメ',stage:'interested',createdAt:Date.now()-14*86400*1000,originalWish:'美味しいもの食べたい'},
-    {name:'ペペロンチーノ自作',category:'料理',stage:'discovered',createdAt:Date.now()-1*86400*1000,originalWish:'ペペロンチーノってどう作るの'},
+    { name: '鬼怒川でリセット', emoji: '♨️' },
+    { name: 'グルメ探し',       emoji: '🍣' },
+    { name: 'ペペロンチーノ自作', emoji: '🍝' },
   ],
   harvestedSeeds: [
-    {name:'カツカレー探し',harvestNote:'蒲田のいっぺこっぺ、最高だった。',harvestedAt:Date.now()-7*86400*1000,futureTitle:'蒲田カツカレー',futureDate:'2026-05',nextSeed:'グルメ探し',originalWish:'美味しいカツカレー探してた'},
-  ],
-  futureBalanceHistory: [
-    {date:'2026-06-01',balance:4},
-    {date:'2026-06-03',balance:7,reason:'event_added',title:'鬼怒川温泉',addedPt:3},
-    {date:'2026-06-05',balance:9,reason:'event_added',title:'嫁さんと寿司',addedPt:2},
-    {date:'2026-06-07',balance:10,reason:'event_added',title:'屋久島',addedPt:1},
-    {date:'2026-06-09',balance:9},
+    {
+      name: 'カツカレー探し',
+      emoji: '🍛',
+      harvestNote: '最高だった',
+      originalWish: '美味しいカツカレー探してた',
+      futureTitle: '蒲田カツカレー',
+      nextSeed: '屋久島に行きたい',
+    },
   ],
 };
 
-// ===== ユーティリティ =====
-const fmtDate = d => { if(!d) return 'いつか'; const[y,m]=d.split('-'); return `${y}年${parseInt(m)}月`; };
-const fmtTs = ts => { if(!ts) return ''; const d=new Date(ts); return `${d.getFullYear()}年${d.getMonth()+1}月`; };
-const calcBal = events => (events||[]).filter(e=>e.status!=='harvest'&&e.status!=='done').reduce((s,e)=>s+(STATUS_POINT[e.status]||0),0);
-const daysSince = ts => ts ? Math.floor((Date.now()-ts)/(24*60*60*1000)) : Infinity;
-const relTime = ts => { const d=daysSince(ts); if(d===0)return'今日'; if(d===1)return'昨日'; if(d<7)return`${d}日前`; if(d<14)return'先週'; if(d<30)return`${Math.floor(d/7)}週間前`; return`${Math.floor(d/30)}ヶ月前`; };
-const daysUntil = dateStr => { if(!dateStr) return null; const[y,m]=dateStr.split('-'); const target=new Date(parseInt(y),parseInt(m)-1,1); return Math.ceil((target-Date.now())/(24*60*60*1000)); };
-const eventEmoji = e => {
-  const t = (e.title||'').toLowerCase();
-  if(t.includes('マラソン')||t.includes('ラン')) return '🏃';
-  if(t.includes('温泉')||t.includes('旅行')||t.includes('旅')) return '🛀';
-  if(t.includes('寿司')||t.includes('グルメ')||t.includes('カレー')||t.includes('食')) return '🍣';
-  if(t.includes('屋久島')||t.includes('山')||t.includes('ハイキング')) return '🏝';
-  if(t.includes('スカイ')||t.includes('ダイビング')) return '🪂';
-  if(t.includes('家具')||t.includes('インテリア')||t.includes('カップボード')) return '🛋';
-  if(t.includes('車')) return '🚗';
-  return '✨';
-};
-
-// ===== 残高ゲージ =====
-function initBalance(data) {
-  const bal = calcBal(data.futureEvents);
-  document.getElementById('gauge-num').textContent = bal;
-  if(data.userName) document.getElementById('greeting').textContent = `おかえり、${data.userName}さん`;
-
-  // ゲージアニメーション（最大30ptで満タン）
-  const pct = Math.min(bal/30, 1);
-  const circ = 2*Math.PI*32;
-  setTimeout(() => {
-    document.getElementById('gauge-fill').style.strokeDashoffset = circ*(1-pct);
-  }, 300);
-
-  // 状態
-  const states = [
-    [0,4,'🌙','小さな希望'],
-    [5,9,'🌤','楽しみがある'],
-    [10,19,'☀️','毎日が待ち遠しい'],
-    [20,29,'🚀','ワクワクでいっぱい'],
-    [30,999,'✨','未来があふれてる'],
-  ];
-  const st = states.find(([min,max])=>bal>=min&&bal<=max)||states[0];
-  document.getElementById('state-icon').textContent = st[2];
-  document.getElementById('state-text').textContent = st[3];
-
-  const active = (data.futureEvents||[]).filter(e=>e.status!=='harvest'&&e.status!=='done');
-  const hist = data.futureBalanceHistory||[];
-  let desc = `楽しみが<span>${active.length}つ</span>育っています`;
-  if(hist.length>=2){const diff=bal-(hist[hist.length-2].balance||0);if(diff>0)desc+=`<br>前回より <span>+${diff}pt</span> 増えた`;}
-  const next=[5,10,15,20,30].find(m=>m>bal);
-  if(next) desc+=`<br>あと<span>${next-bal}pt</span>で次のステージへ`;
-  document.getElementById('balance-desc').innerHTML = desc;
-}
-
-// ===== ホームページ =====
-function renderHome(data) {
-  const el = document.getElementById('page-home');
-  let html = '';
-
-  // 次の楽しみ（scheduledで最も近いもの）
-  const scheduled = (data.futureEvents||[]).filter(e=>e.status==='scheduled').sort((a,b)=>(a.date||'9999')>(b.date||'9999')?1:-1);
-  if(scheduled.length){
-    const next = scheduled[0];
-    const days = daysUntil(next.date);
-    html += `<div class="next-card">
-      <div>
-        <div class="next-label">✨ 次の楽しみ</div>
-        <div class="next-title">${next.title}</div>
-        <div class="next-date">${fmtDate(next.date)}</div>
-      </div>
-      <div class="next-bottom">
-        ${days!==null?`<div class="next-countdown"><span class="next-countdown-num">${days}</span><span class="next-countdown-unit">DAYS</span></div>`:'<div></div>'}
-        <span class="next-badge">予約済み</span>
-      </div>
-    </div>`;
-  } else {
-    // 空状態
-    html += `<div class="next-card next-card-empty">
-      <div class="next-label">✨ 次の楽しみ</div>
-      <div class="next-empty-title">まだ決まっていないね</div>
-      <div class="next-empty-sub">今日は5分だけ、<br>次の楽しみを探してみよう</div>
-      <div class="next-empty-btn" onclick="window.open('https://line.me/R/ti/p/@624btbtc','_blank')">🌱 未来を探す</div>
-    </div>`;
-  }
-
-  // ASTOのことば（動的）
-  const astoMsg = getAstoMessage(data);
-  html += `<div class="asto-word">
-   <img src="/asto.png"
-
-     class="asto-icon"
-
-     alt="ASTO">
-    <div class="asto-bubble">
-      <div class="asto-name">ASTO</div>
-      <div class="asto-text">${astoMsg.replace(/\n/g,'<br>')}</div>
-    </div>
-  </div>`;
-
-  // これから楽しみなこと
-  const active = (data.futureEvents||[]).filter(e=>e.status!=='harvest'&&e.status!=='done'&&e.status!=='scheduled');
-  if(active.length){
-    html += `<div class="section-header"><div class="section-title">✨ これから楽しみなこと <span class="section-count">${active.length}</span></div></div>`;
-    html += '<div class="future-list">';
-    active.slice(0,4).forEach(e=>{
-      html += `<div class="future-row">
-        <div class="future-emoji">${eventEmoji(e)}</div>
-        <div class="future-body">
-          <div class="future-title">${e.title}</div>
-          <div class="future-date">${fmtDate(e.date)}</div>
-        </div>
-        <div class="future-status s-${e.status}">${STATUS_LABEL[e.status]||e.status}</div>
-      </div>`;
-    });
-    html += '</div>';
-  }
-
-  // LINE導線ボタン
-  html += `<div class="chat-card" onclick="window.open('https://line.me/R/ti/p/@624btbtc','_blank')">
-    <span>🌱</span>
-    <div class="chat-card-body">
-      <div class="chat-card-title">新しい未来を探す</div>
-      <div class="chat-card-sub">ASTOと5分だけ話してみる</div>
-    </div>
-    <span class="chat-card-arrow">›</span>
-  </div>`;
-
-  // 最近のうごき（タイムライン）
-  const items = buildTimeline(data);
-  if(items.length){
-    html += `<div class="section-header"><div class="section-title">⚡ 最近のうごき</div></div>`;
-    html += '<div class="timeline">';
-    let lastDay = '';
-    items.forEach(it=>{
-      const day = relTime(it.ts);
-      if(day!==lastDay){ html+=`<div class="tl-day">${day}</div>`; lastDay=day; }
-      html+=`<div class="tl-item"><div class="tl-icon">${it.icon}</div><div class="tl-text">${it.text}</div></div>`;
-    });
-    html += '</div>';
-  }
-
-  el.innerHTML = html || '<div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">アストと話して<br>最初の未来を育てよう</div></div>';
-}
-
-function getAstoMessage(data) {
-  const name = data.userName || 'あなた';
-  const growing = (data.futureEvents||[]).filter(e=>e.status==='plan');
-  const scheduled = (data.futureEvents||[]).filter(e=>e.status==='scheduled');
-  const harvested = data.harvestedSeeds||[];
-
-  if(harvested.length){
-    const h = harvested[harvested.length-1];
-    return `${name}さん、\n「${h.name}」を叶えたんだよね。\nその体験が、次の種になるんだよ。`;
-  }
-  if(scheduled.length){
-    return `${name}さん、\n「${scheduled[0].title}」が決まったね。\n楽しみに待つ時間も、未来の一部だよ。`;
-  }
-  if(growing.length){
-    return `${name}さん、\n「${growing[0].title}」が育ってきたね。\n未来は、育てる時間が一番楽しいんだよ。`;
-  }
-  const seeds = (data.seeds||[]).filter(s=>s.stage!=='harvested');
-  if(seeds.length){
-    return `${name}さん、\n「${seeds[0].name}」の種があるね。\nどんな未来になるか、一緒に育てよう。`;
-  }
-  return `${name}さん、\n次の楽しみを一緒に探そう。\n小さな「気になる」でいいんだよ。`;
-}
-
-function buildTimeline(data) {
-  const items=[];
-  const THIRTY=30*24*60*60*1000;
-  const now=Date.now();
-  (data.seeds||[]).forEach(s=>{if(s.createdAt&&now-s.createdAt<THIRTY)items.push({ts:s.createdAt,icon:'🌱',text:`<strong>${s.name}</strong> の種が芽吹いた`});});
-  (data.futureEvents||[]).forEach(e=>{
-    if(e.createdAt&&now-e.createdAt<THIRTY)items.push({ts:e.createdAt,icon:'✨',text:`<strong>${e.title}</strong> を楽しみにし始めた`});
-    if(Array.isArray(e.history)&&e.history.length>=2){
-      const last=e.history[e.history.length-1];
-      if(last&&last.at&&now-last.at<THIRTY){
-        const text = last.status==='scheduled'
-          ? `<strong>${e.title}</strong> の日程が決まった`
-          : last.status==='plan'
-          ? `<strong>${e.title}</strong> が具体的になってきた`
-          : `<strong>${e.title}</strong> への気持ちが育ってきた`;
-        items.push({ts:last.at,icon:'📅',text});
-      }
-    }
-  });
-  (data.harvestedSeeds||[]).forEach(h=>{if(h.harvestedAt&&now-h.harvestedAt<THIRTY)items.push({ts:h.harvestedAt,icon:'🌾',text:`<strong>${h.name}</strong> を叶えた`});});
-  items.sort((a,b)=>b.ts-a.ts);
-  return items.slice(0,6);
-}
-
-// ===== 育ちページ =====
-function renderGrow(data) {
-  const el = document.getElementById('page-grow');
-  const active = (data.seeds||[]).filter(s=>s.stage!=='harvested');
-  if(!active.length){ el.innerHTML='<div class="empty"><div class="empty-icon">🌱</div><div class="empty-text">育っている種がありません<br>アストと話して種を見つけよう</div></div>'; return; }
-
-  let html = '';
-  active.forEach(s=>{
-    const stageIdx = STAGE_STEPS.indexOf(s.stage);
-    const stepsHtml = STAGE_STEPS.map((st,i)=>{
-      const isDone = i<stageIdx;
-      const isActive = i===stageIdx;
-      const lineClass = isDone?'grow-step-line done':'grow-step-line';
-      return `
-        ${i>0?`<div class="${lineClass}"></div>`:''}
-        <div class="grow-step">
-          <div class="grow-step-icon${isActive?' active':isDone?' done':''}">${STEP_ICONS[i]}</div>
-          <div class="grow-step-label${isActive?' active':''}">${STEP_LABELS[i]}</div>
-        </div>`;
-    }).join('');
-
-    const nextStage = STAGE_STEPS[stageIdx+1];
-    const hint = nextStage ? `あと1ステップで「${STAGE_LABEL[nextStage]}」になります` : '🌳 未来まであと一歩！';
-    const badgeCls = `gb-${s.stage}`;
-
-    html += `<div class="grow-card">
-      <div class="grow-header">
-        <div>
-          <div class="grow-name">${eventEmoji({title:s.name})} ${s.name}</div>
-          <div class="grow-cat">${s.category}</div>
-        </div>
-        <div class="grow-badge ${badgeCls}">${STAGE_LABEL[s.stage]||s.stage}</div>
-      </div>
-      <div class="grow-steps">${stepsHtml}</div>
-      <div class="grow-hint"><span class="grow-hint-next">${hint}</span></div>
-      ${s.originalWish?`<div class="grow-wish">「${s.originalWish}」</div>`:''}
-    </div>`;
-  });
-
-  html += `<button class="grow-add-btn" onclick="alert('アストに話しかけて新しい種を見つけよう🌱')">＋ 新しい種を見つける</button>`;
-  el.innerHTML = html;
-}
-
-// ===== 人生ページ =====
-let lifeTab = 'story';
-function renderLife(data) {
-  const el = document.getElementById('page-life');
-  el.innerHTML = `
-    <div class="life-toggle">
-      <button class="life-toggle-btn ${lifeTab==='story'?'active':''}" onclick="switchLifeTab('story')">📖 物語</button>
-      <button class="life-toggle-btn ${lifeTab==='report'?'active':''}" onclick="switchLifeTab('report')">📊 月次レポート</button>
-    </div>
-    <div id="life-content"></div>`;
-  renderLifeContent(data);
-}
-
-function switchLifeTab(tab) {
-  lifeTab = tab;
-  document.querySelectorAll('.life-toggle-btn').forEach((b,i)=>b.classList.toggle('active',['story','report'][i]===tab));
-  renderLifeContent(currentData);
-}
-
-function renderLifeContent(data) {
-  const el = document.getElementById('life-content');
-  if(!el) return;
-  if(lifeTab==='story') renderStory(data, el);
-  else renderReport(data, el);
-}
-
-function renderStory(data, el) {
-  const chains=[];
-  (data.harvestedSeeds||[]).forEach(h=>{
-    const steps=[];
-    const orig=(data.seeds||[]).find(s=>s.name===h.name);
-    if(orig) steps.push({type:'seed',title:h.name,note:orig.originalWish||null});
-    const rel=(data.futureEvents||[]).find(e=>e.sourceSeed===h.name);
-    if(rel) steps.push({type:'event',title:rel.title,note:fmtDate(rel.date)});
-    steps.push({type:'harvest',title:'収穫',note:h.harvestNote});
-    if(h.nextSeed) steps.push({type:'next',title:h.nextSeed,note:'次に生まれた種'});
-    chains.push({name:h.name,steps});
-  });
-  (data.seeds||[]).filter(s=>s.stage!=='harvested').forEach(s=>{
-    const steps=[];
-    steps.push({type:'seed',title:s.name,note:s.originalWish||s.category});
-    const rel=(data.futureEvents||[]).find(e=>e.sourceSeed===s.name);
-    if(rel) steps.push({type:'event',title:rel.title,note:fmtDate(rel.date)});
-    chains.push({name:s.name,steps,ongoing:true});
-  });
-  if(!chains.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">まだ物語がありません</div></div>'; return; }
-
-  const TYPE_CSS={seed:'st-seed',event:'st-event',harvest:'st-harvest',next:'st-next'};
-  const TYPE_LABEL={seed:'🌱 種の発見',event:'🗓 未来',harvest:'🌾 収穫',next:'🌱 次の種'};
-  const DOT_CSS={seed:'sd-seed',event:'sd-event',harvest:'sd-harvest',next:'sd-next'};
-  el.innerHTML = chains.map(c=>`
-    <div class="story-chain">
-      <div class="story-chain-title">${c.ongoing?'🌱':'🌾'} ${c.name}</div>
-      <div class="story-steps">${c.steps.map(s=>`
-        <div class="story-step">
-          <div class="story-dot-wrap"><div class="story-dot ${DOT_CSS[s.type]}"></div></div>
-          <div class="story-body">
-            <div class="story-type ${TYPE_CSS[s.type]}">${TYPE_LABEL[s.type]}</div>
-            <div class="story-title">${s.title}</div>
-            ${s.note?`<div class="story-note">${s.note}</div>`:''}
-          </div>
-        </div>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-function renderReport(data, el) {
-  const hist = data.futureBalanceHistory||[];
-  const bal = calcBal(data.futureEvents||[]);
-  const thisMonth = new Date().toISOString().slice(0,7);
-  const startBal = hist.filter(h=>h.date<thisMonth+'-01').slice(-1)[0]?.balance||0;
-  const diff = bal-startBal;
-  const monthHarvest = (data.harvestedSeeds||[]).filter(h=>new Date(h.harvestedAt).toISOString().slice(0,7)===thisMonth);
-  const monthNewSeeds = (data.seeds||[]).filter(s=>s.createdAt&&new Date(s.createdAt).toISOString().slice(0,7)===thisMonth);
-
-  const max = Math.max(...hist.map(h=>h.balance),1);
-  const bars = hist.slice(-8).map(h=>`
-    <div class="bar-item">
-      <div class="bar${h.reason?' highlight':''}" style="height:${Math.round((h.balance/max)*44)+4}px"></div>
-      <div class="bar-lbl">${h.date.slice(5)}</div>
-    </div>`).join('');
-
-  el.innerHTML = `
-    <div class="report-card">
-      <div class="report-title">📊 ${thisMonth.replace('-','年')}月のレポート</div>
-      <div class="report-numbers">
-        <div class="report-num">
-          <div class="report-num-val">${bal}pt</div>
-          <div class="report-num-label">未来残高</div>
-          <div class="report-num-diff">${diff>=0?'+':''}${diff}pt</div>
-        </div>
-        <div class="report-num">
-          <div class="report-num-val">${(data.futureEvents||[]).filter(e=>e.status!=='harvest'&&e.status!=='done').length}</div>
-          <div class="report-num-label">育っている未来</div>
-        </div>
-        <div class="report-num">
-          <div class="report-num-val">${monthHarvest.length}</div>
-          <div class="report-num-label">今月の収穫</div>
-        </div>
-        <div class="report-num">
-          <div class="report-num-val">${monthNewSeeds.length}</div>
-          <div class="report-num-label">生まれた種</div>
-        </div>
-      </div>
-      <div class="graph-wrap">
-        <div class="graph-label">未来残高の推移 <span style="color:var(--gold)">■</span> 未来追加日</div>
-        <div class="bar-chart">${bars}</div>
-      </div>
-    </div>`;
-}
-
-// ===== タブ切替 =====
-let currentData = demo;
-
-function switchPage(name) {
-  ['home','grow','life'].forEach(n=>{
-    document.getElementById(`page-${n}`).classList.toggle('active',n===name);
-    const btn = document.getElementById(`tab-${n}`);
-    if(btn) btn.classList.toggle('active',n===name);
-  });
-  if(name==='grow') renderGrow(currentData);
-  if(name==='life') renderLife(currentData);
-}
-
-// ===== データ読み込み =====
+/* ==========================================================
+   データ取得
+   ========================================================== */
 async function loadData() {
-  const params = new URLSearchParams(location.search);
-  const userId = params.get('userId');
-  if(!userId){
-    currentData = demo;
-  } else {
+  const uid = new URLSearchParams(location.search).get('userId');
+  if (uid) {
     try {
-      const res = await fetch(`/api/calendar-data?userId=${userId}`);
-      currentData = await res.json();
-    } catch(e) {
-      currentData = demo;
-    }
+      const r = await fetch(`/api/calendar-data?userId=${encodeURIComponent(uid)}`);
+      if (r.ok) return await r.json();
+    } catch (e) { /* デモにフォールバック */ }
   }
-  initBalance(currentData);
-  renderHome(currentData);
+  return DEMO;
 }
 
-loadData();
+/* ==========================================================
+   ユーティリティ
+   ========================================================== */
+// 日付から温度感のある「いつごろ」ラベルを返す（数字は使わない）
+function whenLabel(date, status) {
+  if (!date) {
+    return status === 'interest' ? '近いうちに' : 'いつか';
+  }
+  const m = parseInt(date.split('-')[1], 10);
+  if ([12,1,2].includes(m)) return '冬ごろ';
+  if ([3,4,5].includes(m))  return '春ごろ';
+  if ([6,7,8].includes(m))  return '夏ごろ';
+  return '秋ごろ';
+}
+
+/* ==========================================================
+   描画
+   ========================================================== */
+let DATA;
+
+function renderMirai() {
+  document.getElementById('hero-name').innerHTML = `おかえり、<br>${DATA.userName}さん`;
+
+  const lead = DATA.futureEvents.find(e => e.status === 'scheduled')
+             || DATA.futureEvents.find(e => e.status === 'plan');
+
+  // ASTOの一言（固定・短い）
+  document.getElementById('asto-say-text').innerHTML = lead
+    ? `${lead.title}、<br>楽しみだね😊<br><br>今日も少しずつ<br>未来に近づいてるよ🌱`
+    : `今日もいい一日だった？😊<br>小さなこと、ASTOに話してみてね🌱`;
+
+  // いちばん楽しみな未来
+  const hf = document.getElementById('hero-future');
+  if (lead) {
+    const timing = lead.daysLeft
+      ? `あと ${lead.daysLeft} 日`
+      : whenLabel(lead.date, lead.status);
+    hf.innerHTML = `
+      <div class="hf-label">✨ いちばん楽しみな未来</div>
+      <div class="hf-emoji">${lead.emoji || '✨'}</div>
+      <div class="hf-name serif">${lead.title}</div>
+      <div class="hf-days">${timing}</div>
+      ${lead.scene ? `<div class="hf-scene">${lead.scene}</div>` : ''}`;
+  } else {
+    hf.style.display = 'none';
+  }
+
+  // これから楽しみなこと（lead 以外）
+  const others = DATA.futureEvents.filter(e => e !== lead);
+  document.getElementById('coming-list').innerHTML = others.map(e => `
+    <div class="coming-row">
+      <span class="coming-emo">${e.emoji || '✨'}</span>
+      <div>
+        <div class="coming-name">${e.title}</div>
+        <div class="coming-when">${whenLabel(e.date, e.status)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSodate() {
+  document.getElementById('sodate-intro').innerHTML = `最近気になってることだね😊`;
+  document.getElementById('seed-list').innerHTML = (DATA.seeds || []).map(s => `
+    <div class="seed-row2">
+      <span class="seed-emo2">${s.emoji || '🌱'}</span>
+      <span class="seed-name2">${s.name}</span>
+    </div>`).join('');
+}
+
+function renderJinsei() {
+  const nodes = [];
+  const h = (DATA.harvestedSeeds || [])[0];
+  if (h) {
+    if (h.originalWish) nodes.push({ cls:'i-seed', ico:'🌱', label: h.originalWish,   sub:'って思ってた' });
+    if (h.futureTitle)  nodes.push({ cls:'i-ev',   ico: h.emoji || '📅', label:`${h.futureTitle}に行く`, sub:'と決めた' });
+    nodes.push({ cls:'i-done', ico:'🌾', label: h.name, sub: h.harvestNote ? `「${h.harvestNote}」` : '' });
+    if (h.nextSeed)     nodes.push({ cls:'i-seed', ico:'🌱', label: h.nextSeed,        sub:'って思った' });
+  }
+  const gs = (DATA.seeds || [])[0];
+  if (gs) {
+    nodes.push({ cls:'i-seed', ico:'🌱', label: gs.name, sub:'育ち中' });
+    const ev = (DATA.futureEvents || []).find(e => e.sourceSeed === gs.name);
+    if (ev) nodes.push({ cls:'i-ev', ico: ev.emoji || '📅', label: ev.title, sub: whenLabel(ev.date, ev.status) });
+  }
+  document.getElementById('jinsei-wrap').innerHTML = nodes.length
+    ? nodes.map((n, i) => `
+        <div class="leaf">
+          <div class="leaf-ico ${n.cls}">${n.ico}</div>
+          <div>
+            <div class="leaf-label">${n.label}</div>
+            <div class="leaf-sub">${n.sub}</div>
+          </div>
+        </div>
+        ${i < nodes.length - 1 ? '<div class="spine"></div>' : ''}`).join('')
+    : '<p style="color:var(--muted);font-size:14px;margin-top:40px;text-align:center;line-height:2">ASTOと話して<br>最初の一粒をまこう🌱</p>';
+}
+
+/* ==========================================================
+   ナビ
+   ========================================================== */
+function switchTab(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.s === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// LINEへ遷移（本番では line:// deep link や LIFF URL に変更）
+function openLine() {
+  const lineUrl = 'https://line.me/R/ti/p/@YOUR_LINE_ID'; // ← LINE ID を設定
+  location.href = lineUrl;
+}
+
+/* ==========================================================
+   星空
+   ========================================================== */
+function makeStars() {
+  const h = document.getElementById('hero');
+  let s = '';
+  for (let i = 0; i < 22; i++) {
+    const sz = Math.random() * 2 + .8;
+    const x  = Math.random() * 100;
+    const y  = Math.random() * 55;
+    const d  = Math.random() * 4;
+    s += `<div class="star" style="width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;opacity:.6;animation-delay:${d}s"></div>`;
+  }
+  h.insertAdjacentHTML('afterbegin', s);
+}
+
+/* ==========================================================
+   起動
+   ========================================================== */
+(async () => {
+  makeStars();
+  DATA = await loadData();
+  renderMirai();
+  renderSodate();
+  renderJinsei();
+})();
 </script>
 </body>
 </html>
