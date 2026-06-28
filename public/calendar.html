@@ -6,276 +6,280 @@
 <title>ASTOme</title>
 <style>
 :root {
-  --navy: #0E1D2B;
-  --gold: #F3C25B;
-  --gold-d: #c8902f;
-  --cream: #FAFAF7;
-  --ivory: #F4EEDC;
-  --sage: #7E9D88;
-  --sage-d: #5d7a67;
-  --ink: #2b3530;
-  --muted: #8a968e;
-  --line: #e8e2d4;
-  --card: #fbf8f1;
+  --navy:#0E1D2B; --gold:#F3C25B; --gold-d:#c8902f;
+  --cream:#FAFAF7; --ivory:#F4EEDC; --sage:#7E9D88; --sage-d:#5d7a67;
+  --ink:#2b3530; --muted:#8a968e; --line:#e8e2d4; --card:#fbf8f1;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  background: var(--cream);
-  color: var(--ink);
-  font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
-  max-width: 390px;
-  margin: 0 auto;
-  padding-bottom: calc(84px + env(safe-area-inset-bottom));
-  line-height: 1.8;
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--cream);color:var(--ink);
+  font-family:-apple-system,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  max-width:390px;margin:0 auto;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  line-height:1.8;
 }
-.serif { font-family: 'Hiragino Mincho ProN', 'Noto Serif JP', Georgia, serif; }
-.screen { display: none; }
-.screen.active { display: block; animation: up .35s ease; }
-@keyframes up { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.serif{font-family:'Hiragino Mincho ProN','Noto Serif JP',Georgia,serif}
+.screen{display:none}
+.screen.active{display:block;animation:up .35s ease}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-/* ===== ヒーロー ===== */
-.hero {
-  position: relative; padding: 52px 24px 80px;
-  background: linear-gradient(180deg,#1a2d44 0%,#294760 45%,#d8b28d 85%,#f5e8d8 100%);
-  color: var(--cream); overflow: hidden;
+/* ヒーロー */
+.hero{
+  position:relative;padding:52px 24px 80px;
+  background:linear-gradient(180deg,#1a2d44 0%,#294760 45%,#d8b28d 85%,#f5e8d8 100%);
+  color:var(--cream);overflow:hidden;
 }
-.star { position:absolute; background:#fff; border-radius:50%; animation:tw 4s ease-in-out infinite; }
-@keyframes tw { 0%,100%{opacity:.15} 50%{opacity:.85} }
-.shoot { position:absolute; top:48px; left:58%; width:60px; height:1px; background:linear-gradient(90deg,transparent,#fff); transform:rotate(22deg); opacity:.6; }
-.hero-brand { font-size:16px; font-weight:700; letter-spacing:.18em; opacity:.65; }
-.hero-brand b { color:var(--gold); }
-.hero-name { font-size:27px; font-weight:700; line-height:1.4; margin-top:22px; }
-.hero-sub { font-size:14px; opacity:.68; margin-top:8px; }
-.hero-asto {
-  position:absolute; right:18px; bottom:62px;
-  width:84px; height:84px; border-radius:50%;
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.85}}
+.shoot{position:absolute;top:48px;left:58%;width:60px;height:1px;background:linear-gradient(90deg,transparent,#fff);transform:rotate(22deg);opacity:.6}
+.hero-brand{font-size:16px;font-weight:700;letter-spacing:.18em;opacity:.65}
+.hero-brand b{color:var(--gold)}
+.hero-name{font-size:27px;font-weight:700;line-height:1.4;margin-top:22px}
+.hero-sub{font-size:14px;opacity:.68;margin-top:8px}
+.hero-asto{
+  position:absolute;right:18px;bottom:62px;
+  width:84px;height:84px;border-radius:50%;
   background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
   box-shadow:0 0 0 2px rgba(243,194,91,.35),0 10px 28px -10px rgba(0,0,0,.5);
-  display:flex; align-items:center; justify-content:center; font-size:43px;
+  display:flex;align-items:center;justify-content:center;font-size:43px;
   animation:bob 5s ease-in-out infinite;
 }
-@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-/* ===== シート ===== */
-.sheet { margin-top:-44px; padding:0 16px; position:relative; z-index:2; }
+.sheet{margin-top:-44px;padding:0 16px;position:relative;z-index:2}
 
 /* ASTOの一言 */
-.asto-say {
-  background:var(--card); border:1px solid var(--line); border-radius:20px;
+.asto-say{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:14px 16px 18px 18px;
-  display:flex; align-items:flex-start; gap:13px;
-  box-shadow:0 6px 24px -14px rgba(40,53,48,.5); margin-bottom:20px;
+  display:flex;align-items:flex-start;gap:13px;
+  box-shadow:0 6px 24px -14px rgba(40,53,48,.5);margin-bottom:20px;
 }
-.asto-ico {
-  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+.asto-ico{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
   box-shadow:0 0 0 1.5px rgba(243,194,91,.28);
-  display:flex; align-items:center; justify-content:center; font-size:19px;
+  display:flex;align-items:center;justify-content:center;font-size:19px;
 }
-.asto-say-text { font-size:15px; line-height:1.95; padding-top:1px; }
+.asto-say-text{font-size:15px;line-height:1.95;padding-top:1px}
 
-/* ===== ヒーローカード（いちばん楽しみ） ===== */
-.hero-future {
-  border-radius:24px; overflow:hidden; margin-bottom:16px;
-  box-shadow:0 8px 32px -12px rgba(14,29,43,.35);
-  cursor:pointer; transition:transform .15s;
+/* ヒーローカード */
+.hero-future{
+  border-radius:24px;overflow:hidden;margin-bottom:20px;
+  box-shadow:0 8px 36px -12px rgba(14,29,43,.4);
+  cursor:pointer;transition:transform .15s;
 }
-.hero-future:active { transform:scale(0.98); }
-.hf-bg {
-  background:linear-gradient(135deg,#1a2d44 0%,#294760 60%,#3a5f7a 100%);
-  padding:28px 26px 26px; color:var(--cream);
+.hero-future:active{transform:scale(0.98)}
+.hf-bg{
+  background:linear-gradient(145deg,#1a2d44 0%,#223c58 55%,#2e5572 100%);
+  padding:28px 26px 28px;color:var(--cream);
 }
-.hf-label { font-size:11px; font-weight:700; letter-spacing:.12em; opacity:.55; margin-bottom:18px; }
-.hf-emoji { font-size:40px; line-height:1; margin-bottom:12px; }
-.hf-name { font-size:30px; font-weight:800; line-height:1.2; }
-/* 情景テキスト：詩的に */
-.hf-scene {
-  margin-top:20px; padding-top:18px;
-  border-top:1px solid rgba(255,255,255,.12);
-  font-size:15px; line-height:2; opacity:.88;
-  font-style:normal; letter-spacing:.02em;
+.hf-label{font-size:11px;font-weight:700;letter-spacing:.14em;opacity:.5;margin-bottom:16px}
+.hf-emoji{font-size:42px;line-height:1;margin-bottom:14px}
+.hf-name{font-size:30px;font-weight:800;line-height:1.2;margin-bottom:20px}
+.hf-scene{
+  font-size:15px;line-height:2.1;opacity:.92;
+  padding-top:18px;border-top:1px solid rgba(255,255,255,.1);
 }
+.hf-tap-hint{font-size:11px;opacity:.3;margin-top:14px;text-align:right}
 
-/* ===== 未来カード（それ以外） ===== */
-.sec-label { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.12em; margin:4px 4px 12px; }
-.future-cards { display:flex; flex-direction:column; gap:10px; margin-bottom:32px; }
-.future-card {
-  background:var(--card); border:1px solid var(--line); border-radius:20px;
-  padding:16px 18px; cursor:pointer;
-  display:flex; align-items:center; gap:14px;
-  box-shadow:0 4px 16px -10px rgba(40,53,48,.3); transition:transform .15s;
+/* 未来カード（グループ） */
+.future-group{margin-bottom:24px}
+.future-group-label{
+  font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.12em;
+  margin:0 4px 10px;display:flex;align-items:center;gap:6px;
 }
-.future-card:active { transform:scale(0.98); }
-.fc-emoji {
-  width:48px; height:48px; border-radius:16px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:24px;
+.future-cards{display:flex;flex-direction:column;gap:10px}
+.future-card{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:16px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:14px;
+  box-shadow:0 4px 16px -10px rgba(40,53,48,.28);transition:transform .15s;
 }
-.fc-emoji-scheduled { background:linear-gradient(135deg,#1a2d44,#2a4a6a); }
-.fc-emoji-plan      { background:linear-gradient(135deg,#3d6b4f,#5a8c68); }
-.fc-emoji-interest  { background:linear-gradient(135deg,#6b5a2a,#8c7a3a); }
-.fc-emoji-dream     { background:linear-gradient(135deg,#3a3a4a,#555568); }
-.fc-body { flex:1; min-width:0; }
-.fc-title { font-size:15px; font-weight:700; line-height:1.3; }
-.fc-when { font-size:12px; color:var(--muted); margin-top:3px; }
-.fc-badge { font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; flex-shrink:0; }
-.fc-badge-scheduled { background:rgba(243,194,91,.18); color:var(--gold-d); }
-.fc-badge-plan      { background:rgba(126,157,136,.18); color:var(--sage-d); }
-.fc-badge-interest  { background:rgba(180,160,100,.12); color:#7a6a30; }
-.fc-badge-dream     { background:rgba(100,100,120,.1); color:var(--muted); }
-.fc-arrow { font-size:14px; color:var(--muted); opacity:.4; flex-shrink:0; }
+.future-card:active{transform:scale(0.98)}
+.fc-emoji{
+  width:48px;height:48px;border-radius:16px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.fc-emoji-scheduled{background:linear-gradient(135deg,#1a2d44,#2a4a6a)}
+.fc-emoji-plan     {background:linear-gradient(135deg,#3d6b4f,#5a8c68)}
+.fc-emoji-interest {background:linear-gradient(135deg,#6b5a2a,#8c7a3a)}
+.fc-emoji-dream    {background:linear-gradient(135deg,#3a3a4a,#555568)}
+.fc-body{flex:1;min-width:0}
+.fc-title{font-size:15px;font-weight:700;line-height:1.3}
+.fc-snippet{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fc-badge{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;flex-shrink:0}
+.fc-badge-scheduled{background:rgba(243,194,91,.18);color:var(--gold-d)}
+.fc-badge-plan     {background:rgba(126,157,136,.18);color:var(--sage-d)}
+.fc-badge-interest {background:rgba(180,160,100,.12);color:#7a6a30}
+.fc-badge-dream    {background:rgba(100,100,120,.1);color:var(--muted)}
+.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.fc-arrow{font-size:14px;color:var(--muted);opacity:.4}
 
-/* ===== フローティングボタン ===== */
-.fab {
-  position:fixed; right:20px; bottom:calc(76px + env(safe-area-inset-bottom));
-  width:56px; height:56px; border-radius:50%;
-  background:var(--navy); color:var(--cream); border:none; cursor:pointer;
-  font-size:22px; display:flex; align-items:center; justify-content:center;
-  box-shadow:0 8px 24px -8px rgba(14,29,43,.55);
-  z-index:50; transition:transform .15s;
+/* FAB */
+.fab{
+  position:fixed;right:20px;bottom:calc(76px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#2a4a3a,#1a2d44);
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px -4px rgba(14,29,43,.35),0 0 0 1.5px rgba(243,194,91,.25);
+  z-index:50;transition:transform .15s;
+  flex-direction:column;gap:1px;
 }
-.fab:active { transform:scale(0.93); }
-.fab-mirai { display:flex; }
-.fab-sodate { display:none; }
-.fab-jinsei { display:none; }
+.fab:active{transform:scale(0.93)}
+.fab-whale{font-size:24px;line-height:1}
+.fab-dots{font-size:9px;letter-spacing:2px;color:var(--cream);height:12px;display:flex;align-items:center;gap:2px}
+.fab-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.5);animation:dotpulse 1.4s ease-in-out infinite}
+.fab-dot:nth-child(1){animation-delay:0s}
+.fab-dot:nth-child(2){animation-delay:.2s}
+.fab-dot:nth-child(3){animation-delay:.4s}
+@keyframes dotpulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
 
-/* ===== 育てるタブ ===== */
-.sodate-header { padding:36px 20px 20px; }
-.sodate-title { font-size:22px; font-weight:800; margin-bottom:4px; }
-.sodate-sub { font-size:13px; color:var(--muted); }
-.seed-cards { padding:0 16px; display:flex; flex-direction:column; gap:16px; margin-bottom:24px; }
-.seed-card {
-  background:var(--card); border:1px solid var(--line); border-radius:24px;
-  padding:22px 22px 18px;
-  box-shadow:0 4px 20px -10px rgba(40,53,48,.2);
+/* 育てるタブ */
+.sodate-header{padding:36px 20px 20px}
+.sodate-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.sodate-sub{font-size:13px;color:var(--muted)}
+.seed-cards{padding:0 16px;display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+.seed-card{
+  background:var(--card);border:1px solid var(--line);border-radius:24px;
+  overflow:hidden;box-shadow:0 4px 20px -10px rgba(40,53,48,.2);
 }
-.seed-name { font-size:18px; font-weight:800; line-height:1.3; margin-bottom:12px; }
-.seed-wish {
-  padding:14px 16px; background:var(--ivory); border-radius:14px;
-  font-size:14px; color:var(--ink); line-height:1.8; font-style:italic;
-  margin-bottom:16px;
+.seed-status-bar{
+  padding:10px 20px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--line);
 }
-.seed-wish::before { content:'💬 '; font-style:normal; }
-.seed-asto-msg {
-  font-size:13px; color:var(--muted); line-height:1.8; margin-bottom:16px;
+.seed-status-ico{font-size:14px}
+.seed-status-text{font-size:12px;font-weight:700;color:var(--muted)}
+.seed-card-body{padding:18px 20px 20px}
+.seed-name{font-size:17px;font-weight:800;line-height:1.3;margin-bottom:12px}
+.seed-wish{
+  padding:13px 15px;background:var(--ivory);border-radius:14px;
+  font-size:14px;color:var(--ink);line-height:1.8;font-style:italic;margin-bottom:14px;
 }
-.seed-talk-btn {
-  width:100%; background:var(--navy); color:var(--cream); border:none;
-  border-radius:999px; padding:13px; font-size:14px; font-weight:700;
-  font-family:inherit; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
+.seed-wish::before{content:'💬 ';font-style:normal}
+.seed-asto-msg{font-size:14px;color:var(--muted);line-height:1.85;margin-bottom:16px}
+.seed-talk-btn{
+  width:100%;background:var(--navy);color:var(--cream);border:none;
+  border-radius:999px;padding:13px;font-size:14px;font-weight:700;
+  font-family:inherit;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
   transition:transform .15s;
 }
-.seed-talk-btn:active { transform:scale(0.98); }
+.seed-talk-btn:active{transform:scale(0.98)}
 
-/* ===== 人生タブ ===== */
-.jinsei-header { padding:36px 20px 24px; }
-.jinsei-title { font-size:22px; font-weight:800; margin-bottom:4px; }
-.jinsei-sub { font-size:13px; color:var(--muted); }
-.timeline { padding:0 24px; margin-bottom:24px; }
-.tl-item { display:flex; gap:0; position:relative; }
-.tl-left { display:flex; flex-direction:column; align-items:center; width:40px; flex-shrink:0; }
-.tl-dot {
-  width:40px; height:40px; border-radius:50%; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:18px;
-  position:relative; z-index:1;
+/* あゆみタブ */
+.jinsei-header{padding:36px 20px 24px}
+.jinsei-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.jinsei-sub{font-size:13px;color:var(--muted)}
+.timeline{padding:0 20px;margin-bottom:24px}
+.tl-chapter{
+  background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:22px 20px;margin-bottom:16px;
+  box-shadow:0 4px 16px -10px rgba(40,53,48,.2);
 }
-.tl-dot-seed    { background:linear-gradient(135deg,#d4e8d4,#b8d4b8); }
-.tl-dot-event   { background:linear-gradient(135deg,#fdf0d4,#f4e0a8); }
-.tl-dot-harvest { background:linear-gradient(135deg,#e8d4b8,#d4b890); }
-.tl-line { width:2px; flex:1; background:var(--line); min-height:20px; }
-.tl-body { flex:1; padding:8px 0 24px 16px; }
-.tl-label { font-size:16px; font-weight:700; line-height:1.4; }
-.tl-sub { font-size:13px; color:var(--muted); margin-top:2px; line-height:1.6; }
+.tl-node{display:flex;gap:14px;position:relative}
+.tl-node + .tl-node{margin-top:0}
+.tl-node-left{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0}
+.tl-dot{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.tl-dot-talk   {background:linear-gradient(135deg,#e8f0e8,#d0e4d0)}
+.tl-dot-event  {background:linear-gradient(135deg,#fdf0d4,#f0dda0)}
+.tl-dot-harvest{background:linear-gradient(135deg,#f0e4c8,#e0c898)}
+.tl-dot-seed   {background:linear-gradient(135deg,#d4e8d4,#b8d4b8)}
+.tl-connector{
+  flex:1;display:flex;align-items:center;gap:0;
+  padding:10px 0;
+}
+.tl-connector-line{width:1px;height:100%;background:var(--line);margin:0 auto}
+.tl-body{flex:1;padding:5px 0 16px}
+.tl-label{font-size:15px;font-weight:700;line-height:1.45;color:var(--ink)}
+.tl-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.65}
+/* 矢印の代わり：テキストの橋 */
+.tl-bridge{
+  display:flex;align-items:center;gap:12px;
+  padding:2px 0 2px 46px;margin:0 0 0;
+}
+.tl-bridge-line{flex:1;height:1px;background:var(--line)}
+.tl-bridge-text{font-size:11px;color:var(--muted);white-space:nowrap}
 
-/* ===== ボトムシート ===== */
-.sheet-overlay {
-  display:none; position:fixed; inset:0; z-index:80;
-  background:rgba(14,29,43,.5); backdrop-filter:blur(3px);
+/* ボトムシート */
+.sheet-overlay{
+  display:none;position:fixed;inset:0;z-index:80;
+  background:rgba(14,29,43,.5);backdrop-filter:blur(3px);
 }
-.sheet-overlay.open { display:block; animation:fadeIn .2s ease; }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.bottom-sheet {
-  position:fixed; left:0; right:0; bottom:0;
-  max-width:390px; margin:0 auto;
-  background:var(--cream); border-radius:28px 28px 0 0;
+.sheet-overlay.open{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.bottom-sheet{
+  position:fixed;left:0;right:0;bottom:0;
+  max-width:390px;margin:0 auto;
+  background:var(--cream);border-radius:28px 28px 0 0;
   padding:0 0 calc(36px + env(safe-area-inset-bottom));
-  z-index:90; transform:translateY(100%);
+  z-index:90;transform:translateY(100%);
   transition:transform .32s cubic-bezier(.32,1,.42,1);
   box-shadow:0 -8px 40px -8px rgba(14,29,43,.25);
-  max-height:90vh; overflow-y:auto;
+  max-height:90vh;overflow-y:auto;
 }
-.bottom-sheet.open { transform:translateY(0); }
-.bs-handle { width:36px; height:4px; border-radius:2px; background:var(--line); margin:14px auto 0; }
-.bs-body { padding:24px 24px 0; }
+.bottom-sheet.open{transform:translateY(0)}
+.bs-handle{width:36px;height:4px;border-radius:2px;background:var(--line);margin:14px auto 0}
+.bs-body{padding:24px 22px 0}
 
-/* ボトムシート内：種の流れ */
-.bs-origin {
-  background:var(--ivory); border-radius:18px; padding:18px 20px; margin-bottom:14px;
-}
-.bs-origin-label { font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.1em; margin-bottom:8px; }
-.bs-origin-seed { font-size:16px; font-weight:700; margin-bottom:10px; }
-.bs-origin-wish { font-size:14px; color:var(--ink); line-height:1.8; font-style:italic; }
-.bs-origin-wish::before { content:'💬 '; font-style:normal; }
+.bs-hero{margin-bottom:18px}
+.bs-emoji{font-size:36px;line-height:1;margin-bottom:10px}
+.bs-title{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:10px}
+.bs-tags{display:flex;gap:6px;flex-wrap:wrap}
+.bs-tag-when{font-size:13px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border:1px solid rgba(243,194,91,.35);border-radius:999px;padding:3px 12px}
+.bs-tag-status{font-size:12px;color:var(--muted);background:var(--ivory);border-radius:999px;padding:3px 10px}
 
-.bs-asto-say {
-  background:var(--card); border:1px solid var(--line); border-radius:18px;
-  padding:16px 18px; margin-bottom:20px;
-  display:flex; gap:10px; align-items:flex-start;
+.bs-asto{
+  background:linear-gradient(145deg,#1a2d44,#223c58);
+  border-radius:18px;padding:18px 20px;margin-bottom:16px;color:var(--cream);
+  display:flex;gap:12px;align-items:flex-start;
 }
-.bs-asto-ico {
-  width:30px; height:30px; border-radius:50%; flex-shrink:0;
-  background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
-  display:flex; align-items:center; justify-content:center; font-size:15px;
+.bs-asto-ico{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 38% 32%,#3a6080,#1a3048);
+  box-shadow:0 0 0 1.5px rgba(243,194,91,.3);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
 }
-.bs-asto-text { font-size:14px; line-height:1.85; padding-top:2px; }
+.bs-asto-text{font-size:14px;line-height:2;opacity:.92}
 
-.bs-title-area { margin-bottom:18px; }
-.bs-emoji { font-size:32px; line-height:1; margin-bottom:10px; }
-.bs-title { font-size:22px; font-weight:800; line-height:1.25; }
-.bs-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
-.bs-tag-when { font-size:13px; font-weight:700; color:var(--gold-d); background:rgba(243,194,91,.15); border:1px solid rgba(243,194,91,.4); border-radius:999px; padding:3px 12px; }
-.bs-tag-status { font-size:12px; color:var(--muted); background:var(--ivory); border-radius:999px; padding:3px 10px; }
+/* そういえばセクション */
+.bs-soyeba{
+  margin-bottom:16px;padding:16px 18px;
+  background:var(--ivory);border:1px solid var(--line);border-radius:16px;
+}
+.bs-soyeba-lead{font-size:13px;color:var(--muted);margin-bottom:8px}
+.bs-soyeba-wish{font-size:15px;line-height:1.8;color:var(--ink);font-style:italic}
+.bs-soyeba-wish::before{content:'「';font-style:normal}
+.bs-soyeba-wish::after{content:'」';font-style:normal}
 
-.bs-copy-text {
-  background:var(--card); border:1px solid var(--line); border-radius:14px;
-  padding:12px 16px; font-size:14px; color:var(--ink); line-height:1.6; margin-bottom:8px;
-}
-.bs-copy-btn {
-  width:100%; background:none; border:1.5px solid var(--sage); color:var(--sage-d);
-  border-radius:999px; padding:11px; font-size:14px; font-weight:700;
-  font-family:inherit; cursor:pointer; margin-bottom:10px;
-}
-.bs-talk-btn {
-  width:100%; background:var(--navy); color:var(--cream); border:none;
-  border-radius:999px; padding:15px; font-size:15px; font-weight:700;
-  font-family:inherit; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-}
+.bs-divider{height:1px;background:var(--line);margin:4px 0 16px}
+.bs-copy-text{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:14px;color:var(--ink);line-height:1.6;margin-bottom:8px}
+.bs-copy-btn{width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:999px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px}
+.bs-talk-btn{width:100%;background:var(--navy);color:var(--cream);border:none;border-radius:999px;padding:15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
 
-/* ===== タブ ===== */
-.tabbar {
-  position:fixed; left:0; right:0; bottom:0;
-  max-width:390px; margin:0 auto;
-  background:rgba(250,250,247,.95); backdrop-filter:blur(14px);
-  border-top:1px solid var(--line); display:flex;
-  padding:6px 0 calc(10px + env(safe-area-inset-bottom)); z-index:60;
+/* タブ */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;
+  background:rgba(250,250,247,.95);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;
+  padding:6px 0 calc(10px + env(safe-area-inset-bottom));z-index:60;
 }
-.tab {
-  flex:1; border:none; background:none; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  padding:4px 0; font-family:inherit; color:var(--muted);
-  transition:color .2s; position:relative;
-}
-.tab.active { color:var(--navy); }
-.tab.active::before { content:''; position:absolute; top:0; width:18px; height:2.5px; border-radius:0 0 3px 3px; background:var(--gold); }
-.tab-ico { font-size:20px; line-height:1; }
-.tab-lbl { font-size:10px; font-weight:700; letter-spacing:.04em; }
+.tab{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;font-family:inherit;color:var(--muted);transition:color .2s;position:relative}
+.tab.active{color:var(--navy)}
+.tab.active::before{content:'';position:absolute;top:0;width:18px;height:2.5px;border-radius:0 0 3px 3px;background:var(--gold)}
+.tab-ico{font-size:20px;line-height:1}
+.tab-lbl{font-size:10px;font-weight:700;letter-spacing:.04em}
 </style>
 </head>
 <body>
 
-<!-- ========== 🗓 未来 ========== -->
+<!-- 楽しみ -->
 <section class="screen active" id="s-mirai">
   <div class="hero" id="hero">
     <div class="shoot"></div>
@@ -285,17 +289,13 @@ body {
     <div class="hero-asto">🐋</div>
   </div>
   <div class="sheet">
-    <div class="asto-say">
-      <div class="asto-ico">🐋</div>
-      <div class="asto-say-text" id="asto-say-text"></div>
-    </div>
+    <div class="asto-say"><div class="asto-ico">🐋</div><div class="asto-say-text" id="asto-say-text"></div></div>
     <div class="hero-future" id="hero-future"></div>
-    <div class="sec-label" id="coming-label" style="display:none">これから楽しみなこと</div>
-    <div class="future-cards" id="coming-list"></div>
+    <div id="future-groups"></div>
   </div>
 </section>
 
-<!-- ========== 🐋 育てる ========== -->
+<!-- 育てる -->
 <section class="screen" id="s-sodate">
   <div class="sodate-header">
     <div class="sodate-title">育てている種</div>
@@ -304,57 +304,130 @@ body {
   <div class="seed-cards" id="seed-list"></div>
 </section>
 
-<!-- ========== 📖 人生 ========== -->
+<!-- あゆみ -->
 <section class="screen" id="s-jinsei">
   <div class="jinsei-header">
-    <div class="jinsei-title">人生</div>
-    <div class="jinsei-sub">種が繋がっていく場所</div>
+    <div class="jinsei-title">あゆみ</div>
+    <div class="jinsei-sub">種が繋がって、人生になっていく</div>
   </div>
   <div class="timeline" id="jinsei-wrap"></div>
 </section>
 
-<!-- ========== フローティングボタン ========== -->
-<button class="fab fab-mirai" id="fab" onclick="openLine()">💬</button>
+<button class="fab" id="fab" onclick="openLine()"><span class="fab-whale">🐋</span><div class="fab-dots"><span class="fab-dot"></span><span class="fab-dot"></span><span class="fab-dot"></span></div></button>
 
-<!-- ========== ボトムシート ========== -->
 <div class="sheet-overlay" id="bs-overlay" onclick="closeSheet()"></div>
 <div class="bottom-sheet" id="bottom-sheet">
   <div class="bs-handle"></div>
   <div class="bs-body" id="bs-body"></div>
 </div>
 
-<!-- ========== タブ ========== -->
 <nav class="tabbar">
-  <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">🗓</span><span class="tab-lbl">未来</span></button>
+  <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">✨</span><span class="tab-lbl">楽しみ</span></button>
   <button class="tab"        data-s="sodate" onclick="switchTab('sodate')"><span class="tab-ico">🐋</span><span class="tab-lbl">育てる</span></button>
-  <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">人生</span></button>
+  <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">あゆみ</span></button>
 </nav>
 
 <script>
-const STATUS_LABEL = { dream:'いつか', interest:'気になってる', plan:'計画中', scheduled:'予定あり' };
+const STATUS_LABEL = {dream:'いつか',interest:'気になってる',plan:'計画中',scheduled:'予定あり'};
+const SEED_STATUS = {
+  discovered:{ ico:'🌱', label:'芽吹いたばかり' },
+  interested: { ico:'🌿', label:'育ってきた' },
+  planning:   { ico:'🌳', label:'もうすぐ形になる' },
+  booked:     { ico:'🌳', label:'もうすぐ叶う' },
+};
+// 育てるタブ：種のカテゴリ別ASTOメッセージ
+const CATEGORY_MSGS = {
+  // スポーツ・マラソン・運動
+  'スポーツ': '次はどんな景色が見えるかな😊',
+  'マラソン': '次はどんな景色が見えるかな😊',
+  'ランニング': '走ってる自分、楽しみだね🌱',
+  // 旅行・温泉
+  '旅行': 'その日の空気、もう想像してる？🌿',
+  '旅': 'その場所の空気、もう想像してる？🌿',
+  '温泉': 'お湯に浸かってるとこ、想像するだけでほっとするね😊',
+  // グルメ・食
+  'グルメ': 'どんな味に出会えるか楽しみだね🍣',
+  '料理': '一口目が待ち遠しいね🍝',
+  '食': 'どんな一皿に出会えるかな😊',
+  // ライフスタイル・買い物
+  'ライフスタイル': 'それが手に入った日、どんな気持ちかな😊',
+  '買い物': 'それが届いた瞬間、きっと嬉しいよ😊',
+  // プロジェクト・仕事
+  'プロジェクト': '少しずつ形になってるね🌱',
+  '仕事': 'それが動き出す日が楽しみだね😊',
+  // 体験・アクティビティ
+  '体験': 'その瞬間、きっと忘れられないよ😊',
+  // デフォルト（ローテーション）
+  '__default__': [
+    'この種、まだまだ大きくなりそう🌱',
+    '続き、また聞かせて😊',
+    '今日はどこまで育ったかな😊',
+    'この続き、気になってるよ🐋',
+    'もう少しで形になりそうだね🌿',
+  ],
+};
+
+function getSeedMsg(seed, idx) {
+  // astoMessageが保存されていれば最優先（AI生成のその人専用の言葉）
+  if (seed.astoMessage) return seed.astoMessage;
+  // カテゴリで分岐（フォールバック）
+  if (seed.category) {
+    for (const key of Object.keys(CATEGORY_MSGS)) {
+      if (key !== '__default__' && seed.category.includes(key)) return CATEGORY_MSGS[key];
+    }
+  }
+  // 種名でもマッチ（フォールバック）
+  for (const key of Object.keys(CATEGORY_MSGS)) {
+    if (key !== '__default__' && seed.name.includes(key)) return CATEGORY_MSGS[key];
+  }
+  const defaults = CATEGORY_MSGS['__default__'];
+  return defaults[idx % defaults.length];
+}
 
 const DEMO = {
   userName: 'りょうた',
   futureEvents: [
     {
-      title:'釧路湿原マラソン', status:'scheduled', date:'2026-11', emoji:'🏃', daysLeft:139,
-      scene:'11月。\n\n海の上を走る。\n\nゴールしたあと、\n「頑張ってよかった」\nって笑ってる自分がいる😊',
+      title:'釧路湿原マラソン', status:'scheduled', date:'2026-11', emoji:'🏃', daysLeft:139, closingMessage:'あの日の風が待ってるね🌱',
+      scene:'ゴールした瞬間、\nりょうたさんが\n「頑張ってよかった」\nって笑ってるの、\nもう見えてるよ😊',
       sourceSeed:'マラソン4時間切り'
     },
-    { title:'鬼怒川温泉', status:'plan', date:'2026-09', emoji:'♨️', scene:'秋の夜。\n\n温泉に浸かって、何も考えない時間。\n\nそれだけで十分だよ😊', sourceSeed:'鬼怒川でリセット' },
-    { title:'嫁さんと寿司', status:'interest', date:null, emoji:'🍣', scene:'二人でカウンターに並んで、\nゆっくり食べる夜😊', sourceSeed:null },
-    { title:'屋久島', status:'dream', date:null, emoji:'🏝', scene:'縄文杉の前に立つ自分。\n\nいつかきっと😊', sourceSeed:null },
+    {
+      title:'鬼怒川温泉旅行', status:'plan', date:'2026-09', emoji:'♨️', closingMessage:'もう荷物を想像しちゃうね😊',
+      scene:'秋の夜。\n\n温泉に浸かって、\n何も考えない時間。\n\nそれだけで、充分だよ😊',
+      sourceSeed:'鬼怒川でリセット'
+    },
+    {
+      title:'葛西臨海公園ナイトラン', status:'scheduled', date:'2026-07', emoji:'🌙',
+      scene:'夜風の中を走る自分。\nきっと気持ちいい夜になる😊',
+      sourceSeed:'マラソン練習'
+    },
+    {
+      title:'嫁さんと寿司', status:'interest', date:null, emoji:'🍣', closingMessage:'一口目が楽しみだね🍣',
+      scene:'二人でカウンターに並んで\nゆっくり食べる夜😊',
+      sourceSeed:null
+    },
+    {
+      title:'屋久島', status:'dream', date:null, emoji:'🏝',
+      scene:'縄文杉の前に立つ自分。\nいつかきっと😊',
+      sourceSeed:null
+    },
   ],
   seeds: [
-    { name:'マラソン4時間切り', emoji:'🏃', stage:'booked', originalWish:'フルマラソン4時間以内で走りたい' },
-    { name:'鬼怒川でリセット', emoji:'♨️', stage:'planning', originalWish:'鬼怒川とかのホテルで食べ放題とプールに入れるとこ' },
-    { name:'グルメ探し', emoji:'🍣', stage:'interested', originalWish:'美味しいもの食べたい' },
+    { name:'マラソン4時間切り', emoji:'🏃', stage:'booked', originalWish:'フルマラソン4時間以内で走りたい', astoMessage:'あの日の風が待ってるね🌱' },
+    { name:'鬼怒川でリセット', emoji:'♨️', stage:'planning', originalWish:'鬼怒川とかのホテルで食べ放題とプールに入れるとこ', astoMessage:'お湯に浸かってるとこ、もう想像してる？🌿' },
+    { name:'グルメ探し', emoji:'🍣', stage:'interested', originalWish:'美味しいもの食べたい', astoMessage:'どんな味に出会えるか楽しみだね🍣' },
     { name:'ペペロンチーノ自作', emoji:'🍝', stage:'discovered', originalWish:'ペペロンチーノってどう作るの' },
   ],
   harvestedSeeds: [
-    { name:'カツカレー探し', emoji:'🍛', harvestNote:'最高だった', originalWish:'美味しいカツカレー探してた', futureTitle:'蒲田カツカレー', nextSeed:'屋久島に行きたい' },
+    {
+      name:'カツカレー', emoji:'🍛',
+      originalWish:'美味しいカツカレー探してた',
+      futureTitle:'蒲田カツカレー',
+      harvestNote:'最高だった',
+      nextSeedWish:'屋久島に行きたい',
+    },
   ],
-  nextActions: [],
 };
 
 async function loadData() {
@@ -377,9 +450,46 @@ function whenLabel(date, status) {
   return '秋ごろ';
 }
 
+// sceneの最初の2行だけ取り出す（カードのスニペット用）
+function sceneSnippet(scene) {
+  if (!scene) return '';
+  return scene.split('\n').filter(l => l.trim()).slice(0,2).join(' ');
+}
+
+// 未来のカテゴリ別締めフレーズ
+const FUTURE_CLOSINGS = {
+  // マラソン・スポーツ
+  run: 'あの日の風が待ってるね🌱',
+  marathon: 'あの日の風が待ってるね🌱',
+  sport: 'その瞬間が楽しみだね😊',
+  // 旅行・温泉
+  travel: 'もう荷物を想像しちゃうね😊',
+  onsen: 'お湯の温かさ、もう感じてる？🌿',
+  trip: 'もう荷物を想像しちゃうね😊',
+  // グルメ
+  food: '一口目が楽しみだね🍣',
+  sushi: '一口目が楽しみだね🍣',
+  gourmet: 'どんな味が待ってるかな🍣',
+  // デフォルト
+  default: '楽しみだね🌱',
+};
+
+function getFutureClosing(event) {
+  // closingMessageが保存されていれば最優先（AI生成のその人専用の言葉）
+  if (event.closingMessage) return event.closingMessage;
+  // フォールバック：タイトルでマッチ
+  const text = (event.title + (event.sourceSeed || '')).toLowerCase();
+  if (/マラソン|ラン|run/.test(text)) return FUTURE_CLOSINGS.marathon;
+  if (/温泉|onsen/.test(text)) return FUTURE_CLOSINGS.onsen;
+  if (/旅行|旅|trip/.test(text)) return FUTURE_CLOSINGS.travel;
+  if (/寿司|sushi|グルメ|ご飯|食/.test(text)) return FUTURE_CLOSINGS.food;
+  if (/スポーツ|sport/.test(text)) return FUTURE_CLOSINGS.sport;
+  return FUTURE_CLOSINGS.default;
+}
+
 let DATA;
 
-/* ===== 未来タブ ===== */
+/* 楽しみタブ */
 function renderMirai() {
   document.getElementById('hero-name').innerHTML = 'おかえり、<br>' + DATA.userName + 'さん';
 
@@ -387,22 +497,20 @@ function renderMirai() {
              || DATA.futureEvents.find(e => e.status === 'plan');
 
   document.getElementById('asto-say-text').innerHTML = lead
-    ? lead.title + '、<br>楽しみだね😊<br><br>今日も少しずつ<br>未来に近づいてるよ🌱'
-    : '今日もいい一日だった？😊<br>小さなこと、ASTOに話してみてね🌱';
+    ? lead.title + '、楽しみだね😊<br><br>今日も少しずつ近づいてるよ🌱'
+    : '今日もいい一日だった？😊<br>小さなこと、話してみてね🌱';
 
-  // ヒーローカード（情景）
   const hf = document.getElementById('hero-future');
   if (lead) {
-    // sceneの改行を<br>に変換
-    const sceneHtml = lead.scene
-      ? lead.scene.replace(/\n/g, '<br>')
-      : '';
+    const sceneHtml = lead.scene ? lead.scene.replace(/\n/g,'<br>') : '';
     hf.innerHTML =
       '<div class="hf-bg">' +
-        '<div class="hf-label">✨ いちばん楽しみな未来</div>' +
-        '<div class="hf-emoji">' + (lead.emoji || '✨') + '</div>' +
+        '<div class="hf-label">✨ いちばん近い未来</div>' +
+        '<div class="hf-emoji">' + (lead.emoji||'✨') + '</div>' +
         '<div class="hf-name serif">' + lead.title + '</div>' +
         (sceneHtml ? '<div class="hf-scene">' + sceneHtml + '</div>' : '') +
+        '<div style="font-size:13px;opacity:.55;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);letter-spacing:.04em">' + getFutureClosing(lead) + '</div>' +
+        '<div class="hf-tap-hint">タップして詳しく見る</div>' +
       '</div>';
     hf.style.display = 'block';
     hf.onclick = () => openSheet(DATA.futureEvents.indexOf(lead));
@@ -410,144 +518,163 @@ function renderMirai() {
     hf.style.display = 'none';
   }
 
-  // それ以外の未来カード
   const others = DATA.futureEvents.filter(e => e !== lead);
-  if (others.length > 0) document.getElementById('coming-label').style.display = 'block';
-  document.getElementById('coming-list').innerHTML = others.map(e => {
-    const idx = DATA.futureEvents.indexOf(e);
-    const st = e.status;
-    return '<div class="future-card" onclick="openSheet(' + idx + ')">' +
-      '<div class="fc-emoji fc-emoji-' + st + '">' + (e.emoji || '✨') + '</div>' +
-      '<div class="fc-body">' +
-        '<div class="fc-title">' + e.title + '</div>' +
-        '<div class="fc-when">' + whenLabel(e.date, e.status) + '</div>' +
-      '</div>' +
-      '<div class="fc-badge fc-badge-' + st + '">' + (STATUS_LABEL[st] || st) + '</div>' +
-      '<div class="fc-arrow">›</div>' +
-    '</div>';
-  }).join('');
+  const soon  = others.filter(e => ['scheduled','plan','interest'].includes(e.status));
+  const dream = others.filter(e => e.status === 'dream');
+
+  let html = '';
+  if (soon.length) {
+    html += '<div class="future-group">' +
+      '<div class="future-group-label">✦ 育ってきた未来</div>' +
+      '<div class="future-cards">' + soon.map(futureCardHtml).join('') + '</div></div>';
+  }
+  if (dream.length) {
+    html += '<div class="future-group">' +
+      '<div class="future-group-label">🌙 いつかのゆめ</div>' +
+      '<div class="future-cards">' + dream.map(futureCardHtml).join('') + '</div></div>';
+  }
+  document.getElementById('future-groups').innerHTML = html;
 }
 
-/* ===== 育てるタブ ===== */
+function futureCardHtml(e) {
+  const idx = DATA.futureEvents.indexOf(e);
+  const st = e.status;
+  const snippet = sceneSnippet(e.scene);
+  return '<div class="future-card" onclick="openSheet(' + idx + ')">' +
+    '<div class="fc-emoji fc-emoji-' + st + '">' + (e.emoji||'✨') + '</div>' +
+    '<div class="fc-body">' +
+      '<div class="fc-title">' + e.title + '</div>' +
+      (snippet ? '<div class="fc-snippet">' + snippet + '</div>' : '') +
+    '</div>' +
+    '<div class="fc-right">' +
+      '<div class="fc-badge fc-badge-' + st + '">' + (STATUS_LABEL[st]||st) + '</div>' +
+      '<div class="fc-arrow">›</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* 育てるタブ */
 function renderSodate() {
-  const seeds = (DATA.seeds || []).filter(s => s.stage !== 'harvested');
+  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   if (!seeds.length) {
     document.getElementById('seed-list').innerHTML =
       '<p style="color:var(--muted);font-size:14px;text-align:center;padding:40px 20px;line-height:2">ASTOと話して<br>最初の種を見つけよう🌱</p>';
     return;
   }
   document.getElementById('seed-list').innerHTML = seeds.map((s, si) => {
+    const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+    const msg = getSeedMsg(s, si);
     return '<div class="seed-card">' +
-      '<div class="seed-name">' + (s.emoji || '🌱') + '&nbsp;&nbsp;' + s.name + '</div>' +
-      (s.originalWish ? '<div class="seed-wish">' + s.originalWish + '</div>' : '') +
-      '<div class="seed-asto-msg">この未来はまだ育っています。またASTOと話してみよう😊</div>' +
-      '<button class="seed-talk-btn" data-seed-idx="' + si + '" onclick="handleSeedTalk(this)">🌱&nbsp;&nbsp;この続きを育てる</button>' +
+      '<div class="seed-status-bar">' +
+        '<span class="seed-status-ico">' + st.ico + '</span>' +
+        '<span class="seed-status-text">' + st.label + '</span>' +
+      '</div>' +
+      '<div class="seed-card-body">' +
+        '<div class="seed-name">' + s.name + '</div>' +
+        (s.originalWish ? '<div class="seed-wish">' + s.originalWish + '</div>' : '') +
+        '<div class="seed-asto-msg">' + msg + '</div>' +
+        '<button class="seed-talk-btn" data-seed-idx="' + si + '" onclick="handleSeedTalk(this)">🌱&nbsp;&nbsp;この続きを育てる</button>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
 
 function handleSeedTalk(btn) {
   const si = parseInt(btn.dataset.seedIdx);
-  const seeds = (DATA.seeds || []).filter(s => s.stage !== 'harvested');
+  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   const seed = seeds[si];
   if (!seed) return;
-  const text = '「' + seed.name + '」について話したい';
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.innerHTML = '✅&nbsp;&nbsp;コピーしました';
-      setTimeout(() => { btn.innerHTML = '🌱&nbsp;&nbsp;この続きを育てる'; }, 2000);
-    });
-  } else {
-    const el = document.createElement('textarea');
-    el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
-    document.body.appendChild(el); el.focus(); el.select();
-    document.execCommand('copy'); document.body.removeChild(el);
-    btn.innerHTML = '✅&nbsp;&nbsp;コピーしました';
-    setTimeout(() => { btn.innerHTML = '🌱&nbsp;&nbsp;この続きを育てる'; }, 2000);
-  }
+  copyText('「' + seed.name + '」について話したい', btn, '✅&nbsp;&nbsp;コピーしました', '🌱&nbsp;&nbsp;この続きを育てる');
 }
 
-/* ===== 人生タブ ===== */
+/* あゆみタブ */
 function renderJinsei() {
-  const items = [];
+  const chapters = [];
 
-  // 収穫済みのストーリー
-  (DATA.harvestedSeeds || []).forEach(h => {
-    if (h.originalWish) items.push({ ico: h.emoji || '🌱', cls:'tl-dot-seed', label:h.originalWish, sub:null });
-    if (h.futureTitle)  items.push({ ico: h.emoji || '📅', cls:'tl-dot-event', label:h.futureTitle, sub:null });
-    items.push({ ico:'🌾', cls:'tl-dot-harvest', label:h.harvestNote ? '「' + h.harvestNote + '」' : h.name, sub:null });
-    if (h.nextSeed) items.push({ ico:'🌱', cls:'tl-dot-seed', label:h.nextSeed, sub:null });
+  // 収穫済み
+  (DATA.harvestedSeeds||[]).forEach(h => {
+    const nodes = [];
+    if (h.originalWish) nodes.push({cls:'tl-dot-talk', ico:'💬', label:h.originalWish, sub:null, bridge:'その願いが、少しずつ形になって'});
+    if (h.futureTitle)  nodes.push({cls:'tl-dot-event', ico:h.emoji||'📅', label:h.futureTitle, sub:null, bridge:'そして'});
+    nodes.push({cls:'tl-dot-harvest', ico:'🌾', label:h.harvestNote ? '「' + h.harvestNote + '」' : '実現した', sub:null, bridge: h.nextSeedWish ? 'そこから、また新しい種が芽吹いた' : null});
+    if (h.nextSeedWish) nodes.push({cls:'tl-dot-seed', ico:'🌱', label:h.nextSeedWish, sub:null, bridge:null});
+    chapters.push(nodes);
   });
 
-  // 育ってる種と未来イベント
-  (DATA.seeds || []).filter(s => s.stage !== 'harvested').forEach(s => {
-    const ev = (DATA.futureEvents || []).find(e => e.sourceSeed === s.name);
-    if (s.originalWish) items.push({ ico:'🌱', cls:'tl-dot-seed', label:s.originalWish, sub:null });
-    if (ev) items.push({ ico: ev.emoji || '📅', cls:'tl-dot-event', label:ev.title, sub:whenLabel(ev.date, ev.status) });
+  // 育ってる種
+  (DATA.seeds||[]).filter(s => s.stage !== 'harvested').forEach(s => {
+    const ev = (DATA.futureEvents||[]).find(e => e.sourceSeed === s.name);
+    const nodes = [];
+    if (s.originalWish) nodes.push({cls:'tl-dot-talk', ico:'💬', label:s.originalWish, sub:null, bridge: ev ? '気づいたら、予定になってたね😊' : null});
+    if (ev) nodes.push({cls:'tl-dot-event', ico:ev.emoji||'📅', label:ev.title, sub:whenLabel(ev.date, ev.status) + '・育ち中', bridge:null});
+    if (nodes.length) chapters.push(nodes);
   });
 
-  if (!items.length) {
+  if (!chapters.length) {
     document.getElementById('jinsei-wrap').innerHTML =
       '<p style="color:var(--muted);font-size:14px;text-align:center;padding:40px 20px;line-height:2">ASTOと話して<br>最初の一粒をまこう🌱</p>';
     return;
   }
 
-  document.getElementById('jinsei-wrap').innerHTML = items.map((n, i) => {
-    const isLast = i === items.length - 1;
-    return '<div class="tl-item">' +
-      '<div class="tl-left">' +
-        '<div class="tl-dot ' + n.cls + '">' + n.ico + '</div>' +
-        (!isLast ? '<div class="tl-line"></div>' : '') +
+  document.getElementById('jinsei-wrap').innerHTML = chapters.map(nodes => {
+    const inner = nodes.map((n, i) => {
+      const isLast = i === nodes.length - 1;
+      return '<div class="tl-node">' +
+        '<div class="tl-node-left"><div class="tl-dot ' + n.cls + '">' + n.ico + '</div></div>' +
+        '<div class="tl-body"><div class="tl-label">' + n.label + '</div>' + (n.sub ? '<div class="tl-sub">' + n.sub + '</div>' : '') + '</div>' +
       '</div>' +
-      '<div class="tl-body">' +
-        '<div class="tl-label">' + n.label + '</div>' +
-        (n.sub ? '<div class="tl-sub">' + n.sub + '</div>' : '') +
-      '</div>' +
-    '</div>';
+      (!isLast && n.bridge
+        ? '<div class="tl-bridge"><div class="tl-bridge-line"></div><div class="tl-bridge-text">' + n.bridge + '</div><div class="tl-bridge-line"></div></div>'
+        : (!isLast ? '<div class="tl-bridge"><div class="tl-bridge-line"></div></div>' : '')
+      );
+    }).join('');
+    return '<div class="tl-chapter">' + inner + '</div>';
   }).join('');
 }
 
-/* ===== ボトムシート ===== */
+/* ボトムシート */
 function openSheet(idx) {
   const e = DATA.futureEvents[idx];
   if (!e) return;
 
   const when = e.daysLeft ? 'あと ' + e.daysLeft + ' 日' : whenLabel(e.date, e.status);
   const statusLabel = STATUS_LABEL[e.status] || e.status;
-  const relatedSeed = e.sourceSeed
-    ? (DATA.seeds || []).find(s => s.name === e.sourceSeed) : null;
+  const relatedSeed = e.sourceSeed ? (DATA.seeds||[]).find(s => s.name === e.sourceSeed) : null;
 
-  // 種の流れ（sourceSeedがある時だけ）
-  const originHtml = relatedSeed
-    ? '<div class="bs-origin">' +
-        '<div class="bs-origin-label">🌱 この未来は「' + relatedSeed.name + '」から生まれました</div>' +
-        (relatedSeed.originalWish
-          ? '<div class="bs-origin-wish">' + relatedSeed.originalWish + '</div>'
-          : '') +
+  // ① 未来タイトル
+  const heroHtml =
+    '<div class="bs-hero">' +
+      '<div class="bs-emoji">' + (e.emoji||'✨') + '</div>' +
+      '<div class="bs-title">' + e.title + '</div>' +
+      '<div class="bs-tags">' +
+        '<span class="bs-tag-when">' + when + '</span>' +
+        '<span class="bs-tag-status">' + statusLabel + '</span>' +
+      '</div>' +
+    '</div>';
+
+  // ② ASTOの感情テキスト
+  const astoHtml = e.scene
+    ? '<div class="bs-asto">' +
+        '<div class="bs-asto-ico">🐋</div>' +
+        '<div class="bs-asto-text">' + e.scene.replace(/\n/g,'<br>') + '</div>' +
       '</div>'
     : '';
 
-  // ASTOの一言
-  const astoMsg = e.scene
-    ? '<div class="bs-asto-say">' +
-        '<div class="bs-asto-ico">🐋</div>' +
-        '<div class="bs-asto-text">' + e.scene.replace(/\n/g, '<br>') + '</div>' +
+  // ③ そういえば（種の言葉）
+  const soyebaHtml = relatedSeed && relatedSeed.originalWish
+    ? '<div class="bs-soyeba">' +
+        '<div class="bs-soyeba-lead">そういえば、</div>' +
+        '<div class="bs-soyeba-wish">' + relatedSeed.originalWish + '</div>' +
+        '<div style="font-size:13px;color:var(--muted);margin-top:6px">って話してたよね😊</div>' +
       '</div>'
     : '';
 
   const copyMsg = '「' + e.title + '」について話したい';
 
   document.getElementById('bs-body').innerHTML =
-    '<div class="bs-title-area">' +
-      '<div class="bs-emoji">' + (e.emoji || '✨') + '</div>' +
-      '<div class="bs-title">' + e.title + '</div>' +
-      '<div class="bs-tags">' +
-        '<span class="bs-tag-when">' + when + '</span>' +
-        '<span class="bs-tag-status">' + statusLabel + '</span>' +
-      '</div>' +
-    '</div>' +
-    originHtml +
-    astoMsg +
+    heroHtml + astoHtml + soyebaHtml +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;padding:0 2px">今日はここまで😊<br>また続きを話そう🌱</div>' +
+    '<div class="bs-divider"></div>' +
     '<div class="bs-copy-text" id="bs-copy-text">' + copyMsg + '</div>' +
     '<button class="bs-copy-btn" id="bs-copy-btn" onclick="copySheetText()">📋&nbsp;&nbsp;コピーする</button>' +
     '<button class="bs-talk-btn" onclick="openLine()">💬&nbsp;&nbsp;ASTOと話す</button>';
@@ -566,22 +693,27 @@ function closeSheet() {
 function copySheetText() {
   const text = document.getElementById('bs-copy-text').textContent;
   const btn = document.getElementById('bs-copy-btn');
+  copyText(text, btn, '✅ コピーしました', '📋&nbsp;&nbsp;コピーする');
+}
+
+function copyText(text, btn, done, reset) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '✅ コピーしました';
-      setTimeout(() => { btn.innerHTML = '📋&nbsp;&nbsp;コピーする'; }, 2000);
+      btn.innerHTML = done;
+      setTimeout(() => { btn.innerHTML = reset; }, 2000);
     });
   } else {
     const el = document.createElement('textarea');
     el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
     document.body.appendChild(el); el.focus(); el.select();
     document.execCommand('copy'); document.body.removeChild(el);
-    btn.textContent = '✅ コピーしました';
-    setTimeout(() => { btn.innerHTML = '📋&nbsp;&nbsp;コピーする'; }, 2000);
+    btn.innerHTML = done;
+    setTimeout(() => { btn.innerHTML = reset; }, 2000);
   }
 }
 
-// スワイプダウンで閉じる
+function openLine() { location.href = 'https://line.me/R/ti/p/@624btbtc'; }
+
 (function() {
   let startY = 0;
   const sheet = document.getElementById('bottom-sheet');
@@ -589,22 +721,14 @@ function copySheetText() {
   sheet.addEventListener('touchend', e => { if (e.changedTouches[0].clientY - startY > 60) closeSheet(); }, {passive:true});
 })();
 
-function openLine() {
-  location.href = 'https://line.me/R/ti/p/@624btbtc';
-}
-
-/* ===== タブ切り替え ===== */
 function switchTab(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s-' + name).classList.add('active');
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.s === name));
-  // FABはmirai/sodateタブのみ表示
-  const fab = document.getElementById('fab');
-  fab.style.display = (name === 'jinsei') ? 'none' : 'flex';
+  document.getElementById('fab').style.display = name === 'jinsei' ? 'none' : 'flex';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* ===== 星空 ===== */
 function makeStars() {
   const h = document.getElementById('hero');
   let s = '';
