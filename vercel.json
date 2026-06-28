@@ -8,8 +8,3 @@
     {"src": "/webhook", "dest": "/api/webhook.js"},
     {"handle": "filesystem"}
   ]
-  // ↓ この部分を丸ごと削除
-  // "crons": [
-  //   {"path": "/api/remind", "schedule": "0 12 * * *"}
-  // ]
-}
