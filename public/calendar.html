@@ -525,14 +525,18 @@ function handleActionCopy(e, btn) {
 
 function handleSeedCopy(btn) {
   const si = parseInt(btn.dataset.seedIdx);
+  const mode = btn.dataset.mode || 'talk';
   const seeds = (DATA.seeds || []).filter(s => s.stage !== 'harvested');
   const seed = seeds[si];
   if (!seed) return;
-  const text = '「' + seed.name + '」について話したい';
+  const text = mode === 'prepare'
+    ? '「' + seed.name + '」のために必要な準備を一緒に整理したい'
+    : '「' + seed.name + '」について話したい';
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => {
       btn.innerHTML = '✅&nbsp;コピーしました';
-      setTimeout(() => { btn.innerHTML = '📋&nbsp;ASTOに話しかける'; }, 2000);
+      const orig = mode === 'prepare' ? '📋&nbsp;準備リストを一緒に作る' : '📋&nbsp;ASTOに話しかける';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
     });
   } else {
     const el = document.createElement('textarea');
@@ -540,7 +544,8 @@ function handleSeedCopy(btn) {
     document.body.appendChild(el); el.focus(); el.select();
     document.execCommand('copy'); document.body.removeChild(el);
     btn.innerHTML = '✅&nbsp;コピーしました';
-    setTimeout(() => { btn.innerHTML = '📋&nbsp;ASTOに話しかける'; }, 2000);
+    const orig = mode === 'prepare' ? '📋&nbsp;準備リストを一緒に作る' : '📋&nbsp;ASTOに話しかける';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
   }
 }
 
@@ -580,7 +585,7 @@ function renderSodate() {
       '</div>';
     } else {
       actionsHtml = '<div class="action-section">' +
-        '<div class="action-empty">アストと話して準備リストを作ろう🌱</div>' +
+        '<button class="seed-copy-btn" data-seed-idx="' + si + '" data-mode="prepare" onclick="handleSeedCopy(this)" style="width:100%">📋&nbsp;準備リストを一緒に作る</button>' +
       '</div>';
     }
 
