@@ -512,9 +512,11 @@ function renderJinsei() {
    ボトムシート
    ========================================================== */
 const STATUS_LABEL = { dream:'いつか', interest:'気になってる', plan:'計画中', scheduled:'予定あり' };
+let currentSeed = null;
 
 function openSheet(idx) {
   const e = DATA.futureEvents[idx];
+  currentSeed = e.title;
   if (!e) return;
 
   const when = e.daysLeft ? `あと ${e.daysLeft} 日` : whenLabel(e.date, e.status);
@@ -538,7 +540,7 @@ function openSheet(idx) {
     </div>
     ${sceneHtml}
     ${seedHtml}
-    <button class="bs-talk" onclick="openLine()">💬&nbsp;&nbsp;ASTOと話す</button>
+    <button class="bs-talk" onclick="openLine(currentSeed)">💬&nbsp;&nbsp;ASTOと話す</button>
   `;
 
   document.getElementById('bs-overlay').classList.add('open');
@@ -572,10 +574,15 @@ function switchTab(name) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// LINEへ遷移（本番では line:// deep link や LIFF URL に変更）
-function openLine() {
-  const lineUrl = 'https://line.me/R/ti/p/@624btbtc'; // ← LINE ID を設定
-  location.href = lineUrl;
+// LINEへ遷移（seedNameがあれば会話の入口テキストを渡す）
+function openLine(seedName) {
+  const base = 'https://line.me/R/ti/p/@624btbtc';
+  if (seedName) {
+    const text = encodeURIComponent(\`「\${seedName}」について話したい\`);
+    location.href = \`\${base}?oaMessage=\${text}\`;
+  } else {
+    location.href = base;
+  }
 }
 
 /* ==========================================================
