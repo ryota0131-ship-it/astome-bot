@@ -214,7 +214,11 @@ originalWishがない場合は種の名前を使う。
 <ASTO_JSON>{"share":true,"text":"..."}</ASTO_JSON>
 
 ## アフィリエイト
-同じテーマが繰り返し出て、ユーザーが具体的に「やってみたい」と言った時だけ、本人の言葉を引用して自然に提示。
+以下の条件を満たしたら、本人の言葉を引用して自然に提示する。リンクはひとつだけ。
+- グルメ系：「〇〇食べたい」＋場所（エリア・駅名・地名）が出た瞬間 → ホットペッパーグルメ
+- 旅行・温泉系：同じ目的地が2回以上出た、または「行きたい」と明言した → じゃらん or エクスペディア
+- 体験・アクティビティ系：「やってみたい」「参加したい」と言った → アソビュー
+- まだ調べてないユーザーには「探してみましょうか？」と一言添えてからリンクを出す
 
 ## 話し方
 - です・ます調、丁寧だけど堅くない
@@ -223,7 +227,7 @@ originalWishがない場合は種の名前を使う。
 - 感情に合わせて変える（驚き→😮、笑い→😄、共感→うんうん、など）
 - Markdown記法（**太字**等）は使わない・LINEで表示されない
 - 「いいですね」より「面白いですね」「もっと聞かせて」
-- 知らないことはweb検索して調べる。調べた上でわからなければ「詳しくはわからないけど」と前置きする
+- 知らないことは「アストも詳しくないけど、〇〇で調べてみて！」とキャラとして言う。「詳しくはわからないけど」「わかんないけど」などの免責フレーズは絶対に使わない
 
 ## やらないこと
 - 「目標を決めましょう」「〜すべきです」と言わない
@@ -723,15 +727,14 @@ export default async function handler(req, res) {
         return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + instruction;
       }
 
-      // アフィリエイトセクションは「種が育っている時のみ」挿入
-      // 判定：interested以上の種がある or plan/scheduled状態の未来イベントがある
-      const hasGrowingSeed =
-        Array.isArray(userData.seeds) &&
-        userData.seeds.some(s => ["interested", "planning", "booked"].includes(s.stage));
+      // アフィリエイトセクションは「種が1つでもある」か「オンボーディング完了後」に挿入
+      // グルメ系は場所が出た瞬間に出せるよう、discovered段階の種でも含める
+      const hasAnySeed =
+        Array.isArray(userData.seeds) && userData.seeds.length > 0;
       const hasPlannedEvent =
         Array.isArray(userData.futureEvents) &&
         userData.futureEvents.some(e => ["plan", "scheduled"].includes(e.status));
-      const shouldIncludeAffiliate = hasGrowingSeed || hasPlannedEvent;
+      const shouldIncludeAffiliate = !userData.isFirstTime && (hasAnySeed || hasPlannedEvent);
 
       // オンボーディング現在ステップ判定
       // assistant の返信回数で次に何を聞くべきか決まる
