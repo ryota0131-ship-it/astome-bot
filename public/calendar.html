@@ -578,8 +578,8 @@ function switchTab(name) {
 function openLine(seedName) {
   const base = 'https://line.me/R/ti/p/@624btbtc';
   if (seedName) {
-    const text = encodeURIComponent(\`「\${seedName}」について話したい\`);
-    location.href = \`\${base}?oaMessage=\${text}\`;
+    const text = encodeURIComponent('「' + seedName + '」について話したい');
+    location.href = base + '?oaMessage=' + text;
   } else {
     location.href = base;
   }
