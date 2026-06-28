@@ -531,6 +531,7 @@ function openSheet(idx) {
        </div>`
     : '';
 
+  const copyMsg = '「' + e.title + '」について話したい';
   document.getElementById('bs-body').innerHTML = `
     <div class="bs-emoji">${e.emoji || '✨'}</div>
     <div class="bs-title">${e.title}</div>
@@ -540,8 +541,8 @@ function openSheet(idx) {
     </div>
     ${sceneHtml}
     ${seedHtml}
-    <div id="bs-copy-area" style="display:none;margin-top:20px">
-      <div style="background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:14px;color:var(--ink);line-height:1.6" id="bs-copy-text"></div>
+    <div style="margin-top:20px">
+      <div style="background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:14px;color:var(--ink);line-height:1.6" id="bs-copy-text">${copyMsg}</div>
       <button onclick="copyText()" style="margin-top:8px;width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:999px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer" id="bs-copy-btn">📋&nbsp;&nbsp;コピーする</button>
     </div>
     <button class="bs-talk" onclick="openLine()" style="margin-top:12px">💬&nbsp;&nbsp;ASTOと話す</button>
