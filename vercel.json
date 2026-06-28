@@ -1,18 +1,15 @@
+// vercel.json の修正
 {
   "version": 2,
   "functions": {
-    "api/webhook.js": {
-      "maxDuration": 30
-    }
+    "api/webhook.js": {"maxDuration": 30}
   },
   "routes": [
-    { "src": "/webhook", "dest": "/api/webhook.js" },
-    { "handle": "filesystem" }
-  ],
-  "crons": [
-    {
-      "path": "/api/remind",
-      "schedule": "0 12 * * *"
-    }
+    {"src": "/webhook", "dest": "/api/webhook.js"},
+    {"handle": "filesystem"}
   ]
+  // ↓ この部分を丸ごと削除
+  // "crons": [
+  //   {"path": "/api/remind", "schedule": "0 12 * * *"}
+  // ]
 }
