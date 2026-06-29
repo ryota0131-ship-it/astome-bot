@@ -319,7 +319,59 @@ body{
 .tab{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;font-family:inherit;color:var(--muted);transition:color .2s;position:relative}
 .tab.active{color:var(--navy)}
 .tab.active::before{content:'';position:absolute;top:0;width:18px;height:2.5px;border-radius:0 0 3px 3px;background:var(--gold)}
-.tab-ico{font-size:20px;line-height:1}
+.tab-ico{
+
+  font-size:20px;
+
+  line-height:1;
+
+}
+
+.tab-lbl{
+
+  font-size:10px;
+
+  font-weight:700;
+
+  letter-spacing:.04em;
+
+}
+
+/* ←ここに追加 */
+
+.tab-asto{
+
+  width:22px;
+
+  height:22px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+}
+
+.tab-asto img{
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:contain;
+
+  display:block;
+
+  transition:transform .2s ease;
+
+}
+
+.tab.active .tab-asto img{
+
+  transform:scale(1.1);
+
+}
 .tab-lbl{font-size:10px;font-weight:700;letter-spacing:.04em}
 </style>
 </head>
@@ -379,7 +431,12 @@ body{
 
 <nav class="tabbar">
   <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">✨</span><span class="tab-lbl">楽しみ</span></button>
-  <button class="tab"        data-s="sodate" onclick="switchTab('sodate')"><span class="tab-ico">🐋</span><span class="tab-lbl">育てる</span></button>
+  <button class="tab" data-s="sodate" onclick="switchTab('sodate')">
+  <span class="tab-ico tab-asto">
+    <img src="/ASTO_face_image.png" alt="ASTO">
+  </span>
+  <span class="tab-lbl">育てる</span>
+</button>
   <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">あゆみ</span></button>
 </nav>
 
