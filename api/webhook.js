@@ -289,7 +289,14 @@ async function getUserData(userId) {
     userFacts: [],            // 長期ファクト（妻がいる・マラソン好きなど・永続）
   };
   }
-  const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+  // 二重JSON.stringifyに対応して最大3回parseする
+  let data = raw;
+  for (let i = 0; i < 3; i++) {
+    if (typeof data === 'string') { data = JSON.parse(data); continue; }
+    if (data && typeof data === 'object' && data.value !== undefined) { data = data.value; continue; }
+    break;
+  }
+  if (typeof data === 'string') data = JSON.parse(data);
   if (!Array.isArray(data.messages)) {
     data.messages = [];
   }
