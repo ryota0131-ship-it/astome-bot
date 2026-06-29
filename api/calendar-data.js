@@ -27,6 +27,8 @@ export default async function handler(req, res) {
 
   try {
     const raw = await redis.get(`user:${userId}`);
+    console.log('raw type:', typeof raw, 'raw:', JSON.stringify(raw)?.slice(0, 200));
+
     if (!raw) {
       return res.status(200).json({
         userName: null, futureEvents: [], seeds: [],
@@ -34,7 +36,18 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    // Upstashは値をJSON文字列でネストして返す場合がある
+    let data;
+    if (typeof raw === 'string') {
+      data = JSON.parse(raw);
+    } else if (raw && typeof raw === 'object' && raw.value) {
+      // {"value": "..."} の形式で返ってくる場合
+      data = typeof raw.value === 'string' ? JSON.parse(raw.value) : raw.value;
+    } else {
+      data = raw;
+    }
+
+    console.log('userName:', data.userName);
 
     return res.status(200).json({
       userName: data.userName || null,
@@ -46,6 +59,6 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('calendar-data error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 }
