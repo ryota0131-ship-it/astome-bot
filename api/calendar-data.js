@@ -22,14 +22,18 @@ export default async function handler(req, res) {
     let raw = json.result ?? null;
     if (!raw) return res.status(200).json({ userName: null, futureEvents: [], seeds: [], harvestedSeeds: [], futureBalanceHistory: [], daily: null });
 
-    // 1回目のparse
-    if (typeof raw === 'string') raw = JSON.parse(raw);
-    // { value: "..." } 形式の場合
-    if (raw && typeof raw === 'object' && raw.value !== undefined) raw = raw.value;
-    // 2回目のparse
+    // 最大3回parseしてオブジェクトになるまで繰り返す
+    for (let i = 0; i < 3; i++) {
+      if (typeof raw === 'string') { raw = JSON.parse(raw); continue; }
+      if (raw && typeof raw === 'object' && raw.value !== undefined) { raw = raw.value; continue; }
+      break;
+    }
+    // まだstringなら最後にparse
     if (typeof raw === 'string') raw = JSON.parse(raw);
 
-    console.log('returning userName:', raw.userName);
+    console.log('raw type after parse:', typeof raw);
+    console.log('raw keys:', raw && typeof raw === 'object' ? Object.keys(raw).slice(0,5) : 'not object');
+    console.log('returning userName:', raw && raw.userName);
     return res.status(200).json({
       userName: raw.userName || null,
       futureEvents: raw.futureEvents || [],
