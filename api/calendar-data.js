@@ -16,7 +16,10 @@ export default async function handler(req, res) {
       body: JSON.stringify(['GET', `user:${userId}`]),
     });
 
+    const reqBody = JSON.stringify(['GET', `user:${userId}`]);
+    console.log('Request body:', reqBody);
     const json = await r.json();
+    console.log('Response result type:', typeof json.result, 'length:', String(json.result).length);
 
     // result → parse → { value: "..." } → .value → parse → 実際のデータ
     let raw = json.result ?? null;
