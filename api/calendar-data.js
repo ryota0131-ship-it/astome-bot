@@ -51,16 +51,19 @@ export default async function handler(req, res) {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
     const today = new Date().toISOString().slice(0, 10);
 
-    // dailyが今日分でなければバックグラウンドで生成・保存
+    // dailyが今日分でなければ生成してから返す
     if (!data.daily || data.daily.date !== today) {
-      generateDaily(data).then(async (daily) => {
+      try {
+        const daily = await generateDaily(data);
         if (daily) {
           data.daily = daily;
           await redis.set(`user:${userId}`, data);
           console.log(`daily生成完了: ${userId}`);
         }
-      }).catch(e => console.error('daily生成エラー:', e));
-      // 生成中でも即座にレスポンスを返す（前回のdailyをそのまま使う）
+      } catch (e) {
+        console.error('daily生成エラー:', e);
+        // 失敗しても前回のdailyで続行
+      }
     }
 
     return res.status(200).json({
