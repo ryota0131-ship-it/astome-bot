@@ -1,6 +1,4 @@
 // api/calendar-data.js
-import { generateDaily } from '../lib/generate-daily.js';
-
 const redis = {
   async get(key) {
     const res = await fetch(
@@ -9,20 +7,6 @@ const redis = {
     );
     const data = await res.json();
     return data.result ?? null;
-  },
-  async set(key, value) {
-    const res = await fetch(
-      `${process.env.KV_REST_API_URL}/set/${encodeURIComponent(key)}`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ value: JSON.stringify(value) }),
-      }
-    );
-    return res.ok;
   },
 };
 
@@ -49,22 +33,6 @@ export default async function handler(req, res) {
     }
 
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    const today = new Date().toISOString().slice(0, 10);
-
-    // dailyが今日分でなければ生成してから返す
-    if (!data.daily || data.daily.date !== today) {
-      try {
-        const daily = await generateDaily(data);
-        if (daily) {
-          data.daily = daily;
-          await redis.set(`user:${userId}`, data);
-          console.log(`daily生成完了: ${userId}`);
-        }
-      } catch (e) {
-        console.error('daily生成エラー:', e);
-        // 失敗しても前回のdailyで続行
-      }
-    }
 
     return res.status(200).json({
       userName: data.userName || null,
