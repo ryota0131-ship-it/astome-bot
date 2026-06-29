@@ -496,9 +496,13 @@ function renderMirai() {
   const lead = DATA.futureEvents.find(e => e.status === 'scheduled')
              || DATA.futureEvents.find(e => e.status === 'plan');
 
-  document.getElementById('asto-say-text').innerHTML = lead
-    ? lead.title + '、楽しみだね😊<br><br>今日も少しずつ近づいてるよ🌱'
-    : '今日もいい一日だった？😊<br>小さなこと、話してみてね🌱';
+  // daily.heroMessageがあれば最優先（毎日朝に生成される今日だけの言葉）
+  const heroMsg = DATA.daily && DATA.daily.heroMessage
+    ? DATA.daily.heroMessage.replace(/\n/g, '<br>')
+    : (lead
+      ? lead.title + '、楽しみだね😊<br><br>今日も少しずつ近づいてるよ🌱'
+      : '今日もいい一日だった？😊<br>小さなこと、話してみてね🌱');
+  document.getElementById('asto-say-text').innerHTML = heroMsg;
 
   const hf = document.getElementById('hero-future');
   if (lead) {
@@ -539,7 +543,9 @@ function renderMirai() {
 function futureCardHtml(e) {
   const idx = DATA.futureEvents.indexOf(e);
   const st = e.status;
-  const snippet = sceneSnippet(e.scene);
+  // daily.futureCardMessagesがあれば今日の一言を優先、なければsceneのスニペット
+  const dailyMsg = DATA.daily && DATA.daily.futureCardMessages && DATA.daily.futureCardMessages[e.title];
+  const snippet = dailyMsg || sceneSnippet(e.scene);
   return '<div class="future-card" onclick="openSheet(' + idx + ')">' +
     '<div class="fc-emoji fc-emoji-' + st + '">' + (e.emoji||'✨') + '</div>' +
     '<div class="fc-body">' +
