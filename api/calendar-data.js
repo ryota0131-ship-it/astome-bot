@@ -34,11 +34,18 @@ export default async function handler(req, res) {
     // まだstringなら最後にparse
     if (typeof raw === 'string') raw = JSON.parse(raw);
 
-    // userNameがない場合はuserFactsから推定
+    // userNameがない場合はLINEプロフィールAPIから取得
     let userName = raw.userName || null;
-    if (!userName && Array.isArray(raw.userFacts)) {
-      const nameFact = raw.userFacts.find(f => f.includes('名前') || f.includes('りょうた'));
-      if (nameFact) userName = nameFact.match(/[ぁ-んァ-ン一-龥a-zA-Z]+/)?.[0] || null;
+    if (!userName && process.env.LINE_CHANNEL_ACCESS_TOKEN) {
+      try {
+        const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+          headers: { Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}` }
+        });
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          userName = profile.displayName || null;
+        }
+      } catch(e) { console.error('LINE profile error:', e.message); }
     }
     return res.status(200).json({
       userName: userName,
