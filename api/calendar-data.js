@@ -31,11 +31,14 @@ export default async function handler(req, res) {
     // まだstringなら最後にparse
     if (typeof raw === 'string') raw = JSON.parse(raw);
 
-    console.log('raw type after parse:', typeof raw);
-    console.log('raw keys:', raw && typeof raw === 'object' ? Object.keys(raw).slice(0,5) : 'not object');
-    console.log('returning userName:', raw && raw.userName);
+    // userNameがない場合はuserFactsから推定
+    let userName = raw.userName || null;
+    if (!userName && Array.isArray(raw.userFacts)) {
+      const nameFact = raw.userFacts.find(f => f.includes('名前') || f.includes('りょうた'));
+      if (nameFact) userName = nameFact.match(/[ぁ-んァ-ン一-龥a-zA-Z]+/)?.[0] || null;
+    }
     return res.status(200).json({
-      userName: raw.userName || null,
+      userName: userName,
       futureEvents: raw.futureEvents || [],
       seeds: raw.seeds || [],
       harvestedSeeds: raw.harvestedSeeds || [],
