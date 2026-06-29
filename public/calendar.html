@@ -432,12 +432,17 @@ const DEMO = {
 
 async function loadData() {
   const uid = new URLSearchParams(location.search).get('userId');
+  console.log('userId:', uid);
   if (uid) {
     try {
       const r = await fetch('/api/calendar-data?userId=' + encodeURIComponent(uid));
-      if (r.ok) return await r.json();
-    } catch(e) {}
+      console.log('API status:', r.status, r.ok);
+      const json = await r.json();
+      console.log('API response userName:', json.userName);
+      if (r.ok && json.userName) return json;
+    } catch(e) { console.error('loadData error:', e); }
   }
+  console.log('Falling back to DEMO');
   return DEMO;
 }
 
