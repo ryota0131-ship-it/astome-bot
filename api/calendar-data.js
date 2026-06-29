@@ -7,23 +7,24 @@ export default async function handler(req, res) {
   if (!userId) return res.status(400).json({ error: 'userId is required' });
 
   try {
-    const url = `${process.env.KV_REST_API_URL}/get/user:${encodeURIComponent(userId)}`;
-    console.log('Fetching:', url);
-
-    const r = await fetch(url, {
-      headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+    // webhook.jsと同じPipeline形式でGET
+    const r = await fetch(process.env.KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['GET', `user:${userId}`]),
     });
 
     const json = await r.json();
-    console.log('Upstash response keys:', Object.keys(json));
-    console.log('result type:', typeof json.result);
-    console.log('result slice:', String(json.result).slice(0, 100));
+    console.log('Upstash response:', JSON.stringify(json).slice(0, 200));
 
-    if (!json.result) {
-      return res.status(200).json({ debug: 'no result', json });
-    }
+    const raw = json.result ?? null;
+    if (!raw) return res.status(200).json({ userName: null, futureEvents: [], seeds: [], harvestedSeeds: [], futureBalanceHistory: [], daily: null });
 
-    const data = JSON.parse(json.result);
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
     return res.status(200).json({
       userName: data.userName || null,
       futureEvents: data.futureEvents || [],
