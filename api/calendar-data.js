@@ -1,11 +1,7 @@
 // api/calendar-data.js
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-  res.setHeader('CDN-Cache-Control', 'no-store');
-  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Surrogate-Control', 'no-store');
+  res.setHeader('Cache-Control', 'no-store');
 
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'userId is required' });
@@ -33,6 +29,7 @@ export default async function handler(req, res) {
     // 2回目のparse
     if (typeof raw === 'string') raw = JSON.parse(raw);
 
+    console.log('returning userName:', raw.userName);
     return res.status(200).json({
       userName: raw.userName || null,
       futureEvents: raw.futureEvents || [],
