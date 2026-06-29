@@ -5,6 +5,15 @@
   },
   "routes": [
     {"src": "/webhook", "dest": "/api/webhook.js"},
+    {
+      "src": "/api/calendar-data",
+      "dest": "/api/calendar-data.js",
+      "headers": {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "CDN-Cache-Control": "no-store",
+        "Vercel-CDN-Cache-Control": "no-store"
+      }
+    },
     {"handle": "filesystem"}
   ]
 }
