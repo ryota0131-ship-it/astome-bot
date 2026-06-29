@@ -436,7 +436,8 @@ async function loadData() {
     try {
       const r = await fetch('/api/calendar-data?userId=' + encodeURIComponent(uid));
       const json = await r.json();
-      if (r.ok && json.userName) return json;
+      // userNameがnullでもfutureEventsがあれば本番データを使う
+      if (r.ok && (json.userName || (json.futureEvents && json.futureEvents.length > 0))) return json;
     } catch(e) {}
   }
   return DEMO;
