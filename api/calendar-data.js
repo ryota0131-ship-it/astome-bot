@@ -7,7 +7,6 @@ export default async function handler(req, res) {
   if (!userId) return res.status(400).json({ error: 'userId is required' });
 
   try {
-    // webhook.jsと同じPipeline形式でGET
     const r = await fetch(process.env.KV_REST_API_URL, {
       method: 'POST',
       headers: {
