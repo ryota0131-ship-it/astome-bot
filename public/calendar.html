@@ -39,20 +39,18 @@ body{
 .hero-sub{font-size:14px;opacity:.68;margin-top:8px}
 .hero-asto{
   position:absolute;right:18px;bottom:62px;
-  width:84px;height:84px;border-radius:50%;
+  width:88px;height:88px;border-radius:50%;
   background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
   box-shadow:0 0 0 2px rgba(243,194,91,.35),0 10px 28px -10px rgba(0,0,0,.5);
   display:flex;align-items:center;justify-content:center;font-size:43px;
   animation:bob 5s ease-in-out infinite;
+  overflow:hidden;
 }
   .hero-asto img{
-
-  width:78%;
-
-  height:78%;
-
-  object-fit:contain;
-
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 30%;
 }
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
@@ -215,6 +213,10 @@ body{
   transition:transform .15s;
 }
 .seed-talk-btn:active{transform:scale(0.98)}
+.seed-prep-line{font-size:12px;color:var(--sage-d);font-weight:700;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.seed-prep-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:8px}
+.seed-prep-bar-fill{height:100%;background:var(--sage);border-radius:2px;transition:width .3s ease}
+.seed-timing-tag{font-size:10px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border-radius:999px;padding:2px 10px;margin-left:auto}
 
 /* あゆみタブ */
 .jinsei-header{padding:36px 20px 24px}
@@ -309,6 +311,19 @@ body{
 .bs-copy-btn{width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:999px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px}
 .bs-talk-btn{width:100%;background:var(--navy);color:var(--cream);border:none;border-radius:999px;padding:15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
 
+/* 種シート：目安の時期＋支度 */
+.bs-timing{display:inline-block;font-size:12px;font-weight:700;color:var(--sage-d);background:rgba(126,157,136,.14);border:1px solid rgba(126,157,136,.3);border-radius:999px;padding:3px 12px}
+.bs-shitaku-head{display:flex;align-items:center;gap:7px;margin:20px 0 10px}
+.bs-shitaku-ico{font-size:16px}
+.bs-shitaku-label{font-size:12px;font-weight:700;color:var(--muted)}
+.prep-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.prep-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line);cursor:pointer}
+.prep-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;font-size:12px;color:#fff;transition:all .15s}
+.prep-item.done .prep-check{background:var(--sage);border-color:var(--sage)}
+.prep-text{font-size:14px;color:var(--ink);line-height:1.6}
+.prep-item.done .prep-text{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--sage)}
+.prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:11px 13px;border-radius:12px;border:1.5px dashed var(--line);color:var(--muted);font-size:13px;cursor:pointer}
+
 /* タブ */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;
@@ -373,9 +388,90 @@ body{
 
 }
 .tab-lbl{font-size:10px;font-weight:700;letter-spacing:.04em}
+
+/* ===== 今日追加：育てるタブ 表示切替 ===== */
+.view-switch{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:0 16px 18px}
+.view-btn{flex:1;text-align:center;padding:9px 0;border-radius:999px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+.view-btn.active{background:var(--navy);color:var(--gold)}
+.view-pane{display:none}
+.view-pane.active{display:block}
+
+/* マップ表示（種のことば雲） */
+.seed-map-card{margin:0 16px 16px;background:linear-gradient(180deg,#FFFDF7,var(--card));border:1px solid var(--line);border-radius:22px;padding:26px 16px;min-height:220px;display:flex;align-items:center;justify-content:center}
+.seed-map-field{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 14px}
+.seed-word{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;border-radius:20px;padding:6px 12px}
+.sw-discovered{font-size:13px;opacity:.75;background:rgba(126,157,136,.12);color:var(--sage-d)}
+.sw-interested{font-size:17px;background:rgba(126,157,136,.18);color:var(--sage-d)}
+.sw-planning{font-size:23px;background:rgba(243,194,91,.2);color:var(--gold-d)}
+.sw-booked{font-size:27px;font-weight:800;background:rgba(243,194,91,.3);color:var(--gold-d)}
+.seed-map-legend{margin:0 16px 24px;font-size:11px;color:var(--muted);text-align:center}
+
+/* 航海図 */
+.koukai-card{position:relative;margin:0 16px 8px;border-radius:24px;overflow:hidden;box-shadow:0 4px 20px -10px rgba(40,53,48,.3)}
+.koukai-sky{position:relative;background:linear-gradient(180deg,#FFF6E4 0%,#FCE7C8 30%,var(--card) 60%);padding:18px 0 0;overflow:hidden}
+.koukai-sunrise-glow{position:absolute;left:60%;top:-64px;width:210px;height:210px;background:radial-gradient(circle,rgba(243,194,91,.4),rgba(243,194,91,0) 70%);transform:translateX(-50%);pointer-events:none}
+.koukai-sun{position:absolute;left:60%;top:6px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE7AE,var(--gold));transform:translateX(-50%);box-shadow:0 0 20px rgba(243,194,91,.55)}
+.koukai-sparkle{position:absolute;color:var(--gold);opacity:0;animation:kwTwinkle 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes kwTwinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1)}}
+.koukai-now-line{position:absolute;left:16px;top:44px;bottom:26px;border-left:2px dashed rgba(21,37,53,.22);z-index:2}
+.koukai-now-lbl{position:absolute;left:6px;top:28px;font-size:10px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:10px;z-index:3;white-space:nowrap}
+.koukai-zones{display:flex;padding:0 14px;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;position:relative;z-index:2}
+.koukai-zones span{flex:1;text-align:center}
+.koukai-stems{position:relative;height:206px;padding:0 14px;z-index:2}
+.koukai-stem{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.koukai-stem-line{width:2px;background:linear-gradient(180deg,rgba(126,157,136,.55),rgba(126,157,136,.15));margin-top:4px}
+.koukai-bud{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-weight:700;white-space:nowrap;border-radius:20px;padding:6px 12px;box-shadow:0 3px 8px rgba(40,53,48,.15);font-size:13px;cursor:pointer}
+.koukai-ocean{position:relative;height:78px;overflow:hidden;background:linear-gradient(180deg,#2E6373,#1C3D4A)}
+.koukai-ocean svg{position:absolute;left:0;width:200%;height:100%}
+.kw-back{top:0;animation:kwDrift 14s linear infinite;opacity:.9}
+.kw-mid{top:10px;animation:kwDrift 10s linear infinite reverse;opacity:.85}
+.kw-front{top:20px;animation:kwDrift 7s linear infinite;opacity:1}
+@keyframes kwDrift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.koukai-glint{position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,231,174,.9);animation:kwGlint 2.6s ease-in-out infinite}
+@keyframes kwGlint{0%,100%{opacity:.15}50%{opacity:.85}}
+.koukai-fin{position:absolute;bottom:20px;font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));animation:kwSwim 9s linear infinite;transform:scaleX(-1)}
+@keyframes kwSwim{0%{left:-6%;opacity:0}8%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+.koukai-caption{text-align:center;font-size:10px;color:rgba(250,250,247,.7);background:#1C3D4A;padding:8px 0 12px}
+.koukai-legend{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin:14px 16px 24px}
+.koukai-legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
+.koukai-legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* 種の詳細シート：支度 */
+.prep-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 6px}
+.prep-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:var(--ivory);cursor:pointer}
+.prep-check{width:19px;height:19px;border-radius:50%;border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;font-size:11px;color:#fff}
+.prep-item.done .prep-check{background:var(--sage)}
+.prep-item.done .prep-text{color:var(--muted);text-decoration:line-through}
+.prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:9px 10px;border-radius:10px;border:1.5px dashed var(--line);color:var(--muted);font-size:12.5px;cursor:pointer}
+
+/* 探す機能・あゆみの記録 入口カード */
+.find-card,.ayumi-entry{margin:4px 16px 24px;background:var(--card);border:1.5px dashed var(--sage);border-radius:18px;padding:16px 17px;display:flex;align-items:center;gap:13px;cursor:pointer}
+.find-ico,.ayumi-ico{width:38px;height:38px;border-radius:12px;background:var(--ivory);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.find-title,.ayumi-entry-title{font-size:14px;font-weight:700;color:var(--ink)}
+.find-sub,.ayumi-entry-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.find-arrow{margin-left:auto;font-size:16px;color:var(--sage-d)}
+
+/* 探す機能：3択オプション */
+.option-card{display:flex;align-items:center;gap:12px;background:var(--ivory);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer}
+.option-ico{width:36px;height:36px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.option-title{font-size:13.5px;font-weight:700}
+.option-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* あゆみの記録：手紙 */
+.letter-open{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:20px}
+.letter-para{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:15px;line-height:2;margin-bottom:18px}
+.letter-stitch{display:flex;align-items:center;gap:10px;margin:24px 0 18px}
+.letter-stitch-line{flex:1;height:0;border-top:1px dashed var(--line)}
+.letter-future{background:var(--ivory);border-radius:12px;padding:16px}
+.letter-future-label{font-size:10px;font-weight:700;color:var(--sage-d);letter-spacing:.1em;margin-bottom:8px}
+
+.toast-mini{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--navy);color:var(--cream);font-size:12.5px;padding:10px 18px;border-radius:30px;opacity:0;transition:all .3s ease;pointer-events:none;z-index:95;text-align:center;max-width:82%}
+.toast-mini.show{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
+
+<div class="toast-mini" id="toastMini"></div>
 
 <!-- 楽しみ -->
 <section class="screen active" id="s-mirai">
@@ -389,13 +485,17 @@ body{
 </div>
   </div>
   <div class="sheet">
-    <div class="asto-say"><div class="asto-ico">
-
-  <img src="/ASTO_face_image.png" alt="ASTO">
-
-</div><div class="asto-say-text" id="asto-say-text"></div></div>
+    <div class="asto-say"><div class="asto-ico"><img src="/ASTO_main_image.png" alt="ASTO"></div><div class="asto-say-text" id="asto-say-text"></div></div>
     <div class="hero-future" id="hero-future"></div>
     <div id="future-groups"></div>
+    <div class="find-card" onclick="openFindSheet()">
+      <div class="find-ico">🌱</div>
+      <div>
+        <div class="find-title">新しい種を見つける</div>
+        <div class="find-sub">どうやって見つけますか？</div>
+      </div>
+      <div class="find-arrow">›</div>
+    </div>
   </div>
 </section>
 
@@ -405,7 +505,52 @@ body{
     <div class="sodate-title">育てている種</div>
     <div class="sodate-sub">気になってること、続きを話そう</div>
   </div>
-  <div class="seed-cards" id="seed-list"></div>
+
+  <div class="view-switch">
+    <button class="view-btn active" id="vb-list" onclick="switchSodateView('list')">リスト</button>
+    <button class="view-btn" id="vb-map" onclick="switchSodateView('map')">マップ</button>
+    <button class="view-btn" id="vb-koukai" onclick="switchSodateView('koukai')">航海図</button>
+  </div>
+
+  <div class="view-pane active" id="pane-list">
+    <div class="seed-cards" id="seed-list"></div>
+  </div>
+
+  <div class="view-pane" id="pane-map">
+    <div class="seed-map-card"><div class="seed-map-field" id="seed-map-field"></div></div>
+    <div class="seed-map-legend">大きいほど、育っている種</div>
+  </div>
+
+  <div class="view-pane" id="pane-koukai">
+    <div class="koukai-card">
+      <div class="koukai-sky">
+        <div class="koukai-sunrise-glow"></div>
+        <div class="koukai-sun"></div>
+        <span class="koukai-sparkle" style="left:20%;top:20px">✦</span>
+        <span class="koukai-sparkle" style="left:76%;top:12px;animation-delay:1.1s">✦</span>
+        <div class="koukai-now-line"></div>
+        <div class="koukai-now-lbl">いま</div>
+        <div class="koukai-zones"><span>今月中</span><span>数ヶ月以内</span><span>今年中には</span><span>いつか</span></div>
+        <div class="koukai-stems" id="koukai-stems"></div>
+      </div>
+      <div class="koukai-ocean">
+        <svg viewBox="0 0 800 78" preserveAspectRatio="none" class="kw-back"><path d="M0,20 C100,36 200,4 300,20 C400,36 500,4 600,20 C700,36 800,4 900,20 L900,78 L0,78 Z" fill="#6FA8A0" opacity=".55"/><path d="M800,20 C900,36 1000,4 1100,20 C1200,36 1300,4 1400,20 C1500,36 1600,4 1700,20 L1700,78 L800,78 Z" fill="#6FA8A0" opacity=".55"/></svg>
+        <svg viewBox="0 0 800 78" preserveAspectRatio="none" class="kw-mid"><path d="M0,30 C120,48 220,10 340,30 C460,46 560,10 680,30 C760,42 800,26 800,30 L800,78 L0,78 Z" fill="#2E6373" opacity=".85"/><path d="M800,30 C920,48 1020,10 1140,30 C1260,46 1360,10 1480,30 C1560,42 1600,26 1600,30 L1600,78 L800,78 Z" fill="#2E6373" opacity=".85"/></svg>
+        <svg viewBox="0 0 800 78" preserveAspectRatio="none" class="kw-front"><path d="M0,40 C110,56 230,22 340,40 C450,54 560,22 680,40 C750,50 800,36 800,40 L800,78 L0,78 Z" fill="#1C3D4A"/><path d="M800,40 C910,56 1030,22 1140,40 C1250,54 1360,22 1480,40 C1550,50 1600,36 1600,40 L1600,78 L800,78 Z" fill="#1C3D4A"/></svg>
+        <div class="koukai-glint" style="left:22%;top:34px"></div>
+        <div class="koukai-glint" style="left:47%;top:46px;animation-delay:.8s"></div>
+        <div class="koukai-glint" style="left:70%;top:38px;animation-delay:1.6s"></div>
+        <span class="koukai-fin">🫍</span>
+      </div>
+      <div class="koukai-caption">高く伸びているほど、育っている種</div>
+    </div>
+    <div class="koukai-legend">
+      <div class="koukai-legend-item"><span class="koukai-legend-dot" style="background:#7E9D88"></span>旅行・暮らし</div>
+      <div class="koukai-legend-item"><span class="koukai-legend-dot" style="background:#C97B4A"></span>体を動かす</div>
+      <div class="koukai-legend-item"><span class="koukai-legend-dot" style="background:#F3C25B"></span>創作</div>
+      <div class="koukai-legend-item"><span class="koukai-legend-dot" style="background:#152535"></span>キャリア</div>
+    </div>
+  </div>
 </section>
 
 <!-- あゆみ -->
@@ -413,6 +558,14 @@ body{
   <div class="jinsei-header">
     <div class="jinsei-title">あゆみ</div>
     <div class="jinsei-sub">種が繋がって、人生になっていく</div>
+  </div>
+  <div class="ayumi-entry" onclick="openAyumiSheet()">
+    <div class="ayumi-ico">📖</div>
+    <div>
+      <div class="ayumi-entry-title">あゆみの記録</div>
+      <div class="ayumi-entry-sub">これまでとこれからのこと</div>
+    </div>
+    <div class="find-arrow">›</div>
   </div>
   <div class="timeline" id="jinsei-wrap"></div>
 </section>
@@ -432,9 +585,7 @@ body{
 <nav class="tabbar">
   <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">✨</span><span class="tab-lbl">楽しみ</span></button>
   <button class="tab" data-s="sodate" onclick="switchTab('sodate')">
-  <span class="tab-ico tab-asto">
-    <img src="/ASTO_face_image.png" alt="ASTO">
-  </span>
+  <span class="tab-ico">🪴</span>
   <span class="tab-lbl">育てる</span>
 </button>
   <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">あゆみ</span></button>
@@ -475,7 +626,7 @@ const CATEGORY_MSGS = {
     'この種、まだまだ大きくなりそう🌱',
     '続き、また聞かせて😊',
     '今日はどこまで育ったかな😊',
-    'この続き、気になってるよ🐋',
+    'この続き、気になってるよ🫍',
     'もう少しで形になりそうだね🌿',
   ],
 };
@@ -527,10 +678,19 @@ const DEMO = {
     },
   ],
   seeds: [
-    { name:'マラソン4時間切り', emoji:'🏃', stage:'booked', originalWish:'フルマラソン4時間以内で走りたい', astoMessage:'あの日の風が待ってるね🌱' },
-    { name:'鬼怒川でリセット', emoji:'♨️', stage:'planning', originalWish:'鬼怒川とかのホテルで食べ放題とプールに入れるとこ', astoMessage:'お湯に浸かってるとこ、もう想像してる？🌿' },
-    { name:'グルメ探し', emoji:'🍣', stage:'interested', originalWish:'美味しいもの食べたい', astoMessage:'どんな味に出会えるか楽しみだね🍣' },
-    { name:'ペペロンチーノ自作', emoji:'🍝', stage:'discovered', originalWish:'ペペロンチーノってどう作るの' },
+    { name:'マラソン4時間切り', emoji:'🏃', stage:'booked', category:'体を動かす', roughTiming:'今年中には', originalWish:'フルマラソン4時間以内で走りたい', astoMessage:'あの日の風が待ってるね🌱',
+      preparations:[
+        {id:'p1', text:'週3回のランを習慣にする', done:true},
+        {id:'p2', text:'ハーフマラソンに1回出てみる', done:true},
+        {id:'p3', text:'本番のエントリーをする', done:false},
+      ] },
+    { name:'鬼怒川でリセット', emoji:'♨️', stage:'planning', category:'旅行・暮らし', roughTiming:'数ヶ月以内', originalWish:'鬼怒川とかのホテルで食べ放題とプールに入れるとこ', astoMessage:'お湯に浸かってるとこ、もう想像してる？🌿',
+      preparations:[
+        {id:'p1', text:'空いてる週末を決める', done:true},
+        {id:'p2', text:'プール付きのホテルを探す', done:false},
+      ] },
+    { name:'グルメ探し', emoji:'🍣', stage:'interested', category:'旅行・暮らし', roughTiming:'今月中', originalWish:'美味しいもの食べたい', astoMessage:'どんな味に出会えるか楽しみだね🍣' },
+    { name:'ペペロンチーノ自作', emoji:'🍝', stage:'discovered', category:'創作', roughTiming:'いつか', originalWish:'ペペロンチーノってどう作るの' },
   ],
   harvestedSeeds: [
     {
@@ -685,19 +845,37 @@ function renderSodate() {
   document.getElementById('seed-list').innerHTML = seeds.map((s, si) => {
     const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
     const msg = getSeedMsg(s, si);
+    const preps = s.preparations || [];
+    const doneCount = preps.filter(p => p.done).length;
+    const prepPct = preps.length ? Math.round((doneCount / preps.length) * 100) : 0;
+    const prepLine = preps.length
+      ? '<div class="seed-prep-line">' + growthIcon(doneCount, preps.length) + '&nbsp;支度 ' + doneCount + '/' + preps.length + '</div>' +
+        '<div class="seed-prep-bar"><div class="seed-prep-bar-fill" style="width:' + prepPct + '%"></div></div>'
+      : '';
+    const timingTag = s.roughTiming ? '<span class="seed-timing-tag">' + s.roughTiming + '</span>' : '';
     return '<div class="seed-card">' +
       '<div class="seed-status-bar">' +
         '<span class="seed-status-ico">' + st.ico + '</span>' +
         '<span class="seed-status-text">' + st.label + '</span>' +
+        timingTag +
       '</div>' +
-      '<div class="seed-card-body">' +
+      '<div class="seed-card-body" onclick="openSeedSheet(' + si + ')" style="cursor:pointer">' +
         '<div class="seed-name">' + s.name + '</div>' +
         (s.originalWish ? '<div class="seed-wish">' + s.originalWish + '</div>' : '') +
         '<div class="seed-asto-msg">' + msg + '</div>' +
+        prepLine +
+      '</div>' +
+      '<div style="padding:0 20px 18px">' +
         '<button class="seed-talk-btn" data-seed-idx="' + si + '" onclick="handleSeedTalk(this)">🌱&nbsp;&nbsp;この続きを育てる</button>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+
+function growthIcon(done, total) {
+  if (total === 0 || done === 0) return '🌱';
+  if (done === total) return '🌳';
+  return '🌿';
 }
 
 function handleSeedTalk(btn) {
@@ -776,7 +954,7 @@ function openSheet(idx) {
   // ② ASTOの感情テキスト
   const astoHtml = e.scene
     ? '<div class="bs-asto">' +
-        '<div class="bs-asto-ico">🐋</div>' +
+        '<div class="bs-asto-ico">🫍</div>' +
         '<div class="bs-asto-text">' + e.scene.replace(/\n/g,'<br>') + '</div>' +
       '</div>'
     : '';
@@ -865,8 +1043,239 @@ function makeStars() {
   DATA = await loadData();
   renderMirai();
   renderSodate();
+  renderSeedMap();
+  renderKoukaizu();
   renderJinsei();
 })();
+
+/* ===== 今日追加：育てるタブ 表示切替 ===== */
+function switchSodateView(v) {
+  ['list','map','koukai'].forEach(k => {
+    document.getElementById('vb-' + k).classList.toggle('active', k === v);
+    document.getElementById('pane-' + k).classList.toggle('active', k === v);
+  });
+}
+
+// 種の名前からゆるい色分け（categoryが無い場合のフォールバック）
+function seedHue(name) {
+  let h = 0; for (let i=0;i<name.length;i++) h = (h*31 + name.charCodeAt(i)) % 997;
+  return h;
+}
+
+// roughTimingがあればそれを優先、なければstageから仮に振り分け
+const TIMING_ZONE = {'今月中':0, '数ヶ月以内':1, '今年中には':2, 'いつか':3};
+function guessZone(seed) {
+  if (seed.roughTiming && TIMING_ZONE[seed.roughTiming] !== undefined) return TIMING_ZONE[seed.roughTiming];
+  const stage = seed.stage;
+  if (stage === 'booked') return 2;
+  if (stage === 'planning') return 1;
+  if (stage === 'interested') return 2;
+  return 3;
+}
+
+// カテゴリ→色（凡例と一致）。未設定は名前ハッシュでフォールバック
+const CAT_COLOR = {
+  '旅行・暮らし': {bg:'rgba(126,157,136,.18)', fg:'var(--sage-d)'},
+  '体を動かす':   {bg:'rgba(201,123,74,.18)',  fg:'#a15b2e'},
+  '創作':         {bg:'rgba(243,194,91,.22)',  fg:'var(--gold-d)'},
+  'キャリア':     {bg:'rgba(21,37,53,.1)',     fg:'var(--navy)'},
+};
+function seedColor(seed) {
+  if (seed.category && CAT_COLOR[seed.category]) return CAT_COLOR[seed.category];
+  const hue = seedHue(seed.name) % 4;
+  return {
+    bg: ['rgba(126,157,136,.18)','rgba(201,123,74,.18)','rgba(243,194,91,.22)','rgba(21,37,53,.1)'][hue],
+    fg: ['var(--sage-d)','#a15b2e','var(--gold-d)','var(--navy)'][hue],
+  };
+}
+
+function renderSeedMap() {
+  const el = document.getElementById('seed-map-field');
+  if (!el) return;
+  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
+  if (!seeds.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">まだ種がありません</p>'; return; }
+  el.innerHTML = seeds.map(s => {
+    const si = (DATA.seeds||[]).indexOf(s);
+    const sz = ({discovered:'discovered',interested:'interested',planning:'planning',booked:'booked'})[s.stage] || 'discovered';
+    return '<span class="seed-word sw-' + sz + '" onclick="openSeedSheet(' + si + ')">' + s.name + '</span>';
+  }).join('');
+}
+
+function renderKoukaizu() {
+  const el = document.getElementById('koukai-stems');
+  if (!el) return;
+  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
+  if (!seeds.length) { el.innerHTML = ''; return; }
+
+  const zoneRanges = [[2,24],[26,49],[51,74],[76,97]]; // 今月中/数ヶ月以内/今年中には/いつか
+  const zoneItems = [[],[],[],[]];
+  seeds.forEach(s => zoneItems[guessZone(s)].push(s));
+
+  let html = '';
+  zoneItems.forEach((list, zi) => {
+    const [lo, hi] = zoneRanges[zi];
+    list.forEach((s, i) => {
+      const si = (DATA.seeds||[]).indexOf(s);
+      const leftPct = list.length === 1 ? (lo+hi)/2 : lo + (i/(list.length-1)) * (hi-lo);
+      const heightPx = { discovered:16, interested:34, planning:64, booked:110 }[s.stage] || 20;
+      const c = seedColor(s);
+      html += '<div class="koukai-stem" style="left:' + leftPct + '%" onclick="openSeedSheet(' + si + ')">' +
+        '<div class="koukai-bud" style="background:' + c.bg + ';color:' + c.fg + '">' + s.name + '</div>' +
+        '<div class="koukai-stem-line" style="height:' + heightPx + 'px"></div>' +
+      '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function toastMini(msg) {
+  const t = document.getElementById('toastMini');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===== 今日追加：種の詳細シート（支度つき） =====
+   既存の openSheet（未来イベント用）と同じボトムシート構造を踏襲。
+   TODO(バックエンド): preparations の done 状態は現状フロントのみで保持。
+   本番では calendar-data API 経由で seeds[].preparations を更新する想定。 */
+let CURRENT_SEED_IDX = null;
+function openSeedSheet(idx) {
+  const s = (DATA.seeds||[])[idx];
+  if (!s) return;
+  CURRENT_SEED_IDX = idx;
+  const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+
+  const timingHtml = s.roughTiming
+    ? '<span class="bs-timing">' + s.roughTiming + '</span>' : '';
+
+  const heroHtml =
+    '<div class="bs-hero">' +
+      '<div class="bs-emoji">' + (s.emoji||'🌱') + '</div>' +
+      '<div class="bs-title">' + s.name + '</div>' +
+      '<div class="bs-tags">' +
+        '<span class="bs-tag-status">' + st.ico + ' ' + st.label + '</span>' +
+        timingHtml +
+      '</div>' +
+    '</div>';
+
+  const wishHtml = s.originalWish
+    ? '<div class="bs-soyeba"><div class="bs-soyeba-lead">そういえば、</div>' +
+      '<div class="bs-soyeba-wish">' + s.originalWish + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-top:6px">って話してたよね😊</div></div>'
+    : '';
+
+  document.getElementById('bs-body').innerHTML =
+    heroHtml + wishHtml +
+    '<div id="shitaku-section">' + shitakuHtml(s) + '</div>' +
+    '<div class="bs-divider"></div>' +
+    '<button class="bs-talk-btn" onclick="talkAboutSeed()">💬&nbsp;&nbsp;この続きをASTOと話す</button>';
+
+  document.getElementById('bs-overlay').classList.add('open');
+  document.getElementById('bottom-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// 支度パートのHTML（育ち具合メッセージ＋チェックリスト）
+function shitakuHtml(s) {
+  const preps = s.preparations || [];
+  const done = preps.filter(p => p.done).length;
+
+  let growthIco = '🌱', growthMsg;
+  if (!preps.length) { growthIco = '🌱'; growthMsg = 'まだ支度は始まっていません'; }
+  else if (done === 0) { growthIco = '🌱'; growthMsg = 'まだ支度は始まったばかりです'; }
+  else if (done === preps.length) { growthIco = '🌳'; growthMsg = 'もう準備は整ってるみたいですね'; }
+  else { growthIco = '🌿'; growthMsg = '支度が' + done + 'つ、育ってきています'; }
+
+  const items = preps.map((p, pi) =>
+    '<div class="prep-item' + (p.done ? ' done' : '') + '" onclick="togglePrep(' + pi + ')">' +
+      '<div class="prep-check">' + (p.done ? '✓' : '') + '</div>' +
+      '<div class="prep-text">' + p.text + '</div>' +
+    '</div>'
+  ).join('');
+
+  return '<div class="bs-shitaku-head"><span class="bs-shitaku-ico">' + growthIco + '</span>' +
+    '<span class="bs-shitaku-label">' + growthMsg + '</span></div>' +
+    '<div class="prep-list">' + items + '</div>' +
+    '<div class="prep-add" onclick="addPrepViaLine()">＋ アストと支度を考える</div>';
+}
+
+function togglePrep(pi) {
+  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  if (!s || !s.preparations || !s.preparations[pi]) return;
+  s.preparations[pi].done = !s.preparations[pi].done;
+  document.getElementById('shitaku-section').innerHTML = shitakuHtml(s);
+}
+
+function talkAboutSeed() {
+  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  if (s) copyToClipboardThenLine('「' + s.name + '」について話したい');
+  else openLine();
+}
+function addPrepViaLine() {
+  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  if (s) copyToClipboardThenLine('「' + s.name + '」の支度を一緒に考えたい');
+  else openLine();
+}
+function copyToClipboardThenLine(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(()=>{});
+  }
+  toastMini('コピーしました。ASTOに送ってね🌱');
+  setTimeout(openLine, 900);
+}
+
+/* ===== 今日追加：新しい種を見つける（探す機能） ===== */
+function openFindSheet() {
+  document.getElementById('bs-body').innerHTML =
+    '<div class="bs-hero"><div class="bs-title">どうやって見つける？</div>' +
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">気になる方法を選んでください</div></div>' +
+    '<div class="option-card" onclick="openLine()"><div class="option-ico">🫍</div><div><div class="option-title">アストと話す</div><div class="option-sub">会話しながら一緒に見つける</div></div></div>' +
+    '<div class="option-card" onclick="toastMini(\'まだ十分に集まっていなくて。もう少し待っていてください🌱\')"><div class="option-ico">🌍</div><div><div class="option-title">誰かの種を見る</div><div class="option-sub">誰かが育てている種のかけらから</div></div></div>' +
+    '<div class="option-card" onclick="openLine()"><div class="option-ico">📖</div><div><div class="option-title">これまでの人生から見つける</div><div class="option-sub">これまでの断片を見直してみる</div></div></div>';
+  document.getElementById('bs-overlay').classList.add('open');
+  document.getElementById('bottom-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+/* ===== あゆみの記録（手紙） =====
+   DATA.ayumi（pastParagraphs / futureSection）があれば本番データを表示。
+   無ければ種のoriginalWishから簡易的に組み立てる。 */
+function escapeHtml(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function openAyumiSheet() {
+  const ayumi = DATA.ayumi || {};
+  const pastParas = Array.isArray(ayumi.pastParagraphs) ? ayumi.pastParagraphs : [];
+  const future = ayumi.futureSection && ayumi.futureSection.text ? ayumi.futureSection.text : null;
+
+  let pastHtml;
+  if (pastParas.length) {
+    pastHtml = pastParas.map(p => '<div class="letter-para">' + escapeHtml(p.text) + '</div>').join('');
+  } else {
+    const wishes = (DATA.seeds||[]).map(s => s.originalWish).filter(Boolean);
+    const para = wishes.length
+      ? escapeHtml(wishes.slice(0,3).join('。')) + '。少しずつ、形になってきている。'
+      : 'まだ、ここに綴るものはありません。ASTOと話すうちに、少しずつ綴られていきます。';
+    pastHtml = '<div class="letter-para">' + para + '</div>';
+  }
+
+  const futureHtml = future ? escapeHtml(future)
+    : 'まだどれも、決まってはいない。だからこそ、楽しみが残っている。';
+
+  document.getElementById('bs-body').innerHTML =
+    '<div class="letter-open">これまでとこれからのこと</div>' +
+    pastHtml +
+    '<div class="letter-stitch"><div class="letter-stitch-line"></div><div style="font-size:14px">🌱</div><div class="letter-stitch-line"></div></div>' +
+    '<div class="letter-future">' +
+      '<div class="letter-future-label">これから</div>' +
+      '<div class="letter-para" style="margin-bottom:0">' + futureHtml + '</div>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin:18px 0;padding:0 2px">この記録は、ASTOと話して育つたびに少しずつ書き足されていきます。</div>' +
+    '<button class="bs-talk-btn" onclick="openLine()">💬&nbsp;&nbsp;ASTOと話す</button>';
+  document.getElementById('bs-overlay').classList.add('open');
+  document.getElementById('bottom-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 </script>
 </body>
 </html>
