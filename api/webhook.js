@@ -413,19 +413,45 @@ function extractName(message, previousMessages) {
   return null;
 }
 
+// Vercelの自動bodyParserを無効化し、生のリクエストボディをそのまま読む
+// （LINEの署名は生バイト列に対して計算されるため、JSON.stringify(req.body)による
+//   再構築では絵文字や文字の並びのズレで一致しない場合があり、稀に403になっていた）
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (chunk) => { data += chunk; });
+    req.on("end", () => resolve(data));
+    req.on("error", reject);
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(200).json({ status: "ASTOme Bot is running! 🌱" });
   }
 
   const signature = req.headers["x-line-signature"];
-  const body = JSON.stringify(req.body);
+  const rawBody = await getRawBody(req);
 
-  if (!line.validateSignature(body, lineConfig.channelSecret, signature)) {
+  if (!line.validateSignature(rawBody, lineConfig.channelSecret, signature)) {
+    console.error("署名検証に失敗しました", {
+      hasSignatureHeader: !!signature,
+      rawBodyLength: rawBody.length,
+      hasChannelSecret: !!lineConfig.channelSecret,
+      channelSecretLength: (lineConfig.channelSecret || "").length,
+      userAgent: req.headers["user-agent"] || null,
+    });
     return res.status(403).json({ error: "Invalid signature" });
   }
 
-  const events = req.body.events;
+  const parsedBody = JSON.parse(rawBody);
+  const events = parsedBody.events;
 
   for (const event of events) {
 
