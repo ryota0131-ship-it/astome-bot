@@ -161,6 +161,8 @@ status: dream/interest/plan/scheduled/done/harvest
 
 体験済み：<ASTO_JSON>{"harvest":true,"seed":"カツカレー探し","result":"最高だった"}</ASTO_JSON>
 
+（カレンダー画面から「〇〇が叶いました！🌾」と送られてくることがある。その時は、いきなり収穫JSONを出す前に「叶ったんですね😊 どうでしたか？」と一言だけ様子を聞いてから、収穫の演出をして収穫する。感想が返ってきたらresultに入れる。）
+
 収穫の演出（必ず守る）：
 収穫JSONを出す時は、同じメッセージの中で必ず以下の順で返す。
 1. originalWishを引用する「あの時『{originalWishの言葉}』って言ってたじゃないですか」
@@ -195,19 +197,24 @@ originalWishがない場合は種の名前を使う。
 
 例：
 「いいですね、〇〇の支度ですね😊 こんな感じかなと思うんですけど、どうですか？
-・（具体的な支度案1）
+・日付を決める
 ・（具体的な支度案2）
 ・（具体的な支度案3）」
 
-ユーザーが合意（「いいね」「それで」「OK」など）したら、その時点でまとめて保存：
-<ASTO_JSON>{"preparationSet":true,"seedName":"北海道に戻る","items":["釧路の宿を探す","休みを確保する","飛行機を調べる"]}</ASTO_JSON>
+支度には「日付を決める」を必ず1つ含める（いつやるかが決まると全部動き出すため）。
+ユーザーが合意（「いいね」「それで」「OK」など）したら、その時点でまとめて保存。
+日付が決まっている項目には date を付ける（YYYY-MM or YYYY-MM-DD）。まだ未定なら wantsDate:true を付けておく：
+<ASTO_JSON>{"preparationSet":true,"seedName":"海辺を走る","items":[{"text":"日付を決める","wantsDate":true},"走る距離を決める","シューズを用意する"]}</ASTO_JSON>
+
+日付が後から決まったら：
+<ASTO_JSON>{"prepDate":true,"seedName":"海辺を走る","text":"日付を決める","date":"2026-10-15"}</ASTO_JSON>
 
 ユーザーが変更・追加・削除を求めたら、提案を修正して再度「これでどうですか？」と確認してから保存する（合意が取れるまでpreparationSetは出さない）。
 
 支度が1つ完了したと分かったら：
-<ASTO_JSON>{"prepComplete":true,"seedName":"北海道に戻る","text":"釧路の宿を探す","done":true}</ASTO_JSON>
+<ASTO_JSON>{"prepComplete":true,"seedName":"海辺を走る","text":"シューズを用意する","done":true}</ASTO_JSON>
 既に支度がある状態で新しく1つだけ追加する場合：
-<ASTO_JSON>{"preparation":true,"seedName":"北海道に戻る","text":"釧路の宿を探す"}</ASTO_JSON>
+<ASTO_JSON>{"preparation":true,"seedName":"海辺を走る","text":"エントリーする"}</ASTO_JSON>
 
 次の一歩（今やってることの延長線上の軽い提案。1つだけ。断定しない）：
 例：マラソン→フルマラソン／トレイル、ギター→弾き語り録音、など。
@@ -1092,31 +1099,56 @@ const rawReply = response.content
           }
 
           // === 支度：提案一覧を合意した時点でまとめて保存 ===
-          // <ASTO_JSON>{"preparationSet":true,"seedName":"...","items":["...","...","..."]}</ASTO_JSON>
+          // items は文字列 or {text,date} の配列を許容
+          // <ASTO_JSON>{"preparationSet":true,"seedName":"...","items":[{"text":"日付を決める","date":"2026-10"},"宿を探す"]}</ASTO_JSON>
           if (data.preparationSet && data.seedName && Array.isArray(data.items)) {
             if (!Array.isArray(userData.seeds)) userData.seeds = [];
             const si = userData.seeds.findIndex(s => s.name === data.seedName);
             if (si >= 0) {
               const prevPreps = Array.isArray(userData.seeds[si].preparations) ? userData.seeds[si].preparations : [];
               userData.seeds[si].preparations = data.items
-                .filter(t => t && typeof t === "string")
-                .map(text => {
-                  const prev = prevPreps.find(p => p.text === text);
-                  return { text, done: prev ? !!prev.done : false };
+                .map(it => (typeof it === "string" ? { text: it } : it))
+                .filter(it => it && it.text)
+                .map(it => {
+                  const prev = prevPreps.find(p => p.text === it.text);
+                  const rec = { text: it.text, done: prev ? !!prev.done : false };
+                  if (it.date) rec.date = it.date;
+                  else if (prev && prev.date) rec.date = prev.date;
+                  if (it.wantsDate) rec.wantsDate = true;
+                  return rec;
                 });
             }
             replyText = replyText.replace(match[0], "").trim();
           }
 
-          // === 支度：1件追加 ===
-          // <ASTO_JSON>{"preparation":true,"seedName":"...","text":"..."}</ASTO_JSON>
+          // === 支度：1件追加（date対応） ===
+          // <ASTO_JSON>{"preparation":true,"seedName":"...","text":"...","date":"2026-10"}</ASTO_JSON>
           if (data.preparation && data.seedName && data.text) {
             if (!Array.isArray(userData.seeds)) userData.seeds = [];
             const si = userData.seeds.findIndex(s => s.name === data.seedName);
             if (si >= 0) {
               if (!Array.isArray(userData.seeds[si].preparations)) userData.seeds[si].preparations = [];
-              if (!userData.seeds[si].preparations.some(p => p.text === data.text)) {
-                userData.seeds[si].preparations.push({ text: data.text, done: !!data.done });
+              const exist = userData.seeds[si].preparations.find(p => p.text === data.text);
+              if (exist) {
+                if (data.date) exist.date = data.date;
+                if (typeof data.done === "boolean") exist.done = data.done;
+              } else {
+                const rec = { text: data.text, done: !!data.done };
+                if (data.date) rec.date = data.date;
+                userData.seeds[si].preparations.push(rec);
+              }
+            }
+            replyText = replyText.replace(match[0], "").trim();
+          }
+
+          // === 支度：日付だけ更新 ===
+          // <ASTO_JSON>{"prepDate":true,"seedName":"...","text":"...","date":"2026-10-15"}</ASTO_JSON>
+          if (data.prepDate && data.seedName && data.text) {
+            if (Array.isArray(userData.seeds)) {
+              const si = userData.seeds.findIndex(s => s.name === data.seedName);
+              if (si >= 0 && Array.isArray(userData.seeds[si].preparations)) {
+                const p = userData.seeds[si].preparations.find(p => p.text === data.text);
+                if (p) p.date = data.date || null;
               }
             }
             replyText = replyText.replace(match[0], "").trim();
