@@ -323,6 +323,11 @@ body{
 .prep-text{font-size:14px;color:var(--ink);line-height:1.6}
 .prep-item.done .prep-text{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--sage)}
 .prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:11px 13px;border-radius:12px;border:1.5px dashed var(--line);color:var(--muted);font-size:13px;cursor:pointer}
+.prep-date{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border-radius:999px;padding:3px 9px;cursor:pointer}
+.prep-date.empty{color:var(--muted);background:var(--line)}
+.bs-achieve-btn{width:100%;background:var(--card);color:var(--sage-d);border:1.5px solid var(--sage);border-radius:999px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;transition:all .2s}
+.bs-achieve-btn.ready{background:linear-gradient(135deg,#F3C25B,#E0A93F);color:var(--navy);border-color:transparent;box-shadow:0 6px 16px -6px rgba(243,194,91,.6)}
+.bs-achieve-btn:active{transform:scale(.98)}
 
 /* タブ */
 .tabbar{
@@ -680,7 +685,7 @@ const DEMO = {
   seeds: [
     { name:'マラソン4時間切り', emoji:'🏃', stage:'booked', category:'体を動かす', roughTiming:'今年中には', originalWish:'フルマラソン4時間以内で走りたい', astoMessage:'あの日の風が待ってるね🌱',
       preparations:[
-        {id:'p1', text:'週3回のランを習慣にする', done:true},
+        {id:'p1', text:'日付を決める', done:true, date:'2026-10-12'},
         {id:'p2', text:'ハーフマラソンに1回出てみる', done:true},
         {id:'p3', text:'本番のエントリーをする', done:false},
       ] },
@@ -1139,15 +1144,26 @@ function toastMini(msg) {
    既存の openSheet（未来イベント用）と同じボトムシート構造を踏襲。
    TODO(バックエンド): preparations の done 状態は現状フロントのみで保持。
    本番では calendar-data API 経由で seeds[].preparations を更新する想定。 */
-let CURRENT_SEED_IDX = null;
-function openSeedSheet(idx) {
-  const s = (DATA.seeds||[])[idx];
-  if (!s) return;
-  CURRENT_SEED_IDX = idx;
-  const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+let CURRENT_SEED_NAME = null;
+function findSeedByName(name){ return (DATA.seeds||[]).find(s => s.name === name); }
 
-  const timingHtml = s.roughTiming
-    ? '<span class="bs-timing">' + s.roughTiming + '</span>' : '';
+function openSeedSheet(idx) {
+  // idxはフィルタ後リストのindex。名前で本体を引き当てて以降は名前で管理
+  const visible = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
+  const s = visible[idx];
+  if (!s) return;
+  CURRENT_SEED_NAME = s.name;
+  renderSeedSheet();
+  document.getElementById('bs-overlay').classList.add('open');
+  document.getElementById('bottom-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderSeedSheet() {
+  const s = findSeedByName(CURRENT_SEED_NAME);
+  if (!s) return;
+  const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+  const timingHtml = s.roughTiming ? '<span class="bs-timing">' + s.roughTiming + '</span>' : '';
 
   const heroHtml =
     '<div class="bs-hero">' +
@@ -1165,18 +1181,30 @@ function openSeedSheet(idx) {
       '<div style="font-size:13px;color:var(--muted);margin-top:6px">って話してたよね😊</div></div>'
     : '';
 
+  const preps = s.preparations || [];
+  const allDone = preps.length > 0 && preps.every(p => p.done);
+  // 支度が全部終わっていたら「達成した」ボタンを目立たせる
+  const achieveBtn = '<button class="bs-achieve-btn' + (allDone ? ' ready' : '') + '" onclick="achieveSeed()">' +
+    '🌾&nbsp;&nbsp;叶った！収穫する</button>';
+
   document.getElementById('bs-body').innerHTML =
     heroHtml + wishHtml +
     '<div id="shitaku-section">' + shitakuHtml(s) + '</div>' +
     '<div class="bs-divider"></div>' +
+    achieveBtn +
     '<button class="bs-talk-btn" onclick="talkAboutSeed()">💬&nbsp;&nbsp;この続きをASTOと話す</button>';
-
-  document.getElementById('bs-overlay').classList.add('open');
-  document.getElementById('bottom-sheet').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
-// 支度パートのHTML（育ち具合メッセージ＋チェックリスト）
+// 日付の表示整形（YYYY-MM-DD → M月D日 / YYYY-MM → M月）
+function fmtPrepDate(d) {
+  if (!d) return '';
+  const parts = d.split('-');
+  if (parts.length >= 3) return parseInt(parts[1],10) + '月' + parseInt(parts[2],10) + '日';
+  if (parts.length === 2) return parseInt(parts[1],10) + '月ごろ';
+  return d;
+}
+
+// 支度パートのHTML（育ち具合メッセージ＋チェックリスト＋日付）
 function shitakuHtml(s) {
   const preps = s.preparations || [];
   const done = preps.filter(p => p.done).length;
@@ -1187,12 +1215,19 @@ function shitakuHtml(s) {
   else if (done === preps.length) { growthIco = '🌳'; growthMsg = 'もう準備は整ってるみたいですね'; }
   else { growthIco = '🌿'; growthMsg = '支度が' + done + 'つ、育ってきています'; }
 
-  const items = preps.map((p, pi) =>
-    '<div class="prep-item' + (p.done ? ' done' : '') + '" onclick="togglePrep(' + pi + ')">' +
+  const items = preps.map((p, pi) => {
+    // 日付を持つ支度は、テキスト横に日付チップ＋編集
+    const dateChip = p.date
+      ? '<span class="prep-date" onclick="event.stopPropagation();editPrepDate(' + pi + ')">📅 ' + fmtPrepDate(p.date) + '</span>'
+      : (p.wantsDate
+          ? '<span class="prep-date empty" onclick="event.stopPropagation();editPrepDate(' + pi + ')">＋日付</span>'
+          : '');
+    return '<div class="prep-item' + (p.done ? ' done' : '') + '" onclick="togglePrep(' + pi + ')">' +
       '<div class="prep-check">' + (p.done ? '✓' : '') + '</div>' +
       '<div class="prep-text">' + p.text + '</div>' +
-    '</div>'
-  ).join('');
+      dateChip +
+    '</div>';
+  }).join('');
 
   return '<div class="bs-shitaku-head"><span class="bs-shitaku-ico">' + growthIco + '</span>' +
     '<span class="bs-shitaku-label">' + growthMsg + '</span></div>' +
@@ -1201,19 +1236,48 @@ function shitakuHtml(s) {
 }
 
 function togglePrep(pi) {
-  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  const s = findSeedByName(CURRENT_SEED_NAME);
   if (!s || !s.preparations || !s.preparations[pi]) return;
   s.preparations[pi].done = !s.preparations[pi].done;
-  document.getElementById('shitaku-section').innerHTML = shitakuHtml(s);
+  // シート内・リスト・マップ・航海図すべてを再描画（バーとカウントを同期）
+  renderSeedSheet();
+  renderSodate();
+}
+
+// 支度の日付を編集（ネイティブのdate入力を使う）
+function editPrepDate(pi) {
+  const s = findSeedByName(CURRENT_SEED_NAME);
+  if (!s || !s.preparations || !s.preparations[pi]) return;
+  const input = document.createElement('input');
+  input.type = 'date';
+  if (s.preparations[pi].date) input.value = s.preparations[pi].date;
+  input.style.position = 'fixed';
+  input.style.left = '-9999px';
+  document.body.appendChild(input);
+  input.addEventListener('change', () => {
+    s.preparations[pi].date = input.value || null;
+    document.body.removeChild(input);
+    renderSeedSheet();
+    toastMini('日付を入れました📅（LINEでアストに伝えると保存されます）');
+  });
+  input.addEventListener('blur', () => { if (input.parentNode) document.body.removeChild(input); });
+  input.showPicker ? input.showPicker() : input.click();
+}
+
+// 達成（収穫）：ASTOme辞書に沿って「収穫」。Bフロー＝LINEでASTOが演出してから正式収穫
+function achieveSeed() {
+  const s = findSeedByName(CURRENT_SEED_NAME);
+  if (!s) { openLine(); return; }
+  copyToClipboardThenLine('「' + s.name + '」が叶いました！🌾');
 }
 
 function talkAboutSeed() {
-  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  const s = findSeedByName(CURRENT_SEED_NAME);
   if (s) copyToClipboardThenLine('「' + s.name + '」について話したい');
   else openLine();
 }
 function addPrepViaLine() {
-  const s = (DATA.seeds||[])[CURRENT_SEED_IDX];
+  const s = findSeedByName(CURRENT_SEED_NAME);
   if (s) copyToClipboardThenLine('「' + s.name + '」の支度を一緒に考えたい');
   else openLine();
 }
