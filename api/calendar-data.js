@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
     // result → parse → { value: "..." } → .value → parse → 実際のデータ
     let raw = json.result ?? null;
-    if (!raw) return res.status(200).json({ userName: null, futureEvents: [], seeds: [], harvestedSeeds: [], futureBalanceHistory: [], daily: null });
+    if (!raw) return res.status(200).json({ userName: null, futureEvents: [], seeds: [], harvestedSeeds: [], futureBalanceHistory: [], daily: null, lifeCard: { keywords: [], threads: [], lastGeneratedAt: 0 }, ayumi: { pastParagraphs: [], futureSection: null, lastOpenedAt: 0 } });
 
     // 最大3回parseしてオブジェクトになるまで繰り返す
     for (let i = 0; i < 3; i++) {
@@ -54,6 +54,8 @@ export default async function handler(req, res) {
       harvestedSeeds: raw.harvestedSeeds || [],
       futureBalanceHistory: raw.futureBalanceHistory || [],
       daily: raw.daily || null,
+      lifeCard: raw.lifeCard || { keywords: [], threads: [], lastGeneratedAt: 0 },
+      ayumi: raw.ayumi || { pastParagraphs: [], futureSection: null, lastOpenedAt: 0 },
     });
   } catch (e) {
     console.error('error:', e.message);
