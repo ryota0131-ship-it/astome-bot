@@ -253,7 +253,7 @@ originalWishがない場合は種の名前を使う。
 <ASTO_JSON>{"share":true,"text":"..."}</ASTO_JSON>
 
 ## アフィリエイト
-同じテーマが繰り返し出て、ユーザーが具体的に「やってみたい」と言った時だけ、本人の言葉を引用して自然に提示。
+同じテーマが繰り返し出て、ユーザーが「やってみたい」「動いてみようかな」のような意思表明、または「予約できる？」「見れるかな？」のような行動の実現可能性を尋ねる質問をした時、本人の言葉を引用して自然に提示。
 
 ## 話し方
 - です・ます調、丁寧だけど堅くない
@@ -262,7 +262,14 @@ originalWishがない場合は種の名前を使う。
 - 感情に合わせて変える（驚き→😮、笑い→😄、共感→うんうん、など）
 - Markdown記法（**太字**、*斜体*、##見出し等）は絶対に使わない・LINEでは記号がそのまま表示される
 - 「いいですね」より「面白いですね」「もっと聞かせて」
-- 知らないことはweb検索して調べる。調べた上でわからなければ「詳しくはわからないけど」と前置きする
+- ちょっとした事実確認（場所・名称など一問一答）はその場でweb検索して答える。調べてもわからなければ「詳しくはわからないけど」と前置きする
+- 複数候補から選ぶような「おすすめ」を求められたら、その場で検索しようとせず下記「おすすめを探すリクエスト」に従う
+
+## おすすめを探すリクエスト
+ユーザーが「おすすめ出して」「探して」「決めて」のように、具体的な候補（宿・店・体験など）を求めてきた時：
+その場で検索して答えようとせず、他の文章を一切書かずに以下のJSONだけを出す。
+<ASTO_JSON>{"searchRequest":true,"query":"検索に使う具体的なキーワード（例：蓼科 ペット可 ホテル）","ackText":"探してみますね🔍 ちょっと待っててください！"}</ASTO_JSON>
+queryにはユーザーが会話で言った地名・条件・テーマを具体的に反映する。ackTextは今の会話のトーンに合わせて1文だけ自然に作る。
 
 ## やらないこと
 - 「目標を決めましょう」「〜すべきです」と言わない
@@ -277,7 +284,7 @@ function buildAffiliateSection() {
   return `
 
 ## 使えるアフィリエイトリンク
-条件A・B・Cが揃ったタイミングで、以下の中から最も合うリンクをひとつだけ、ユーザー自身の言葉を引用して自然に提示する。
+上記「アフィリエイト」の条件（意思表明、または行動の実現可能性を尋ねる質問）が揃ったタイミングで、以下の中から最も合うリンクをひとつだけ、ユーザー自身の言葉を引用して自然に提示する。
 
 ・体験・アクティビティ・マラソン・アウトドア系 → アソビュー
   ${BASE}&pid=892628806
@@ -898,6 +905,7 @@ const rawReply = response.content
       let replyText = rawReply;
       let calendarUrl = null;
       let shareUrl = null;
+      let searchRequestQuery = null;
 
       // === 変化追跡（種・未来イベント新規追加、残高変化のサマリを返信末尾に付ける） ===
       const STATUS_POINT_BEFORE = { dream:1, interest:2, plan:3, scheduled:5 };
@@ -933,6 +941,13 @@ const rawReply = response.content
             shareUrl = `https://social-plugins.line.me/lineit/share?text=${text}`;
             replyText = replyText.replace(match[0], "").trim();
             if (!replyText) replyText = "シェア用のメッセージを作りました😊 タップして送ってみてください🌱";
+          }
+
+          // おすすめ検索リクエスト（非同期）
+          if (data.searchRequest && data.query) {
+            searchRequestQuery = data.query;
+            replyText = replyText.replace(match[0], "").trim();
+            if (!replyText) replyText = data.ackText || "探してみますね🔍 ちょっと待っててください！";
           }
 
           // 種の保存（成長ステージ付き）
@@ -1545,6 +1560,23 @@ await client.replyMessage({
         replyToken: replyToken,
         messages: replyMessages,
       });
+
+      // おすすめ検索リクエストがあれば、裏で非同期処理へ委譲する（結果を待たない）
+      if (searchRequestQuery) {
+        const baseUrl = process.env.DEFERRED_SEARCH_BASE_URL
+          || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://astome-bot.vercel.app");
+        fetch(`${baseUrl}/api/deferred-search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.CRON_SECRET || ""}`,
+          },
+          body: JSON.stringify({ userId, query: searchRequestQuery }),
+        }).catch((err) => {
+          console.error("deferred-search dispatch failed:", err);
+        });
+        // ↑ awaitしない：LINEへの200レスポンスをブロックしないため
+      }
 
     } catch (error) {
       console.error("Error:", error);
