@@ -253,7 +253,7 @@ originalWishがない場合は種の名前を使う。
 <ASTO_JSON>{"share":true,"text":"..."}</ASTO_JSON>
 
 ## アフィリエイト
-同じテーマが繰り返し出て、ユーザーが「やってみたい」「動いてみようかな」のような意思表明、または「予約できる？」「見れるかな？」のような行動の実現可能性を尋ねる質問をした時、本人の言葉を引用して自然に提示。
+同じテーマが繰り返し出て、ユーザーが「やってみたい」「動いてみようかな」のような意思表明、「予約できる？」「見れるかな？」のような行動の実現可能性を尋ねる質問、または「探して」「教えて」「調べて」のように具体的な候補を直接求めてきた時、本人の言葉を引用して自然に提示。
 
 ## 話し方
 - です・ます調、丁寧だけど堅くない
@@ -822,14 +822,13 @@ export default async function handler(req, res) {
         return "\n\n---\n\n" + parts.join("\n---\n") + "\n---\n\n" + instruction;
       }
 
-      // アフィリエイトセクションは「種が育っている時のみ」挿入
-      // 判定：interested以上の種がある or plan/scheduled状態の未来イベントがある
+      // アフィリエイトセクションは「種や未来イベントが何かある時」は常に渡す
+      // 実際に出すかどうかの判断（会話の文脈・ユーザーの発言）はプロンプト側の条件に委ねる
+      // ※以前はstage/statusで絞っていたが、二重ゲートになり取りこぼしの原因になっていたため撤廃
       const hasGrowingSeed =
-        Array.isArray(userData.seeds) &&
-        userData.seeds.some(s => ["interested", "planning", "booked"].includes(s.stage));
+        Array.isArray(userData.seeds) && userData.seeds.length > 0;
       const hasPlannedEvent =
-        Array.isArray(userData.futureEvents) &&
-        userData.futureEvents.some(e => ["plan", "scheduled"].includes(e.status));
+        Array.isArray(userData.futureEvents) && userData.futureEvents.length > 0;
       const shouldIncludeAffiliate = hasGrowingSeed || hasPlannedEvent;
 
       // オンボーディング現在ステップ判定
