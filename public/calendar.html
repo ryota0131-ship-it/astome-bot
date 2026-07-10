@@ -4,11 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ASTOme</title>
+<meta name="description" content="人生に、次の楽しみを。ASTOと一緒に未来の種を見つけて育てるアプリ">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0E1D2B">
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ASTOme">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root {
-  --navy:#0E1D2B; --gold:#F3C25B; --gold-d:#c8902f;
+  --navy:#0E1D2B; --navy-2:#152535; --gold:#F3C25B; --gold-d:#c8902f;
   --cream:#FAFAF7; --ivory:#F4EEDC; --sage:#7E9D88; --sage-d:#5d7a67;
   --ink:#2b3530; --muted:#8a968e; --line:#e8e2d4; --card:#fbf8f1;
+  --ease-spring: cubic-bezier(.34,1.3,.5,1);
+  --ease-out: cubic-bezier(.22,1,.36,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
@@ -20,43 +32,58 @@ body{
   line-height:1.8;
 }
 .serif{font-family:'Hiragino Mincho ProN','Noto Serif JP',Georgia,serif}
+button{font-family:inherit}
+button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:8px}
 .screen{display:none}
-.screen.active{display:block;animation:up .35s ease}
-@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.screen.active{display:block;animation:up .4s var(--ease-out)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* ヒーロー */
+/* ===== 時間帯で変わるヒーロー ===== */
 .hero{
-  position:relative;padding:52px 24px 80px;
-  background:linear-gradient(180deg,#1a2d44 0%,#294760 45%,#d8b28d 85%,#f5e8d8 100%);
+  position:relative;padding:52px 24px 84px;
   color:var(--cream);overflow:hidden;
+  transition:background 1.2s ease;
 }
+.hero.sky-dawn { background:linear-gradient(180deg,#1a2d44 0%,#3d4a66 30%,#c98a6e 68%,#f3c98d 88%,#f8ecd8 100%); }
+.hero.sky-day  { background:linear-gradient(180deg,#3d6584 0%,#6d94ad 45%,#c9d8d4 82%,#f2efe2 100%); }
+.hero.sky-dusk { background:linear-gradient(180deg,#16273c 0%,#33415e 40%,#b06a52 75%,#e8b277 95%,#f5e4c8 100%); }
+.hero.sky-night{ background:linear-gradient(180deg,#0a1522 0%,#13233a 55%,#22374f 85%,#31465d 100%); }
 .star{position:absolute;background:#fff;border-radius:50%;animation:tw 4s ease-in-out infinite}
-@keyframes tw{0%,100%{opacity:.15}50%{opacity:.85}}
-.shoot{position:absolute;top:48px;left:58%;width:60px;height:1px;background:linear-gradient(90deg,transparent,#fff);transform:rotate(22deg);opacity:.6}
-.hero-brand{font-size:16px;font-weight:700;letter-spacing:.18em;opacity:.65}
+@keyframes tw{0%,100%{opacity:.12}50%{opacity:.85}}
+.shoot{position:absolute;top:44px;left:58%;width:64px;height:1px;background:linear-gradient(90deg,transparent,#fff);transform:rotate(22deg);opacity:0;animation:shootby 7s ease-in-out infinite}
+@keyframes shootby{0%,88%,100%{opacity:0}92%{opacity:.7}96%{opacity:0;transform:rotate(22deg) translateX(-30px)}}
+.hero-sun{position:absolute;right:26%;width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#FFEFC4,var(--gold));
+  box-shadow:0 0 34px rgba(243,194,91,.55);pointer-events:none;transition:top 1.2s ease,opacity 1.2s ease}
+.sky-dawn  .hero-sun{top:58%}
+.sky-day   .hero-sun{top:14%}
+.sky-dusk  .hero-sun{top:64%;background:radial-gradient(circle at 35% 30%,#FFD9A8,#E8A45B);box-shadow:0 0 34px rgba(232,164,91,.55)}
+.sky-night .hero-sun{opacity:0}
+.hero-cloud{position:absolute;height:10px;border-radius:10px;background:rgba(255,255,255,.35);filter:blur(4px);animation:cloudDrift 40s linear infinite;pointer-events:none}
+@keyframes cloudDrift{from{transform:translateX(-120px)}to{transform:translateX(440px)}}
+.sky-night .hero-cloud{opacity:.08}
+.hero-brand{position:relative;font-size:16px;font-weight:700;letter-spacing:.18em;opacity:.7}
 .hero-brand b{color:var(--gold)}
-.hero-name{font-size:27px;font-weight:700;line-height:1.4;margin-top:22px}
-.hero-sub{font-size:14px;opacity:.68;margin-top:8px}
+.hero-name{position:relative;font-size:27px;font-weight:700;line-height:1.4;margin-top:22px}
+.hero-sub{position:relative;font-size:14px;opacity:.72;margin-top:8px}
 .hero-asto{
-  position:absolute;right:18px;bottom:62px;
+  position:absolute;right:18px;bottom:66px;
   width:88px;height:88px;border-radius:50%;
   background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
   box-shadow:0 0 0 2px rgba(243,194,91,.35),0 10px 28px -10px rgba(0,0,0,.5);
   display:flex;align-items:center;justify-content:center;font-size:43px;
-  animation:bob 5s ease-in-out infinite;
-  overflow:hidden;
+  animation:bob 5s ease-in-out infinite;overflow:hidden;
 }
-  .hero-asto img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center 30%;
-}
+.hero-asto img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-.sheet{margin-top:-44px;padding:0 16px;position:relative;z-index:2}
+.sheet{margin-top:-48px;padding:0 16px;position:relative;z-index:2}
 
-/* ASTOの一言 */
+/* 順番に現れるカード */
+.reveal{opacity:0;transform:translateY(14px);animation:reveal .55s var(--ease-out) forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+
+/* ===== ASTOの一言 ===== */
 .asto-say{
   background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:14px 16px 18px 18px;
@@ -67,42 +94,52 @@ body{
   width:36px;height:36px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 38% 32%,#2a4660,#0b1822);
   box-shadow:0 0 0 1.5px rgba(243,194,91,.28);
-  display:flex;align-items:center;justify-content:center;font-size:19px;
+  display:flex;align-items:center;justify-content:center;font-size:19px;overflow:hidden;
 }
-  .asto-ico img{
-
-  width:100%;
-
-  height:100%;
-
-  object-fit:contain;
-
-  display:block;
-
-}
+.asto-ico img{width:100%;height:100%;object-fit:contain;display:block}
 .asto-say-text{font-size:15px;line-height:1.95;padding-top:1px}
 
-/* ヒーローカード */
+/* ===== いちばん近い未来(ヒーローカード) ===== */
 .hero-future{
-  border-radius:24px;overflow:hidden;margin-bottom:20px;
+  border-radius:24px;overflow:hidden;margin-bottom:22px;
   box-shadow:0 8px 36px -12px rgba(14,29,43,.4);
-  cursor:pointer;transition:transform .15s;
+  cursor:pointer;transition:transform .18s var(--ease-spring);
+  position:relative;
 }
 .hero-future:active{transform:scale(0.98)}
 .hf-bg{
-  background:linear-gradient(145deg,#1a2d44 0%,#223c58 55%,#2e5572 100%);
-  padding:28px 26px 28px;color:var(--cream);
+  position:relative;
+  background:linear-gradient(160deg,#16283f 0%,#223c58 52%,#2e5572 100%);
+  padding:26px 24px 24px;color:var(--cream);overflow:hidden;
 }
-.hf-label{font-size:11px;font-weight:700;letter-spacing:.14em;opacity:.5;margin-bottom:16px}
-.hf-emoji{font-size:42px;line-height:1;margin-bottom:14px}
-.hf-name{font-size:30px;font-weight:800;line-height:1.2;margin-bottom:20px}
+.hf-horizon{position:absolute;left:0;right:0;bottom:0;height:66px;pointer-events:none;opacity:.55}
+.hf-horizon-sun{position:absolute;left:50%;bottom:16px;width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#FFE9B8,rgba(243,194,91,.85));
+  transform:translateX(-50%);filter:blur(1px);
+  box-shadow:0 0 44px 12px rgba(243,194,91,.35);
+  animation:sunRise 6s ease-in-out infinite alternate}
+@keyframes sunRise{from{transform:translateX(-50%) translateY(6px)}to{transform:translateX(-50%) translateY(-2px)}}
+.hf-horizon-sea{position:absolute;left:0;right:0;bottom:0;height:26px;background:linear-gradient(180deg,rgba(28,61,74,.0),rgba(28,61,74,.9))}
+.hf-top{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.hf-label{font-size:11px;font-weight:700;letter-spacing:.14em;opacity:.55}
+.hf-count{
+  flex-shrink:0;text-align:center;
+  background:rgba(243,194,91,.14);border:1px solid rgba(243,194,91,.4);
+  border-radius:16px;padding:8px 14px 7px;line-height:1.2;
+}
+.hf-count-num{font-size:24px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.hf-count-unit{font-size:10px;font-weight:700;color:var(--gold);opacity:.85}
+.hf-count-pre{font-size:10px;font-weight:700;color:var(--gold);opacity:.85;display:block;margin-bottom:1px}
+.hf-emoji{position:relative;font-size:40px;line-height:1;margin-bottom:12px}
+.hf-name{position:relative;font-size:29px;font-weight:800;line-height:1.25;margin-bottom:18px}
 .hf-scene{
-  font-size:15px;line-height:2.1;opacity:.92;
-  padding-top:18px;border-top:1px solid rgba(255,255,255,.1);
+  position:relative;font-size:15px;line-height:2.05;opacity:.92;
+  padding-top:16px;border-top:1px solid rgba(255,255,255,.1);
 }
-.hf-tap-hint{font-size:11px;opacity:.3;margin-top:14px;text-align:right}
+.hf-closing{position:relative;font-size:13px;opacity:.6;margin-top:16px;padding-top:13px;border-top:1px solid rgba(255,255,255,.08);letter-spacing:.04em}
+.hf-tap-hint{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:11px;opacity:.4;margin-top:12px}
 
-/* 未来カード（グループ） */
+/* ===== 未来カード(グループ) ===== */
 .future-group{margin-bottom:24px}
 .future-group-label{
   font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.12em;
@@ -111,11 +148,12 @@ body{
 .future-cards{display:flex;flex-direction:column;gap:10px}
 .future-card{
   background:var(--card);border:1px solid var(--line);border-radius:20px;
-  padding:16px 18px;cursor:pointer;
+  padding:15px 16px;cursor:pointer;min-height:64px;
   display:flex;align-items:center;gap:14px;
-  box-shadow:0 4px 16px -10px rgba(40,53,48,.28);transition:transform .15s;
+  box-shadow:0 4px 16px -10px rgba(40,53,48,.28);
+  transition:transform .18s var(--ease-spring);
 }
-.future-card:active{transform:scale(0.98)}
+.future-card:active{transform:scale(0.97)}
 .fc-emoji{
   width:48px;height:48px;border-radius:16px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:24px;
@@ -125,55 +163,30 @@ body{
 .fc-emoji-interest {background:linear-gradient(135deg,#6b5a2a,#8c7a3a)}
 .fc-emoji-dream    {background:linear-gradient(135deg,#3a3a4a,#555568)}
 .fc-body{flex:1;min-width:0}
-.fc-title{font-size:15px;font-weight:700;line-height:1.3}
-.fc-snippet{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.fc-badge{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;flex-shrink:0}
+.fc-title{font-size:15px;font-weight:700;line-height:1.35}
+.fc-snippet{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.fc-badge{font-size:10px;font-weight:700;border-radius:999px;padding:2px 9px}
 .fc-badge-scheduled{background:rgba(243,194,91,.18);color:var(--gold-d)}
 .fc-badge-plan     {background:rgba(126,157,136,.18);color:var(--sage-d)}
 .fc-badge-interest {background:rgba(180,160,100,.12);color:#7a6a30}
 .fc-badge-dream    {background:rgba(100,100,120,.1);color:var(--muted)}
-.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.fc-days{font-size:10.5px;font-weight:700;color:var(--gold-d);font-variant-numeric:tabular-nums}
 .fc-arrow{font-size:14px;color:var(--muted);opacity:.4}
 
-/* FAB */
+/* ===== FAB ===== */
 .fab{
-  position:fixed;right:20px;bottom:calc(76px + env(safe-area-inset-bottom));
-  width:56px;height:56px;border-radius:50%;
+  position:fixed;right:20px;bottom:calc(78px + env(safe-area-inset-bottom));
+  width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,#2a4a3a,#1a2d44);
   border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px -4px rgba(14,29,43,.35),0 0 0 1.5px rgba(243,194,91,.25);
-  z-index:50;transition:transform .15s;
-  flex-direction:column;gap:1px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;
+  box-shadow:0 6px 16px -4px rgba(14,29,43,.4),0 0 0 1.5px rgba(243,194,91,.25);
+  z-index:50;transition:transform .18s var(--ease-spring);
 }
-.fab:active{transform:scale(0.93)}
-.fab-whale{
-
-  width:42px;
-
-  height:42px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  line-height:1;
-
-}
-
-.fab-whale img{
-
-  width:100%;
-
-  height:100%;
-
-  object-fit:contain;
-
-  display:block;
-
-}
+.fab:active{transform:scale(0.9)}
+.fab-whale{width:42px;height:42px;display:flex;align-items:center;justify-content:center;line-height:1}
+.fab-whale img{width:100%;height:100%;object-fit:contain;display:block}
 .fab-dots{font-size:9px;letter-spacing:2px;color:var(--cream);height:12px;display:flex;align-items:center;gap:2px}
 .fab-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.5);animation:dotpulse 1.4s ease-in-out infinite}
 .fab-dot:nth-child(1){animation-delay:0s}
@@ -181,44 +194,95 @@ body{
 .fab-dot:nth-child(3){animation-delay:.4s}
 @keyframes dotpulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
 
-/* 育てるタブ */
-.sodate-header{padding:36px 20px 20px}
+/* ===== 育てるタブ ===== */
+.sodate-header{padding:36px 20px 18px}
 .sodate-title{font-size:22px;font-weight:800;margin-bottom:4px}
 .sodate-sub{font-size:13px;color:var(--muted)}
-.seed-cards{padding:0 16px;display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+
+/* セグメント切替(iOS風) */
+.view-switch{position:relative;display:flex;background:rgba(232,226,212,.55);border-radius:999px;padding:4px;margin:0 16px 18px}
+.view-thumb{
+  position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);
+  background:var(--card);border-radius:999px;
+  box-shadow:0 2px 8px -2px rgba(40,53,48,.25);
+  transition:transform .3s var(--ease-spring);
+}
+.view-switch[data-view="koukai"] .view-thumb{transform:translateX(100%)}
+.view-btn{flex:1;position:relative;text-align:center;padding:10px 0;border-radius:999px;border:none;background:none;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:color .25s;display:flex;align-items:center;justify-content:center;gap:5px}
+.view-btn.active{color:var(--navy)}
+.view-pane{display:none}
+.view-pane.active{display:block;animation:up .35s var(--ease-out)}
+
+/* 種カード */
+.seed-cards{padding:0 16px;display:flex;flex-direction:column;gap:16px;margin-bottom:8px}
 .seed-card{
   background:var(--card);border:1px solid var(--line);border-radius:24px;
   overflow:hidden;box-shadow:0 4px 20px -10px rgba(40,53,48,.2);
 }
 .seed-status-bar{
-  padding:10px 20px;
-  display:flex;align-items:center;gap:8px;
+  padding:11px 20px;
+  display:flex;align-items:center;gap:9px;
   border-bottom:1px solid var(--line);
 }
-.seed-status-ico{font-size:14px}
-.seed-status-text{font-size:12px;font-weight:700;color:var(--muted)}
-.seed-card-body{padding:18px 20px 20px}
-.seed-name{font-size:17px;font-weight:800;line-height:1.3;margin-bottom:12px}
+.seed-stage-dots{display:flex;align-items:center;gap:4px}
+.seed-stage-dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .3s}
+.seed-stage-dot.on{background:var(--sage)}
+.seed-status-text{font-size:12px;font-weight:700;color:var(--sage-d)}
+.seed-timing-tag{font-size:10px;font-weight:700;color:var(--muted);background:var(--ivory);border-radius:999px;padding:3px 10px;margin-left:auto}
+.seed-card-body{padding:18px 20px 20px;cursor:pointer}
+.seed-name{font-size:17px;font-weight:800;line-height:1.35;margin-bottom:12px}
 .seed-wish{
   padding:13px 15px;background:var(--ivory);border-radius:14px;
   font-size:14px;color:var(--ink);line-height:1.8;font-style:italic;margin-bottom:14px;
 }
 .seed-wish::before{content:'💬 ';font-style:normal}
-.seed-asto-msg{font-size:14px;color:var(--muted);line-height:1.85;margin-bottom:16px}
+.seed-asto-msg{font-size:14px;color:var(--muted);line-height:1.85}
+.seed-prep-line{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--sage-d);font-weight:700;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.seed-prep-count{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:11.5px}
+.seed-prep-bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+.seed-prep-bar-fill{height:100%;background:linear-gradient(90deg,var(--sage),#8fae98);border-radius:3px;transition:width .5s var(--ease-out)}
 .seed-talk-btn{
   width:100%;background:var(--navy);color:var(--cream);border:none;
-  border-radius:999px;padding:13px;font-size:14px;font-weight:700;
-  font-family:inherit;cursor:pointer;
+  border-radius:999px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:transform .15s;
+  transition:transform .18s var(--ease-spring);
 }
-.seed-talk-btn:active{transform:scale(0.98)}
-.seed-prep-line{font-size:12px;color:var(--sage-d);font-weight:700;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.seed-prep-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:8px}
-.seed-prep-bar-fill{height:100%;background:var(--sage);border-radius:2px;transition:width .3s ease}
-.seed-timing-tag{font-size:10px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border-radius:999px;padding:2px 10px;margin-left:auto}
+.seed-talk-btn:active{transform:scale(0.97)}
 
-/* あゆみタブ */
+/* ===== 航海図 ===== */
+.koukai-card{position:relative;margin:0 16px 8px;border-radius:24px;overflow:hidden;box-shadow:0 4px 20px -10px rgba(40,53,48,.3)}
+.koukai-sky{position:relative;background:linear-gradient(180deg,#FFF6E4 0%,#FCE7C8 30%,var(--card) 60%);padding:18px 0 0;overflow:hidden}
+.koukai-sunrise-glow{position:absolute;left:60%;top:-64px;width:210px;height:210px;background:radial-gradient(circle,rgba(243,194,91,.4),rgba(243,194,91,0) 70%);transform:translateX(-50%);pointer-events:none}
+.koukai-sun{position:absolute;left:60%;top:6px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE7AE,var(--gold));transform:translateX(-50%);box-shadow:0 0 20px rgba(243,194,91,.55)}
+.koukai-sparkle{position:absolute;color:var(--gold);opacity:0;animation:kwTwinkle 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes kwTwinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1)}}
+.koukai-now-line{position:absolute;left:16px;top:44px;bottom:26px;border-left:2px dashed rgba(21,37,53,.22);z-index:2}
+.koukai-now-lbl{position:absolute;left:6px;top:28px;font-size:10px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:10px;z-index:3;white-space:nowrap}
+.koukai-zones{display:flex;padding:0 14px;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;position:relative;z-index:2}
+.koukai-zones span{flex:1;text-align:center}
+.koukai-stems{position:relative;height:206px;padding:0 14px;z-index:2}
+.koukai-stem{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;cursor:pointer;animation:budSway 5.5s ease-in-out infinite}
+.koukai-stem:nth-child(2n){animation-delay:1.4s}
+.koukai-stem:nth-child(3n){animation-delay:2.6s}
+@keyframes budSway{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.koukai-stem-line{width:2px;background:linear-gradient(180deg,rgba(126,157,136,.55),rgba(126,157,136,.15));margin-top:4px}
+.koukai-bud{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-weight:700;white-space:nowrap;border-radius:20px;padding:7px 13px;box-shadow:0 3px 8px rgba(40,53,48,.15);font-size:13px;cursor:pointer}
+.koukai-ocean{position:relative;height:78px;overflow:hidden;background:linear-gradient(180deg,#2E6373,#1C3D4A)}
+.koukai-ocean svg{position:absolute;left:0;width:200%;height:100%}
+.kw-back{top:0;animation:kwDrift 14s linear infinite;opacity:.9}
+.kw-mid{top:10px;animation:kwDrift 10s linear infinite reverse;opacity:.85}
+.kw-front{top:20px;animation:kwDrift 7s linear infinite}
+@keyframes kwDrift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.koukai-glint{position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,231,174,.9);animation:kwGlint 2.6s ease-in-out infinite}
+@keyframes kwGlint{0%,100%{opacity:.15}50%{opacity:.85}}
+.koukai-fin{position:absolute;bottom:20px;font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));animation:kwSwim 9s linear infinite;transform:scaleX(-1)}
+@keyframes kwSwim{0%{left:-6%;opacity:0}8%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+.koukai-caption{text-align:center;font-size:10px;color:rgba(250,250,247,.7);background:#1C3D4A;padding:8px 0 12px}
+.koukai-legend{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin:14px 16px 24px}
+.koukai-legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
+.koukai-legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* ===== あゆみタブ ===== */
 .jinsei-header{padding:36px 20px 24px}
 .jinsei-title{font-size:22px;font-weight:800;margin-bottom:4px}
 .jinsei-sub{font-size:13px;color:var(--muted)}
@@ -229,7 +293,6 @@ body{
   box-shadow:0 4px 16px -10px rgba(40,53,48,.2);
 }
 .tl-node{display:flex;gap:14px;position:relative}
-.tl-node + .tl-node{margin-top:0}
 .tl-node-left{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0}
 .tl-dot{
   width:32px;height:32px;border-radius:50%;flex-shrink:0;
@@ -239,23 +302,14 @@ body{
 .tl-dot-event  {background:linear-gradient(135deg,#fdf0d4,#f0dda0)}
 .tl-dot-harvest{background:linear-gradient(135deg,#f0e4c8,#e0c898)}
 .tl-dot-seed   {background:linear-gradient(135deg,#d4e8d4,#b8d4b8)}
-.tl-connector{
-  flex:1;display:flex;align-items:center;gap:0;
-  padding:10px 0;
-}
-.tl-connector-line{width:1px;height:100%;background:var(--line);margin:0 auto}
 .tl-body{flex:1;padding:5px 0 16px}
 .tl-label{font-size:15px;font-weight:700;line-height:1.45;color:var(--ink)}
 .tl-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.65}
-/* 矢印の代わり：テキストの橋 */
-.tl-bridge{
-  display:flex;align-items:center;gap:12px;
-  padding:2px 0 2px 46px;margin:0 0 0;
-}
+.tl-bridge{display:flex;align-items:center;gap:12px;padding:2px 0 2px 46px}
 .tl-bridge-line{flex:1;height:1px;background:var(--line)}
 .tl-bridge-text{font-size:11px;color:var(--muted);white-space:nowrap}
 
-/* ボトムシート */
+/* ===== ボトムシート ===== */
 .sheet-overlay{
   display:none;position:fixed;inset:0;z-index:80;
   background:rgba(14,29,43,.5);backdrop-filter:blur(3px);
@@ -268,20 +322,22 @@ body{
   background:var(--cream);border-radius:28px 28px 0 0;
   padding:0 0 calc(36px + env(safe-area-inset-bottom));
   z-index:90;transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,1,.42,1);
+  transition:transform .34s var(--ease-spring);
   box-shadow:0 -8px 40px -8px rgba(14,29,43,.25);
-  max-height:90vh;overflow-y:auto;
+  max-height:90vh;overflow-y:auto;overscroll-behavior:contain;
 }
 .bottom-sheet.open{transform:translateY(0)}
-.bs-handle{width:36px;height:4px;border-radius:2px;background:var(--line);margin:14px auto 0}
-.bs-body{padding:24px 22px 0}
+.bottom-sheet.dragging{transition:none}
+.bs-handle{width:40px;height:5px;border-radius:3px;background:var(--line);margin:12px auto 0}
+.bs-body{padding:22px 22px 0}
 
 .bs-hero{margin-bottom:18px}
 .bs-emoji{font-size:36px;line-height:1;margin-bottom:10px}
-.bs-title{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:10px}
+.bs-title{font-size:24px;font-weight:800;line-height:1.25;margin-bottom:10px}
 .bs-tags{display:flex;gap:6px;flex-wrap:wrap}
 .bs-tag-when{font-size:13px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border:1px solid rgba(243,194,91,.35);border-radius:999px;padding:3px 12px}
 .bs-tag-status{font-size:12px;color:var(--muted);background:var(--ivory);border-radius:999px;padding:3px 10px}
+.bs-timing{display:inline-block;font-size:12px;font-weight:700;color:var(--sage-d);background:rgba(126,157,136,.14);border:1px solid rgba(126,157,136,.3);border-radius:999px;padding:3px 12px}
 
 .bs-asto{
   background:linear-gradient(145deg,#1a2d44,#223c58);
@@ -296,7 +352,6 @@ body{
 }
 .bs-asto-text{font-size:14px;line-height:2;opacity:.92}
 
-/* そういえばセクション */
 .bs-soyeba{
   margin-bottom:16px;padding:16px 18px;
   background:var(--ivory);border:1px solid var(--line);border-radius:16px;
@@ -308,192 +363,195 @@ body{
 
 .bs-divider{height:1px;background:var(--line);margin:4px 0 16px}
 .bs-copy-text{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:14px;color:var(--ink);line-height:1.6;margin-bottom:8px}
-.bs-copy-btn{width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:999px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px}
-.bs-talk-btn{width:100%;background:var(--navy);color:var(--cream);border:none;border-radius:999px;padding:15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.bs-copy-btn{width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:999px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.bs-talk-btn{width:100%;background:var(--navy);color:var(--cream);border:none;border-radius:999px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .18s var(--ease-spring)}
+.bs-talk-btn:active{transform:scale(0.97)}
 
-/* 種シート：目安の時期＋支度 */
-.bs-timing{display:inline-block;font-size:12px;font-weight:700;color:var(--sage-d);background:rgba(126,157,136,.14);border:1px solid rgba(126,157,136,.3);border-radius:999px;padding:3px 12px}
+/* 支度 */
 .bs-shitaku-head{display:flex;align-items:center;gap:7px;margin:20px 0 10px}
 .bs-shitaku-ico{font-size:16px}
 .bs-shitaku-label{font-size:12px;font-weight:700;color:var(--muted)}
 .prep-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
-.prep-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line);cursor:pointer}
-.prep-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;font-size:12px;color:#fff;transition:all .15s}
-.prep-item.done .prep-check{background:var(--sage);border-color:var(--sage)}
+.prep-item{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line);cursor:pointer;min-height:46px;position:relative}
+.prep-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;font-size:12px;color:#fff;transition:all .2s var(--ease-spring)}
+.prep-item.done .prep-check{background:var(--sage);border-color:var(--sage);transform:scale(1.05)}
 .prep-text{font-size:14px;color:var(--ink);line-height:1.6}
 .prep-item.done .prep-text{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--sage)}
-.prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:11px 13px;border-radius:12px;border:1.5px dashed var(--line);color:var(--muted);font-size:13px;cursor:pointer}
-.prep-date{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border-radius:999px;padding:3px 9px;cursor:pointer}
+.prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:12px 13px;border-radius:12px;border:1.5px dashed var(--line);color:var(--muted);font-size:13px;cursor:pointer;min-height:46px}
+.prep-date{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:700;color:var(--gold-d);background:rgba(243,194,91,.15);border-radius:999px;padding:4px 10px;cursor:pointer}
 .prep-date.empty{color:var(--muted);background:var(--line)}
-.bs-achieve-btn{width:100%;background:var(--card);color:var(--sage-d);border:1.5px solid var(--sage);border-radius:999px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;transition:all .2s}
-.bs-achieve-btn.ready{background:linear-gradient(135deg,#F3C25B,#E0A93F);color:var(--navy);border-color:transparent;box-shadow:0 6px 16px -6px rgba(243,194,91,.6)}
+.prep-pop{position:absolute;right:12px;top:-4px;font-size:14px;pointer-events:none;animation:prepPop .8s var(--ease-out) forwards}
+@keyframes prepPop{0%{opacity:0;transform:translateY(4px) scale(.6)}25%{opacity:1;transform:translateY(-6px) scale(1.1)}100%{opacity:0;transform:translateY(-20px) scale(1)}}
+
+/* 収穫ボタン(Gold=達成の文脈のみ) */
+.bs-achieve-btn{width:100%;background:var(--card);color:var(--sage-d);border:1.5px solid var(--sage);border-radius:999px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:all .25s}
+.bs-achieve-btn.ready{
+  background:linear-gradient(135deg,#F3C25B,#E0A93F);color:var(--navy);border-color:transparent;
+  box-shadow:0 6px 18px -6px rgba(243,194,91,.65);
+  animation:achieveGlow 2.2s ease-in-out infinite;
+}
+@keyframes achieveGlow{0%,100%{box-shadow:0 6px 18px -6px rgba(243,194,91,.55)}50%{box-shadow:0 6px 26px -4px rgba(243,194,91,.85)}}
 .bs-achieve-btn:active{transform:scale(.98)}
 
-/* タブ */
+/* 収穫の祝福(金の粒) */
+.harvest-burst{position:fixed;inset:0;pointer-events:none;z-index:120}
+.harvest-grain{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);animation:grainFall 1.4s var(--ease-out) forwards}
+@keyframes grainFall{0%{opacity:0;transform:translateY(0) scale(.5)}15%{opacity:1;transform:translateY(-26px) scale(1.1)}100%{opacity:0;transform:translateY(70px) scale(.7)}}
+
+/* 探す・あゆみ入口 */
+.find-card,.ayumi-entry{margin:4px 16px 24px;background:var(--card);border:1.5px dashed var(--sage);border-radius:18px;padding:16px 17px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:transform .18s var(--ease-spring)}
+.find-card:active,.ayumi-entry:active{transform:scale(.98)}
+.find-ico,.ayumi-ico{width:38px;height:38px;border-radius:12px;background:var(--ivory);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.find-title,.ayumi-entry-title{font-size:14px;font-weight:700;color:var(--ink)}
+.find-sub,.ayumi-entry-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.find-arrow{margin-left:auto;font-size:16px;color:var(--sage-d)}
+
+.option-card{display:flex;align-items:center;gap:12px;background:var(--ivory);border-radius:14px;padding:15px 14px;margin-bottom:10px;cursor:pointer;min-height:60px;transition:transform .18s var(--ease-spring)}
+.option-card:active{transform:scale(.98)}
+.option-ico{width:36px;height:36px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.option-title{font-size:13.5px;font-weight:700}
+.option-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* あゆみの手紙 */
+.letter-open{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:20px}
+.letter-para{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:15px;line-height:2.1;margin-bottom:18px}
+.letter-stitch{display:flex;align-items:center;gap:10px;margin:24px 0 18px}
+.letter-stitch-line{flex:1;height:0;border-top:1px dashed var(--line)}
+.letter-future{background:var(--ivory);border-radius:12px;padding:16px}
+.letter-future-label{font-size:10px;font-weight:700;color:var(--sage-d);letter-spacing:.1em;margin-bottom:8px}
+
+/* ===== うみタブ(みんなの種のたより) ===== */
+.umi-header{position:relative;padding:36px 20px 0;overflow:hidden}
+.umi-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.umi-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.umi-ocean{position:relative;height:54px;overflow:hidden;border-radius:18px;margin:0 16px 18px;background:linear-gradient(180deg,#2E6373,#1C3D4A)}
+.umi-ocean svg{position:absolute;left:0;width:200%;height:100%}
+.umi-fin{position:absolute;bottom:12px;font-size:19px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));animation:kwSwim 11s linear infinite;transform:scaleX(-1)}
+.feed-list{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.feed-card{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:15px 16px;cursor:pointer;
+  display:flex;align-items:flex-start;gap:13px;
+  box-shadow:0 4px 16px -10px rgba(40,53,48,.28);
+  transition:transform .18s var(--ease-spring);
+}
+.feed-card:active{transform:scale(0.97)}
+.feed-emoji{
+  width:44px;height:44px;border-radius:15px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.feed-emoji-seed   {background:linear-gradient(135deg,#e4efe4,#cfe2cf)}
+.feed-emoji-growth {background:linear-gradient(135deg,#d7e6da,#b9d2bf)}
+.feed-emoji-harvest{background:linear-gradient(135deg,#fdf0d4,#f0d79a)}
+.feed-body{flex:1;min-width:0}
+.feed-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:3px}
+.feed-meta b{font-weight:700;color:var(--sage-d)}
+.feed-card-harvest .feed-meta b{color:var(--gold-d)}
+.feed-title{font-size:15px;font-weight:700;line-height:1.4}
+.feed-words{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.65;font-style:italic;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.feed-words::before{content:'「';font-style:normal}
+.feed-words::after{content:'」';font-style:normal}
+.feed-card-harvest{border-color:rgba(243,194,91,.45)}
+.feed-end{
+  text-align:center;padding:30px 20px 40px;color:var(--muted);
+  font-size:12.5px;line-height:2;
+}
+.feed-end-wave{font-size:20px;margin-bottom:6px;opacity:.7}
+
+/* ===== ホーム画面に追加バナー ===== */
+.install-banner{
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#1a2d44,#223c58);color:var(--cream);
+  border-radius:18px;padding:14px 14px 14px 16px;margin-bottom:20px;
+  box-shadow:0 6px 20px -10px rgba(14,29,43,.5);
+}
+.install-banner-ico{width:34px;height:34px;border-radius:10px;background:rgba(243,194,91,.16);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.install-banner-body{flex:1;min-width:0}
+.install-banner-title{font-size:13px;font-weight:700;line-height:1.5}
+.install-banner-sub{font-size:11.5px;opacity:.65;margin-top:2px;line-height:1.5}
+.install-banner-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.install-banner-btn{background:var(--gold);color:var(--navy);border:none;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.install-banner-close{background:none;border:none;color:rgba(250,250,247,.5);font-size:11px;cursor:pointer;padding:4px}
+
+/* iOS向け:ホーム画面追加の手順シート */
+.ios-steps{display:flex;flex-direction:column;gap:12px;margin:16px 0 6px}
+.ios-step{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.ios-step-num{width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--gold);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ios-step-text{font-size:13.5px;line-height:1.6}
+.ios-step-ico{font-size:16px}
+
+/* ===== タブバー ===== */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;
   background:rgba(250,250,247,.95);backdrop-filter:blur(14px);
   border-top:1px solid var(--line);display:flex;
   padding:6px 0 calc(10px + env(safe-area-inset-bottom));z-index:60;
 }
-.tab{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;font-family:inherit;color:var(--muted);transition:color .2s;position:relative}
+.tab{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;color:var(--muted);transition:color .2s;position:relative;min-height:48px}
 .tab.active{color:var(--navy)}
 .tab.active::before{content:'';position:absolute;top:0;width:18px;height:2.5px;border-radius:0 0 3px 3px;background:var(--gold)}
-.tab-ico{
-
-  font-size:20px;
-
-  line-height:1;
-
-}
-
-.tab-lbl{
-
-  font-size:10px;
-
-  font-weight:700;
-
-  letter-spacing:.04em;
-
-}
-
-/* ←ここに追加 */
-
-.tab-asto{
-
-  width:22px;
-
-  height:22px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-}
-
-.tab-asto img{
-
-  width:100%;
-
-  height:100%;
-
-  object-fit:contain;
-
-  display:block;
-
-  transition:transform .2s ease;
-
-}
-
-.tab.active .tab-asto img{
-
-  transform:scale(1.1);
-
-}
+.tab-ico{font-size:20px;line-height:1;transition:transform .25s var(--ease-spring)}
+.tab.active .tab-ico{transform:translateY(-1px) scale(1.08)}
 .tab-lbl{font-size:10px;font-weight:700;letter-spacing:.04em}
 
-/* ===== 今日追加：育てるタブ 表示切替 ===== */
-.view-switch{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:0 16px 18px}
-.view-btn{flex:1;text-align:center;padding:9px 0;border-radius:999px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
-.view-btn.active{background:var(--navy);color:var(--gold)}
-.view-pane{display:none}
-.view-pane.active{display:block}
-
-/* マップ表示（種のことば雲） */
-.seed-map-card{margin:0 16px 16px;background:linear-gradient(180deg,#FFFDF7,var(--card));border:1px solid var(--line);border-radius:22px;padding:26px 16px;min-height:220px;display:flex;align-items:center;justify-content:center}
-.seed-map-field{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 14px}
-.seed-word{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;border-radius:20px;padding:6px 12px}
-.sw-discovered{font-size:13px;opacity:.75;background:rgba(126,157,136,.12);color:var(--sage-d)}
-.sw-interested{font-size:17px;background:rgba(126,157,136,.18);color:var(--sage-d)}
-.sw-planning{font-size:23px;background:rgba(243,194,91,.2);color:var(--gold-d)}
-.sw-booked{font-size:27px;font-weight:800;background:rgba(243,194,91,.3);color:var(--gold-d)}
-.seed-map-legend{margin:0 16px 24px;font-size:11px;color:var(--muted);text-align:center}
-
-/* 航海図 */
-.koukai-card{position:relative;margin:0 16px 8px;border-radius:24px;overflow:hidden;box-shadow:0 4px 20px -10px rgba(40,53,48,.3)}
-.koukai-sky{position:relative;background:linear-gradient(180deg,#FFF6E4 0%,#FCE7C8 30%,var(--card) 60%);padding:18px 0 0;overflow:hidden}
-.koukai-sunrise-glow{position:absolute;left:60%;top:-64px;width:210px;height:210px;background:radial-gradient(circle,rgba(243,194,91,.4),rgba(243,194,91,0) 70%);transform:translateX(-50%);pointer-events:none}
-.koukai-sun{position:absolute;left:60%;top:6px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE7AE,var(--gold));transform:translateX(-50%);box-shadow:0 0 20px rgba(243,194,91,.55)}
-.koukai-sparkle{position:absolute;color:var(--gold);opacity:0;animation:kwTwinkle 3.2s ease-in-out infinite;pointer-events:none}
-@keyframes kwTwinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1)}}
-.koukai-now-line{position:absolute;left:16px;top:44px;bottom:26px;border-left:2px dashed rgba(21,37,53,.22);z-index:2}
-.koukai-now-lbl{position:absolute;left:6px;top:28px;font-size:10px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:10px;z-index:3;white-space:nowrap}
-.koukai-zones{display:flex;padding:0 14px;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;position:relative;z-index:2}
-.koukai-zones span{flex:1;text-align:center}
-.koukai-stems{position:relative;height:206px;padding:0 14px;z-index:2}
-.koukai-stem{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;cursor:pointer}
-.koukai-stem-line{width:2px;background:linear-gradient(180deg,rgba(126,157,136,.55),rgba(126,157,136,.15));margin-top:4px}
-.koukai-bud{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-weight:700;white-space:nowrap;border-radius:20px;padding:6px 12px;box-shadow:0 3px 8px rgba(40,53,48,.15);font-size:13px;cursor:pointer}
-.koukai-ocean{position:relative;height:78px;overflow:hidden;background:linear-gradient(180deg,#2E6373,#1C3D4A)}
-.koukai-ocean svg{position:absolute;left:0;width:200%;height:100%}
-.kw-back{top:0;animation:kwDrift 14s linear infinite;opacity:.9}
-.kw-mid{top:10px;animation:kwDrift 10s linear infinite reverse;opacity:.85}
-.kw-front{top:20px;animation:kwDrift 7s linear infinite;opacity:1}
-@keyframes kwDrift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.koukai-glint{position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,231,174,.9);animation:kwGlint 2.6s ease-in-out infinite}
-@keyframes kwGlint{0%,100%{opacity:.15}50%{opacity:.85}}
-.koukai-fin{position:absolute;bottom:20px;font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));animation:kwSwim 9s linear infinite;transform:scaleX(-1)}
-@keyframes kwSwim{0%{left:-6%;opacity:0}8%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
-.koukai-caption{text-align:center;font-size:10px;color:rgba(250,250,247,.7);background:#1C3D4A;padding:8px 0 12px}
-.koukai-legend{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin:14px 16px 24px}
-.koukai-legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
-.koukai-legend-dot{width:8px;height:8px;border-radius:50%}
-
-/* 種の詳細シート：支度 */
-.prep-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 6px}
-.prep-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:var(--ivory);cursor:pointer}
-.prep-check{width:19px;height:19px;border-radius:50%;border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;font-size:11px;color:#fff}
-.prep-item.done .prep-check{background:var(--sage)}
-.prep-item.done .prep-text{color:var(--muted);text-decoration:line-through}
-.prep-add{display:flex;align-items:center;gap:8px;margin:6px 0 4px;padding:9px 10px;border-radius:10px;border:1.5px dashed var(--line);color:var(--muted);font-size:12.5px;cursor:pointer}
-
-/* 探す機能・あゆみの記録 入口カード */
-.find-card,.ayumi-entry{margin:4px 16px 24px;background:var(--card);border:1.5px dashed var(--sage);border-radius:18px;padding:16px 17px;display:flex;align-items:center;gap:13px;cursor:pointer}
-.find-ico,.ayumi-ico{width:38px;height:38px;border-radius:12px;background:var(--ivory);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.find-title,.ayumi-entry-title{font-size:14px;font-weight:700;color:var(--ink)}
-.find-sub,.ayumi-entry-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
-.find-arrow{margin-left:auto;font-size:16px;color:var(--sage-d)}
-
-/* 探す機能：3択オプション */
-.option-card{display:flex;align-items:center;gap:12px;background:var(--ivory);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer}
-.option-ico{width:36px;height:36px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.option-title{font-size:13.5px;font-weight:700}
-.option-sub{font-size:11px;color:var(--muted);margin-top:2px}
-
-/* あゆみの記録：手紙 */
-.letter-open{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:20px}
-.letter-para{font-family:'Hiragino Mincho ProN','Noto Serif JP',serif;font-size:15px;line-height:2;margin-bottom:18px}
-.letter-stitch{display:flex;align-items:center;gap:10px;margin:24px 0 18px}
-.letter-stitch-line{flex:1;height:0;border-top:1px dashed var(--line)}
-.letter-future{background:var(--ivory);border-radius:12px;padding:16px}
-.letter-future-label{font-size:10px;font-weight:700;color:var(--sage-d);letter-spacing:.1em;margin-bottom:8px}
-
-.toast-mini{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--navy);color:var(--cream);font-size:12.5px;padding:10px 18px;border-radius:30px;opacity:0;transition:all .3s ease;pointer-events:none;z-index:95;text-align:center;max-width:82%}
+/* ===== トースト ===== */
+.toast-mini{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--navy);color:var(--cream);font-size:12.5px;padding:11px 18px;border-radius:30px;opacity:0;transition:all .3s var(--ease-out);pointer-events:none;z-index:95;text-align:center;max-width:82%;line-height:1.6}
 .toast-mini.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== スケルトンローディング ===== */
+.skel{position:relative;overflow:hidden;background:var(--line);border-radius:16px}
+.skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+#skeleton{padding:0}
+#skeleton .skel-hero{height:210px;border-radius:0 0 0 0;margin-bottom:-44px}
+#skeleton .skel-inner{padding:0 16px;position:relative;z-index:2}
+#skeleton .skel-say{height:74px;margin-bottom:20px}
+#skeleton .skel-big{height:280px;border-radius:24px;margin-bottom:20px}
+#skeleton .skel-row{height:78px;border-radius:20px;margin-bottom:10px}
+
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty-ico{font-size:40px;margin-bottom:12px}
+.empty-text{font-size:14px;line-height:2}
+
+/* ===== reduced motion ===== */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.15s !important}
+}
 </style>
 </head>
 <body>
 
 <div class="toast-mini" id="toastMini"></div>
 
+<!-- ローディング -->
+<div id="skeleton">
+  <div class="skel skel-hero"></div>
+  <div class="skel-inner">
+    <div class="skel skel-say"></div>
+    <div class="skel skel-big"></div>
+    <div class="skel skel-row"></div>
+    <div class="skel skel-row"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+
 <!-- 楽しみ -->
 <section class="screen active" id="s-mirai">
-  <div class="hero" id="hero">
-    <div class="shoot"></div>
+  <div class="hero sky-dawn" id="hero">
+    <div class="shoot" id="hero-shoot"></div>
+    <div class="hero-sun" id="hero-sun"></div>
     <div class="hero-brand serif">ASTO <b>✦</b></div>
     <div class="hero-name" id="hero-name"></div>
-    <div class="hero-sub">今日も未来を楽しみにいこう。</div>
-    <div class="hero-asto"><img src="/asto.png" alt="ASTO">
-
-</div>
+    <div class="hero-sub" id="hero-sub">今日も未来を楽しみにいこう。</div>
+    <div class="hero-asto"><img src="/asto.png" alt="ASTO"></div>
   </div>
   <div class="sheet">
-    <div class="asto-say"><div class="asto-ico"><img src="/ASTO_main_image.png" alt="ASTO"></div><div class="asto-say-text" id="asto-say-text"></div></div>
-    <div class="hero-future" id="hero-future"></div>
+    <div class="asto-say reveal" style="animation-delay:.05s"><div class="asto-ico"><img src="/ASTO_main_image.png" alt="ASTO"></div><div class="asto-say-text" id="asto-say-text"></div></div>
+    <div id="install-banner-slot"></div>
+    <div class="hero-future reveal" id="hero-future" style="animation-delay:.15s"></div>
     <div id="future-groups"></div>
-    <div class="find-card" onclick="openFindSheet()">
+    <div class="find-card reveal" style="animation-delay:.3s" onclick="openFindSheet()" role="button" tabindex="0">
       <div class="find-ico">🌱</div>
       <div>
         <div class="find-title">新しい種を見つける</div>
@@ -511,19 +569,14 @@ body{
     <div class="sodate-sub">気になってること、続きを話そう</div>
   </div>
 
-  <div class="view-switch">
-    <button class="view-btn active" id="vb-list" onclick="switchSodateView('list')">リスト</button>
-    <button class="view-btn" id="vb-map" onclick="switchSodateView('map')">マップ</button>
-    <button class="view-btn" id="vb-koukai" onclick="switchSodateView('koukai')">航海図</button>
+  <div class="view-switch" id="view-switch" data-view="list">
+    <div class="view-thumb"></div>
+    <button class="view-btn active" id="vb-list" onclick="switchSodateView('list')">🌱 リスト</button>
+    <button class="view-btn" id="vb-koukai" onclick="switchSodateView('koukai')">⛵ 航海図</button>
   </div>
 
   <div class="view-pane active" id="pane-list">
     <div class="seed-cards" id="seed-list"></div>
-  </div>
-
-  <div class="view-pane" id="pane-map">
-    <div class="seed-map-card"><div class="seed-map-field" id="seed-map-field"></div></div>
-    <div class="seed-map-legend">大きいほど、育っている種</div>
   </div>
 
   <div class="view-pane" id="pane-koukai">
@@ -558,13 +611,31 @@ body{
   </div>
 </section>
 
+<!-- うみ(みんなの種のたより) -->
+<section class="screen" id="s-umi">
+  <div class="umi-header">
+    <div class="umi-title">うみ</div>
+    <div class="umi-sub">誰かの種のたよりが、波にのって流れ着きます</div>
+  </div>
+  <div class="umi-ocean">
+    <svg viewBox="0 0 800 54" preserveAspectRatio="none" class="kw-mid"><path d="M0,20 C120,34 220,6 340,20 C460,32 560,6 680,20 C760,30 800,18 800,20 L800,54 L0,54 Z" fill="#2E6373" opacity=".85"/><path d="M800,20 C920,34 1020,6 1140,20 C1260,32 1360,6 1480,20 C1560,30 1600,18 1600,20 L1600,54 L800,54 Z" fill="#2E6373" opacity=".85"/></svg>
+    <svg viewBox="0 0 800 54" preserveAspectRatio="none" class="kw-front"><path d="M0,28 C110,40 230,16 340,28 C450,38 560,16 680,28 C750,35 800,26 800,28 L800,54 L0,54 Z" fill="#1C3D4A"/><path d="M800,28 C910,40 1030,16 1140,28 C1250,38 1360,16 1480,28 C1550,35 1600,26 1600,28 L1600,54 L800,54 Z" fill="#1C3D4A"/></svg>
+    <span class="umi-fin">🫍</span>
+  </div>
+  <div class="feed-list" id="feed-list"></div>
+  <div class="feed-end" id="feed-end" style="display:none">
+    <div class="feed-end-wave">🌊</div>
+    今日の波はここまで。<br>また明日、新しいたよりが流れ着きます
+  </div>
+</section>
+
 <!-- あゆみ -->
 <section class="screen" id="s-jinsei">
   <div class="jinsei-header">
     <div class="jinsei-title">あゆみ</div>
     <div class="jinsei-sub">種が繋がって、人生になっていく</div>
   </div>
-  <div class="ayumi-entry" onclick="openAyumiSheet()">
+  <div class="ayumi-entry" onclick="openAyumiSheet()" role="button" tabindex="0">
     <div class="ayumi-ico">📖</div>
     <div>
       <div class="ayumi-entry-title">あゆみの記録</div>
@@ -575,11 +646,9 @@ body{
   <div class="timeline" id="jinsei-wrap"></div>
 </section>
 
-<button class="fab" id="fab" onclick="openLine()"><span class="fab-whale">
+</div><!-- /app -->
 
-    <img src="/ASTO_face_image.png" alt="ASTO">
-
-</span><div class="fab-dots"><span class="fab-dot"></span><span class="fab-dot"></span><span class="fab-dot"></span></div></button>
+<button class="fab" id="fab" onclick="openLine()" aria-label="ASTOと話す"><span class="fab-whale"><img src="/ASTO_face_image.png" alt="ASTO"></span><div class="fab-dots"><span class="fab-dot"></span><span class="fab-dot"></span><span class="fab-dot"></span></div></button>
 
 <div class="sheet-overlay" id="bs-overlay" onclick="closeSheet()"></div>
 <div class="bottom-sheet" id="bottom-sheet">
@@ -589,44 +658,34 @@ body{
 
 <nav class="tabbar">
   <button class="tab active" data-s="mirai"  onclick="switchTab('mirai')"><span class="tab-ico">✨</span><span class="tab-lbl">楽しみ</span></button>
-  <button class="tab" data-s="sodate" onclick="switchTab('sodate')">
-  <span class="tab-ico">🪴</span>
-  <span class="tab-lbl">育てる</span>
-</button>
+  <button class="tab"        data-s="sodate" onclick="switchTab('sodate')"><span class="tab-ico">🪴</span><span class="tab-lbl">育てる</span></button>
+  <button class="tab"        data-s="umi"    onclick="switchTab('umi')"><span class="tab-ico">🌊</span><span class="tab-lbl">うみ</span></button>
   <button class="tab"        data-s="jinsei" onclick="switchTab('jinsei')"><span class="tab-ico">📖</span><span class="tab-lbl">あゆみ</span></button>
 </nav>
 
 <script>
 const STATUS_LABEL = {dream:'いつか',interest:'気になってる',plan:'計画中',scheduled:'予定あり'};
 const SEED_STATUS = {
-  discovered:{ ico:'🌱', label:'芽吹いたばかり' },
-  interested: { ico:'🌿', label:'育ってきた' },
-  planning:   { ico:'🌳', label:'もうすぐ形になる' },
-  booked:     { ico:'🌳', label:'もうすぐ叶う' },
+  discovered:{ ico:'🌱', label:'芽吹いたばかり', step:1 },
+  interested: { ico:'🌿', label:'育ってきた', step:2 },
+  planning:   { ico:'🪴', label:'もうすぐ形になる', step:3 },
+  booked:     { ico:'🌳', label:'もうすぐ叶う', step:4 },
 };
-// 育てるタブ：種のカテゴリ別ASTOメッセージ
 const CATEGORY_MSGS = {
-  // スポーツ・マラソン・運動
   'スポーツ': '次はどんな景色が見えるかな😊',
   'マラソン': '次はどんな景色が見えるかな😊',
   'ランニング': '走ってる自分、楽しみだね🌱',
-  // 旅行・温泉
   '旅行': 'その日の空気、もう想像してる？🌿',
   '旅': 'その場所の空気、もう想像してる？🌿',
   '温泉': 'お湯に浸かってるとこ、想像するだけでほっとするね😊',
-  // グルメ・食
   'グルメ': 'どんな味に出会えるか楽しみだね🍣',
   '料理': '一口目が待ち遠しいね🍝',
   '食': 'どんな一皿に出会えるかな😊',
-  // ライフスタイル・買い物
   'ライフスタイル': 'それが手に入った日、どんな気持ちかな😊',
   '買い物': 'それが届いた瞬間、きっと嬉しいよ😊',
-  // プロジェクト・仕事
   'プロジェクト': '少しずつ形になってるね🌱',
   '仕事': 'それが動き出す日が楽しみだね😊',
-  // 体験・アクティビティ
   '体験': 'その瞬間、きっと忘れられないよ😊',
-  // デフォルト（ローテーション）
   '__default__': [
     'この種、まだまだ大きくなりそう🌱',
     '続き、また聞かせて😊',
@@ -637,15 +696,12 @@ const CATEGORY_MSGS = {
 };
 
 function getSeedMsg(seed, idx) {
-  // astoMessageが保存されていれば最優先（AI生成のその人専用の言葉）
   if (seed.astoMessage) return seed.astoMessage;
-  // カテゴリで分岐（フォールバック）
   if (seed.category) {
     for (const key of Object.keys(CATEGORY_MSGS)) {
       if (key !== '__default__' && seed.category.includes(key)) return CATEGORY_MSGS[key];
     }
   }
-  // 種名でもマッチ（フォールバック）
   for (const key of Object.keys(CATEGORY_MSGS)) {
     if (key !== '__default__' && seed.name.includes(key)) return CATEGORY_MSGS[key];
   }
@@ -714,13 +770,22 @@ async function loadData() {
     try {
       const r = await fetch('/api/calendar-data?userId=' + encodeURIComponent(uid));
       const json = await r.json();
-      // userNameがnullでもfutureEventsがあれば本番データを使う
       if (r.ok && (json.userName || (json.futureEvents && json.futureEvents.length > 0))) return json;
     } catch(e) {}
   }
   return DEMO;
 }
 
+/* ===== 時間帯 ===== */
+function timeContext() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 9)   return { sky:'sky-dawn',  greet:'おはよう、',   sub:'今日はどんな一日になるかな。' };
+  if (h >= 9 && h < 16)  return { sky:'sky-day',   greet:'こんにちは、', sub:'今日も未来を楽しみにいこう。' };
+  if (h >= 16 && h < 19) return { sky:'sky-dusk',  greet:'おかえり、',   sub:'今日もおつかれさま。' };
+  return { sky:'sky-night', greet:'こんばんは、', sub:'未来を思い出す時間にしよう。' };
+}
+
+/* ===== 日数・時期 ===== */
 function whenLabel(date, status) {
   if (!date) return status === 'interest' ? '近いうちに' : 'いつか';
   const m = parseInt(date.split('-')[1], 10);
@@ -730,34 +795,44 @@ function whenLabel(date, status) {
   return '秋ごろ';
 }
 
-// sceneの最初の2行だけ取り出す（カードのスニペット用）
+// e.daysLeft優先。なければdate(YYYY-MM or YYYY-MM-DD)から概算
+function daysUntil(e) {
+  if (typeof e.daysLeft === 'number') return e.daysLeft;
+  if (!e.date) return null;
+  const parts = e.date.split('-').map(Number);
+  if (!parts[0] || !parts[1]) return null;
+  const target = new Date(parts[0], parts[1]-1, parts[2] || 15);
+  const diff = Math.ceil((target - new Date()) / 86400000);
+  return diff > 0 ? diff : null;
+}
+
+function countdownChip(e) {
+  const d = daysUntil(e);
+  if (d === null) return '';
+  if (d <= 60) return '<span class="fc-days">あと' + d + '日</span>';
+  return '<span class="fc-days">あと約' + Math.round(d/30) + 'ヶ月</span>';
+}
+
 function sceneSnippet(scene) {
   if (!scene) return '';
   return scene.split('\n').filter(l => l.trim()).slice(0,2).join(' ');
 }
 
-// 未来のカテゴリ別締めフレーズ
 const FUTURE_CLOSINGS = {
-  // マラソン・スポーツ
   run: 'あの日の風が待ってるね🌱',
   marathon: 'あの日の風が待ってるね🌱',
   sport: 'その瞬間が楽しみだね😊',
-  // 旅行・温泉
   travel: 'もう荷物を想像しちゃうね😊',
   onsen: 'お湯の温かさ、もう感じてる？🌿',
   trip: 'もう荷物を想像しちゃうね😊',
-  // グルメ
   food: '一口目が楽しみだね🍣',
   sushi: '一口目が楽しみだね🍣',
   gourmet: 'どんな味が待ってるかな🍣',
-  // デフォルト
   default: '楽しみだね🌱',
 };
 
 function getFutureClosing(event) {
-  // closingMessageが保存されていれば最優先（AI生成のその人専用の言葉）
   if (event.closingMessage) return event.closingMessage;
-  // フォールバック：タイトルでマッチ
   const text = (event.title + (event.sourceSeed || '')).toLowerCase();
   if (/マラソン|ラン|run/.test(text)) return FUTURE_CLOSINGS.marathon;
   if (/温泉|onsen/.test(text)) return FUTURE_CLOSINGS.onsen;
@@ -769,14 +844,18 @@ function getFutureClosing(event) {
 
 let DATA;
 
-/* 楽しみタブ */
+/* ===== 楽しみタブ ===== */
 function renderMirai() {
-  document.getElementById('hero-name').innerHTML = 'おかえり、<br>' + DATA.userName + 'さん';
+  const tc = timeContext();
+  const hero = document.getElementById('hero');
+  hero.className = 'hero ' + tc.sky;
+  document.getElementById('hero-name').innerHTML = tc.greet + '<br>' + DATA.userName + 'さん';
+  document.getElementById('hero-sub').textContent = tc.sub;
+  makeSkyDeco(tc.sky);
 
   const lead = DATA.futureEvents.find(e => e.status === 'scheduled')
              || DATA.futureEvents.find(e => e.status === 'plan');
 
-  // daily.heroMessageがあれば最優先（毎日朝に生成される今日だけの言葉）
   const heroMsg = DATA.daily && DATA.daily.heroMessage
     ? DATA.daily.heroMessage.replace(/\n/g, '<br>')
     : (lead
@@ -787,14 +866,19 @@ function renderMirai() {
   const hf = document.getElementById('hero-future');
   if (lead) {
     const sceneHtml = lead.scene ? lead.scene.replace(/\n/g,'<br>') : '';
+    const d = daysUntil(lead);
+    const countHtml = d !== null
+      ? '<div class="hf-count"><span class="hf-count-pre">あと</span><span class="hf-count-num">' + (d <= 99 ? d : Math.round(d/30)) + '</span><span class="hf-count-unit">' + (d <= 99 ? '日' : 'ヶ月') + '</span></div>'
+      : '';
     hf.innerHTML =
       '<div class="hf-bg">' +
-        '<div class="hf-label">✨ いちばん近い未来</div>' +
+        '<div class="hf-horizon"><div class="hf-horizon-sun"></div><div class="hf-horizon-sea"></div></div>' +
+        '<div class="hf-top"><div class="hf-label">✨ いちばん近い未来</div>' + countHtml + '</div>' +
         '<div class="hf-emoji">' + (lead.emoji||'✨') + '</div>' +
         '<div class="hf-name serif">' + lead.title + '</div>' +
         (sceneHtml ? '<div class="hf-scene">' + sceneHtml + '</div>' : '') +
-        '<div style="font-size:13px;opacity:.55;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);letter-spacing:.04em">' + getFutureClosing(lead) + '</div>' +
-        '<div class="hf-tap-hint">タップして詳しく見る</div>' +
+        '<div class="hf-closing">' + getFutureClosing(lead) + '</div>' +
+        '<div class="hf-tap-hint">タップして詳しく見る ›</div>' +
       '</div>';
     hf.style.display = 'block';
     hf.onclick = () => openSheet(DATA.futureEvents.indexOf(lead));
@@ -808,14 +892,17 @@ function renderMirai() {
 
   let html = '';
   if (soon.length) {
-    html += '<div class="future-group">' +
+    html += '<div class="future-group reveal" style="animation-delay:.22s">' +
       '<div class="future-group-label">✦ 育ってきた未来</div>' +
       '<div class="future-cards">' + soon.map(futureCardHtml).join('') + '</div></div>';
   }
   if (dream.length) {
-    html += '<div class="future-group">' +
+    html += '<div class="future-group reveal" style="animation-delay:.28s">' +
       '<div class="future-group-label">🌙 いつかのゆめ</div>' +
       '<div class="future-cards">' + dream.map(futureCardHtml).join('') + '</div></div>';
+  }
+  if (!lead && !soon.length && !dream.length) {
+    html = '<div class="empty reveal"><div class="empty-ico">🫍</div><div class="empty-text">まだ未来はこれから。<br>ASTOと話して、最初の楽しみを見つけよう🌱</div></div>';
   }
   document.getElementById('future-groups').innerHTML = html;
 }
@@ -823,10 +910,9 @@ function renderMirai() {
 function futureCardHtml(e) {
   const idx = DATA.futureEvents.indexOf(e);
   const st = e.status;
-  // daily.futureCardMessagesがあれば今日の一言を優先、なければsceneのスニペット
   const dailyMsg = DATA.daily && DATA.daily.futureCardMessages && DATA.daily.futureCardMessages[e.title];
   const snippet = dailyMsg || sceneSnippet(e.scene);
-  return '<div class="future-card" onclick="openSheet(' + idx + ')">' +
+  return '<div class="future-card" onclick="openSheet(' + idx + ')" role="button" tabindex="0">' +
     '<div class="fc-emoji fc-emoji-' + st + '">' + (e.emoji||'✨') + '</div>' +
     '<div class="fc-body">' +
       '<div class="fc-title">' + e.title + '</div>' +
@@ -834,37 +920,70 @@ function futureCardHtml(e) {
     '</div>' +
     '<div class="fc-right">' +
       '<div class="fc-badge fc-badge-' + st + '">' + (STATUS_LABEL[st]||st) + '</div>' +
+      countdownChip(e) +
       '<div class="fc-arrow">›</div>' +
     '</div>' +
   '</div>';
 }
 
-/* 育てるタブ */
+/* 空の演出(星・雲) */
+function makeSkyDeco(sky) {
+  const h = document.getElementById('hero');
+  h.querySelectorAll('.star,.hero-cloud').forEach(el => el.remove());
+  let s = '';
+  if (sky === 'sky-night' || sky === 'sky-dawn') {
+    const n = sky === 'sky-night' ? 26 : 10;
+    for (let i = 0; i < n; i++) {
+      const sz = Math.random() * 2 + .8;
+      s += '<div class="star" style="width:' + sz + 'px;height:' + sz + 'px;left:' + (Math.random()*100) + '%;top:' + (Math.random()*50) + '%;opacity:.6;animation-delay:' + (Math.random()*4) + 's"></div>';
+    }
+  }
+  if (sky === 'sky-day' || sky === 'sky-dusk') {
+    for (let i = 0; i < 3; i++) {
+      const w = 60 + Math.random()*70;
+      s += '<div class="hero-cloud" style="width:' + w + 'px;left:' + (Math.random()*70) + '%;top:' + (14 + Math.random()*30) + '%;animation-delay:-' + (Math.random()*40) + 's"></div>';
+    }
+  }
+  document.getElementById('hero-shoot').style.display = sky === 'sky-night' ? 'block' : 'none';
+  h.insertAdjacentHTML('afterbegin', s);
+}
+
+/* ===== 育てるタブ ===== */
+function stageDots(step) {
+  let d = '';
+  for (let i = 1; i <= 4; i++) d += '<span class="seed-stage-dot' + (i <= step ? ' on' : '') + '"></span>';
+  return '<span class="seed-stage-dots">' + d + '</span>';
+}
+
+let sodateRevealed = false;
 function renderSodate() {
   const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   if (!seeds.length) {
     document.getElementById('seed-list').innerHTML =
-      '<p style="color:var(--muted);font-size:14px;text-align:center;padding:40px 20px;line-height:2">ASTOと話して<br>最初の種を見つけよう🌱</p>';
+      '<div class="empty"><div class="empty-ico">🌱</div><div class="empty-text">ASTOと話して<br>最初の種を見つけよう</div></div>';
     return;
   }
   document.getElementById('seed-list').innerHTML = seeds.map((s, si) => {
-    const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+    const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中', step:1};
     const msg = getSeedMsg(s, si);
     const preps = s.preparations || [];
     const doneCount = preps.filter(p => p.done).length;
     const prepPct = preps.length ? Math.round((doneCount / preps.length) * 100) : 0;
     const prepLine = preps.length
-      ? '<div class="seed-prep-line">' + growthIcon(doneCount, preps.length) + '&nbsp;支度 ' + doneCount + '/' + preps.length + '</div>' +
+      ? '<div class="seed-prep-line">' + growthIcon(doneCount, preps.length) + '&nbsp;支度<span class="seed-prep-count">' + doneCount + ' / ' + preps.length + '</span></div>' +
         '<div class="seed-prep-bar"><div class="seed-prep-bar-fill" style="width:' + prepPct + '%"></div></div>'
       : '';
     const timingTag = s.roughTiming ? '<span class="seed-timing-tag">' + s.roughTiming + '</span>' : '';
-    return '<div class="seed-card">' +
+    const revealCls = sodateRevealed ? '' : ' reveal';
+    const revealDelay = sodateRevealed ? '' : 'animation-delay:' + (si*0.07+0.05).toFixed(2) + 's';
+    return '<div class="seed-card' + revealCls + '" style="' + revealDelay + '">' +
       '<div class="seed-status-bar">' +
-        '<span class="seed-status-ico">' + st.ico + '</span>' +
+        '<span style="font-size:14px">' + st.ico + '</span>' +
+        stageDots(st.step) +
         '<span class="seed-status-text">' + st.label + '</span>' +
         timingTag +
       '</div>' +
-      '<div class="seed-card-body" onclick="openSeedSheet(' + si + ')" style="cursor:pointer">' +
+      '<div class="seed-card-body" onclick="openSeedSheet(' + si + ')" role="button" tabindex="0">' +
         '<div class="seed-name">' + s.name + '</div>' +
         (s.originalWish ? '<div class="seed-wish">' + s.originalWish + '</div>' : '') +
         '<div class="seed-asto-msg">' + msg + '</div>' +
@@ -875,6 +994,7 @@ function renderSodate() {
       '</div>' +
     '</div>';
   }).join('');
+  sodateRevealed = true;
 }
 
 function growthIcon(done, total) {
@@ -888,14 +1008,13 @@ function handleSeedTalk(btn) {
   const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   const seed = seeds[si];
   if (!seed) return;
-  copyText('「' + seed.name + '」について話したい', btn, '✅&nbsp;&nbsp;コピーしました', '🌱&nbsp;&nbsp;この続きを育てる');
+  copyToClipboardThenLine('「' + seed.name + '」について話したい');
 }
 
-/* あゆみタブ */
+/* ===== あゆみタブ ===== */
 function renderJinsei() {
   const chapters = [];
 
-  // 収穫済み
   (DATA.harvestedSeeds||[]).forEach(h => {
     const nodes = [];
     if (h.originalWish) nodes.push({cls:'tl-dot-talk', ico:'💬', label:h.originalWish, sub:null, bridge:'その願いが、少しずつ形になって'});
@@ -905,7 +1024,6 @@ function renderJinsei() {
     chapters.push(nodes);
   });
 
-  // 育ってる種
   (DATA.seeds||[]).filter(s => s.stage !== 'harvested').forEach(s => {
     const ev = (DATA.futureEvents||[]).find(e => e.sourceSeed === s.name);
     const nodes = [];
@@ -916,7 +1034,7 @@ function renderJinsei() {
 
   if (!chapters.length) {
     document.getElementById('jinsei-wrap').innerHTML =
-      '<p style="color:var(--muted);font-size:14px;text-align:center;padding:40px 20px;line-height:2">ASTOと話して<br>最初の一粒をまこう🌱</p>';
+      '<div class="empty"><div class="empty-ico">📖</div><div class="empty-text">ASTOと話して<br>最初の一粒をまこう🌱</div></div>';
     return;
   }
 
@@ -936,16 +1054,16 @@ function renderJinsei() {
   }).join('');
 }
 
-/* ボトムシート */
+/* ===== ボトムシート ===== */
 function openSheet(idx) {
   const e = DATA.futureEvents[idx];
   if (!e) return;
 
-  const when = e.daysLeft ? 'あと ' + e.daysLeft + ' 日' : whenLabel(e.date, e.status);
+  const d = daysUntil(e);
+  const when = d !== null ? 'あと ' + d + ' 日' : whenLabel(e.date, e.status);
   const statusLabel = STATUS_LABEL[e.status] || e.status;
   const relatedSeed = e.sourceSeed ? (DATA.seeds||[]).find(s => s.name === e.sourceSeed) : null;
 
-  // ① 未来タイトル
   const heroHtml =
     '<div class="bs-hero">' +
       '<div class="bs-emoji">' + (e.emoji||'✨') + '</div>' +
@@ -956,7 +1074,6 @@ function openSheet(idx) {
       '</div>' +
     '</div>';
 
-  // ② ASTOの感情テキスト
   const astoHtml = e.scene
     ? '<div class="bs-asto">' +
         '<div class="bs-asto-ico">🫍</div>' +
@@ -964,7 +1081,6 @@ function openSheet(idx) {
       '</div>'
     : '';
 
-  // ③ そういえば（種の言葉）
   const soyebaHtml = relatedSeed && relatedSeed.originalWish
     ? '<div class="bs-soyeba">' +
         '<div class="bs-soyeba-lead">そういえば、</div>' +
@@ -983,6 +1099,10 @@ function openSheet(idx) {
     '<button class="bs-copy-btn" id="bs-copy-btn" onclick="copySheetText()">📋&nbsp;&nbsp;コピーする</button>' +
     '<button class="bs-talk-btn" onclick="openLine()">💬&nbsp;&nbsp;ASTOと話す</button>';
 
+  showSheet();
+}
+
+function showSheet() {
   document.getElementById('bs-overlay').classList.add('open');
   document.getElementById('bottom-sheet').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -990,7 +1110,9 @@ function openSheet(idx) {
 
 function closeSheet() {
   document.getElementById('bs-overlay').classList.remove('open');
-  document.getElementById('bottom-sheet').classList.remove('open');
+  const sh = document.getElementById('bottom-sheet');
+  sh.classList.remove('open');
+  sh.style.transform = '';
   document.body.style.overflow = '';
 }
 
@@ -1018,11 +1140,29 @@ function copyText(text, btn, done, reset) {
 
 function openLine() { location.href = 'https://line.me/R/ti/p/@624btbtc'; }
 
+/* シート:指に追従して閉じる */
 (function() {
-  let startY = 0;
   const sheet = document.getElementById('bottom-sheet');
-  sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
-  sheet.addEventListener('touchend', e => { if (e.changedTouches[0].clientY - startY > 60) closeSheet(); }, {passive:true});
+  let startY = 0, curY = 0, dragging = false;
+  sheet.addEventListener('touchstart', e => {
+    if (sheet.scrollTop > 2) return;
+    startY = e.touches[0].clientY; curY = startY; dragging = true;
+    sheet.classList.add('dragging');
+  }, {passive:true});
+  sheet.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    curY = e.touches[0].clientY;
+    const dy = Math.max(0, curY - startY);
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+  }, {passive:true});
+  sheet.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    sheet.classList.remove('dragging');
+    const dy = curY - startY;
+    if (dy > 90) { closeSheet(); }
+    else { sheet.style.transform = ''; }
+  }, {passive:true});
 })();
 
 function switchTab(name) {
@@ -1033,41 +1173,20 @@ function switchTab(name) {
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function makeStars() {
-  const h = document.getElementById('hero');
-  let s = '';
-  for (let i = 0; i < 22; i++) {
-    const sz = Math.random() * 2 + .8;
-    s += '<div class="star" style="width:' + sz + 'px;height:' + sz + 'px;left:' + (Math.random()*100) + '%;top:' + (Math.random()*55) + '%;opacity:.6;animation-delay:' + (Math.random()*4) + 's"></div>';
-  }
-  h.insertAdjacentHTML('afterbegin', s);
-}
-
-(async () => {
-  makeStars();
-  DATA = await loadData();
-  renderMirai();
-  renderSodate();
-  renderSeedMap();
-  renderKoukaizu();
-  renderJinsei();
-})();
-
-/* ===== 今日追加：育てるタブ 表示切替 ===== */
+/* ===== 育てる:表示切替 ===== */
 function switchSodateView(v) {
-  ['list','map','koukai'].forEach(k => {
+  document.getElementById('view-switch').dataset.view = v;
+  ['list','koukai'].forEach(k => {
     document.getElementById('vb-' + k).classList.toggle('active', k === v);
     document.getElementById('pane-' + k).classList.toggle('active', k === v);
   });
 }
 
-// 種の名前からゆるい色分け（categoryが無い場合のフォールバック）
 function seedHue(name) {
   let h = 0; for (let i=0;i<name.length;i++) h = (h*31 + name.charCodeAt(i)) % 997;
   return h;
 }
 
-// roughTimingがあればそれを優先、なければstageから仮に振り分け
 const TIMING_ZONE = {'今月中':0, '数ヶ月以内':1, '今年中には':2, 'いつか':3};
 function guessZone(seed) {
   if (seed.roughTiming && TIMING_ZONE[seed.roughTiming] !== undefined) return TIMING_ZONE[seed.roughTiming];
@@ -1078,7 +1197,6 @@ function guessZone(seed) {
   return 3;
 }
 
-// カテゴリ→色（凡例と一致）。未設定は名前ハッシュでフォールバック
 const CAT_COLOR = {
   '旅行・暮らし': {bg:'rgba(126,157,136,.18)', fg:'var(--sage-d)'},
   '体を動かす':   {bg:'rgba(201,123,74,.18)',  fg:'#a15b2e'},
@@ -1094,25 +1212,13 @@ function seedColor(seed) {
   };
 }
 
-function renderSeedMap() {
-  const el = document.getElementById('seed-map-field');
-  if (!el) return;
-  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
-  if (!seeds.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">まだ種がありません</p>'; return; }
-  el.innerHTML = seeds.map(s => {
-    const si = (DATA.seeds||[]).indexOf(s);
-    const sz = ({discovered:'discovered',interested:'interested',planning:'planning',booked:'booked'})[s.stage] || 'discovered';
-    return '<span class="seed-word sw-' + sz + '" onclick="openSeedSheet(' + si + ')">' + s.name + '</span>';
-  }).join('');
-}
-
 function renderKoukaizu() {
   const el = document.getElementById('koukai-stems');
   if (!el) return;
   const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   if (!seeds.length) { el.innerHTML = ''; return; }
 
-  const zoneRanges = [[2,24],[26,49],[51,74],[76,97]]; // 今月中/数ヶ月以内/今年中には/いつか
+  const zoneRanges = [[2,24],[26,49],[51,74],[76,97]];
   const zoneItems = [[],[],[],[]];
   seeds.forEach(s => zoneItems[guessZone(s)].push(s));
 
@@ -1124,7 +1230,7 @@ function renderKoukaizu() {
       const leftPct = list.length === 1 ? (lo+hi)/2 : lo + (i/(list.length-1)) * (hi-lo);
       const heightPx = { discovered:16, interested:34, planning:64, booked:110 }[s.stage] || 20;
       const c = seedColor(s);
-      html += '<div class="koukai-stem" style="left:' + leftPct + '%" onclick="openSeedSheet(' + si + ')">' +
+      html += '<div class="koukai-stem" style="left:' + leftPct + '%" onclick="openSeedSheetByName(\'' + s.name.replace(/'/g,"\\'") + '\')">' +
         '<div class="koukai-bud" style="background:' + c.bg + ';color:' + c.fg + '">' + s.name + '</div>' +
         '<div class="koukai-stem-line" style="height:' + heightPx + 'px"></div>' +
       '</div>';
@@ -1137,32 +1243,34 @@ function toastMini(msg) {
   const t = document.getElementById('toastMini');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-/* ===== 今日追加：種の詳細シート（支度つき） =====
-   既存の openSheet（未来イベント用）と同じボトムシート構造を踏襲。
-   TODO(バックエンド): preparations の done 状態は現状フロントのみで保持。
-   本番では calendar-data API 経由で seeds[].preparations を更新する想定。 */
+/* ===== 種の詳細シート(支度つき) ===== */
 let CURRENT_SEED_NAME = null;
 function findSeedByName(name){ return (DATA.seeds||[]).find(s => s.name === name); }
 
 function openSeedSheet(idx) {
-  // idxはフィルタ後リストのindex。名前で本体を引き当てて以降は名前で管理
   const visible = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
   const s = visible[idx];
   if (!s) return;
   CURRENT_SEED_NAME = s.name;
   renderSeedSheet();
-  document.getElementById('bs-overlay').classList.add('open');
-  document.getElementById('bottom-sheet').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  showSheet();
+}
+
+function openSeedSheetByName(name) {
+  const s = findSeedByName(name);
+  if (!s) return;
+  CURRENT_SEED_NAME = s.name;
+  renderSeedSheet();
+  showSheet();
 }
 
 function renderSeedSheet() {
   const s = findSeedByName(CURRENT_SEED_NAME);
   if (!s) return;
-  const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中'};
+  const st = SEED_STATUS[s.stage] || {ico:'🌱', label:'育ち中', step:1};
   const timingHtml = s.roughTiming ? '<span class="bs-timing">' + s.roughTiming + '</span>' : '';
 
   const heroHtml =
@@ -1183,7 +1291,6 @@ function renderSeedSheet() {
 
   const preps = s.preparations || [];
   const allDone = preps.length > 0 && preps.every(p => p.done);
-  // 支度が全部終わっていたら「達成した」ボタンを目立たせる
   const achieveBtn = '<button class="bs-achieve-btn' + (allDone ? ' ready' : '') + '" onclick="achieveSeed()">' +
     '🌾&nbsp;&nbsp;叶った！収穫する</button>';
 
@@ -1195,7 +1302,6 @@ function renderSeedSheet() {
     '<button class="bs-talk-btn" onclick="talkAboutSeed()">💬&nbsp;&nbsp;この続きをASTOと話す</button>';
 }
 
-// 日付の表示整形（YYYY-MM-DD → M月D日 / YYYY-MM → M月）
 function fmtPrepDate(d) {
   if (!d) return '';
   const parts = d.split('-');
@@ -1204,7 +1310,6 @@ function fmtPrepDate(d) {
   return d;
 }
 
-// 支度パートのHTML（育ち具合メッセージ＋チェックリスト＋日付）
 function shitakuHtml(s) {
   const preps = s.preparations || [];
   const done = preps.filter(p => p.done).length;
@@ -1216,13 +1321,12 @@ function shitakuHtml(s) {
   else { growthIco = '🌿'; growthMsg = '支度が' + done + 'つ、育ってきています'; }
 
   const items = preps.map((p, pi) => {
-    // 日付を持つ支度は、テキスト横に日付チップ＋編集
     const dateChip = p.date
       ? '<span class="prep-date" onclick="event.stopPropagation();editPrepDate(' + pi + ')">📅 ' + fmtPrepDate(p.date) + '</span>'
       : (p.wantsDate
           ? '<span class="prep-date empty" onclick="event.stopPropagation();editPrepDate(' + pi + ')">＋日付</span>'
           : '');
-    return '<div class="prep-item' + (p.done ? ' done' : '') + '" onclick="togglePrep(' + pi + ')">' +
+    return '<div class="prep-item' + (p.done ? ' done' : '') + '" onclick="togglePrep(' + pi + ')" role="button" tabindex="0">' +
       '<div class="prep-check">' + (p.done ? '✓' : '') + '</div>' +
       '<div class="prep-text">' + p.text + '</div>' +
       dateChip +
@@ -1238,13 +1342,28 @@ function shitakuHtml(s) {
 function togglePrep(pi) {
   const s = findSeedByName(CURRENT_SEED_NAME);
   if (!s || !s.preparations || !s.preparations[pi]) return;
-  s.preparations[pi].done = !s.preparations[pi].done;
-  // シート内・リスト・マップ・航海図すべてを再描画（バーとカウントを同期）
+  const nowDone = !s.preparations[pi].done;
+  s.preparations[pi].done = nowDone;
   renderSeedSheet();
   renderSodate();
+  if (nowDone) {
+    // チェックした項目に小さな芽の祝福
+    const items = document.querySelectorAll('#shitaku-section .prep-item');
+    const item = items[pi];
+    if (item) {
+      const pop = document.createElement('span');
+      pop.className = 'prep-pop';
+      pop.textContent = '🌱';
+      item.appendChild(pop);
+      setTimeout(() => pop.remove(), 800);
+    }
+    const preps = s.preparations || [];
+    if (preps.length && preps.every(p => p.done)) {
+      toastMini('支度がぜんぶ整ったよ🌳 収穫の準備はできてる');
+    }
+  }
 }
 
-// 支度の日付を編集（ネイティブのdate入力を使う）
 function editPrepDate(pi) {
   const s = findSeedByName(CURRENT_SEED_NAME);
   if (!s || !s.preparations || !s.preparations[pi]) return;
@@ -1258,17 +1377,34 @@ function editPrepDate(pi) {
     s.preparations[pi].date = input.value || null;
     document.body.removeChild(input);
     renderSeedSheet();
-    toastMini('日付を入れました📅（LINEでアストに伝えると保存されます）');
+    toastMini('日付を入れました📅(LINEでアストに伝えると保存されます)');
   });
   input.addEventListener('blur', () => { if (input.parentNode) document.body.removeChild(input); });
   input.showPicker ? input.showPicker() : input.click();
 }
 
-// 達成（収穫）：ASTOme辞書に沿って「収穫」。Bフロー＝LINEでASTOが演出してから正式収穫
+/* 収穫:金の粒が舞う(Gold=達成の文脈) */
+function harvestBurst() {
+  const wrap = document.createElement('div');
+  wrap.className = 'harvest-burst';
+  for (let i = 0; i < 14; i++) {
+    const g = document.createElement('div');
+    g.className = 'harvest-grain';
+    g.style.left = (30 + Math.random()*40) + '%';
+    g.style.top = (35 + Math.random()*20) + '%';
+    g.style.animationDelay = (Math.random()*0.3) + 's';
+    g.style.width = g.style.height = (5 + Math.random()*5) + 'px';
+    wrap.appendChild(g);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 1800);
+}
+
 function achieveSeed() {
   const s = findSeedByName(CURRENT_SEED_NAME);
   if (!s) { openLine(); return; }
-  copyToClipboardThenLine('「' + s.name + '」が叶いました！🌾');
+  harvestBurst();
+  setTimeout(() => copyToClipboardThenLine('「' + s.name + '」が叶いました！🌾'), 600);
 }
 
 function talkAboutSeed() {
@@ -1285,26 +1421,22 @@ function copyToClipboardThenLine(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).catch(()=>{});
   }
-  toastMini('コピーしました。ASTOに送ってね🌱');
-  setTimeout(openLine, 900);
+  toastMini('コピーしました。LINEで貼り付けて送ってね🌱');
+  setTimeout(openLine, 1100);
 }
 
-/* ===== 今日追加：新しい種を見つける（探す機能） ===== */
+/* ===== 新しい種を見つける ===== */
 function openFindSheet() {
   document.getElementById('bs-body').innerHTML =
     '<div class="bs-hero"><div class="bs-title">どうやって見つける？</div>' +
     '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">気になる方法を選んでください</div></div>' +
-    '<div class="option-card" onclick="openLine()"><div class="option-ico">🫍</div><div><div class="option-title">アストと話す</div><div class="option-sub">会話しながら一緒に見つける</div></div></div>' +
-    '<div class="option-card" onclick="toastMini(\'まだ十分に集まっていなくて。もう少し待っていてください🌱\')"><div class="option-ico">🌍</div><div><div class="option-title">誰かの種を見る</div><div class="option-sub">誰かが育てている種のかけらから</div></div></div>' +
-    '<div class="option-card" onclick="openLine()"><div class="option-ico">📖</div><div><div class="option-title">これまでの人生から見つける</div><div class="option-sub">これまでの断片を見直してみる</div></div></div>';
-  document.getElementById('bs-overlay').classList.add('open');
-  document.getElementById('bottom-sheet').classList.add('open');
-  document.body.style.overflow = 'hidden';
+    '<div class="option-card" onclick="openLine()" role="button" tabindex="0"><div class="option-ico">🫍</div><div><div class="option-title">アストと話す</div><div class="option-sub">会話しながら一緒に見つける</div></div></div>' +
+    '<div class="option-card" onclick="closeSheet();switchTab(\'umi\')" role="button" tabindex="0"><div class="option-ico">🌊</div><div><div class="option-title">誰かの種を見る</div><div class="option-sub">うみに流れ着いた、誰かの種のたよりから</div></div></div>' +
+    '<div class="option-card" onclick="openLine()" role="button" tabindex="0"><div class="option-ico">📖</div><div><div class="option-title">これまでの人生から見つける</div><div class="option-sub">これまでの断片を見直してみる</div></div></div>';
+  showSheet();
 }
 
-/* ===== あゆみの記録（手紙） =====
-   DATA.ayumi（pastParagraphs / futureSection）があれば本番データを表示。
-   無ければ種のoriginalWishから簡易的に組み立てる。 */
+/* ===== あゆみの記録(手紙) ===== */
 function escapeHtml(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 
 function openAyumiSheet() {
@@ -1336,10 +1468,225 @@ function openAyumiSheet() {
     '</div>' +
     '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin:18px 0;padding:0 2px">この記録は、ASTOと話して育つたびに少しずつ書き足されていきます。</div>' +
     '<button class="bs-talk-btn" onclick="openLine()">💬&nbsp;&nbsp;ASTOと話す</button>';
-  document.getElementById('bs-overlay').classList.add('open');
-  document.getElementById('bottom-sheet').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  showSheet();
 }
+
+/* ===== うみタブ(みんなの種のたより) =====
+   GET /api/feed?userId=... → { items:[{type:'seed'|'growth'|'harvest', title, words?, emoji?, ago?, at?}] }
+   type: seed=種が芽吹いた / growth=種が育った / harvest=楽しみが叶った
+   バックエンド未実装の間はDEMO_FEED(fragment_bank想定の匿名データ)を表示。
+   設計メモ: 名前・いいね・フォロー・件数は出さない。今日の分だけで終わる(無限スクロールなし)。 */
+const FEED_TYPE = {
+  seed:    { verb:'誰かの種が芽吹いた',   ico:'🌱' },
+  growth:  { verb:'誰かの種が育った',     ico:'🌿' },
+  harvest: { verb:'誰かの楽しみが叶った', ico:'🌾' },
+};
+
+const DEMO_FEED = [
+  { type:'harvest', emoji:'🏔', title:'高尾山で朝日を見る',       words:'一度でいいから山の上で朝日が見たかった', ago:'さっき' },
+  { type:'seed',    emoji:'🍞', title:'パン屋めぐり',             words:'近所においしいパン屋があるらしい', ago:'今日' },
+  { type:'growth',  emoji:'🎸', title:'ギターで1曲弾けるように',   words:'昔ちょっとだけ触ってたんだよね', ago:'今日' },
+  { type:'seed',    emoji:'♨️', title:'ひとり温泉',               words:'誰にも気をつかわない休日がほしい', ago:'今日' },
+  { type:'harvest', emoji:'🍜', title:'行列のラーメン屋',          words:'ずっと気になってた店にやっと行けた', ago:'昨日' },
+  { type:'growth',  emoji:'🏃', title:'10km走れるようになる',      words:'まずは5kmから始めてみようかな', ago:'昨日' },
+  { type:'seed',    emoji:'📷', title:'フィルムカメラを始める',    words:'現像を待つ時間っていいなと思って', ago:'昨日' },
+  { type:'seed',    emoji:'🌺', title:'ベランダで花を育てる',      words:'朝起きる楽しみがひとつ増えそう', ago:'2日前' },
+  { type:'harvest', emoji:'🎬', title:'ひとり映画館',             words:'平日の昼間に観る映画は特別だった', ago:'2日前' },
+  { type:'growth',  emoji:'✈️', title:'台湾で朝ごはん',           words:'豆乳のスープ、いつか現地で食べたい', ago:'3日前' },
+  { type:'seed',    emoji:'📚', title:'読書の秋をやる',           words:'積んだままの本、今年こそ読みたい', ago:'3日前' },
+  { type:'harvest', emoji:'🍰', title:'ケーキを一台まるごと焼く',  words:'誕生日は自分で焼くって決めてた', ago:'3日前' },
+];
+
+let FEED = [];
+
+async function loadFeed() {
+  const uid = new URLSearchParams(location.search).get('userId');
+  try {
+    const r = await fetch('/api/feed' + (uid ? '?userId=' + encodeURIComponent(uid) : ''));
+    if (r.ok) {
+      const json = await r.json();
+      if (json && Array.isArray(json.items) && json.items.length) return json.items;
+    }
+  } catch(e) {}
+  return DEMO_FEED;
+}
+
+function feedAgo(item) {
+  if (item.ago) return item.ago;
+  if (!item.at) return '';
+  const diff = Date.now() - new Date(item.at).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return 'さっき';
+  if (h < 24) return '今日';
+  const d = Math.floor(h / 24);
+  if (d === 1) return '昨日';
+  return d + '日前';
+}
+
+function renderUmi() {
+  const el = document.getElementById('feed-list');
+  const end = document.getElementById('feed-end');
+  if (!FEED.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">🌊</div><div class="empty-text">まだ波は静かです。<br>そのうち、誰かの種のたよりが流れ着きます</div></div>';
+    end.style.display = 'none';
+    return;
+  }
+  el.innerHTML = FEED.slice(0, 20).map((f, i) => {
+    const t = FEED_TYPE[f.type] || FEED_TYPE.seed;
+    const cardCls = f.type === 'harvest' ? ' feed-card-harvest' : '';
+    return '<div class="feed-card' + cardCls + (i < 6 ? ' reveal' : '') + '" style="' + (i < 6 ? 'animation-delay:' + (i*0.06+0.05).toFixed(2) + 's' : '') + '" onclick="openFeedSheet(' + i + ')" role="button" tabindex="0">' +
+      '<div class="feed-emoji feed-emoji-' + (FEED_TYPE[f.type] ? f.type : 'seed') + '">' + escapeHtml(f.emoji || t.ico) + '</div>' +
+      '<div class="feed-body">' +
+        '<div class="feed-meta"><b>' + t.ico + ' ' + t.verb + '</b><span>・' + escapeHtml(feedAgo(f)) + '</span></div>' +
+        '<div class="feed-title">' + escapeHtml(f.title) + '</div>' +
+        (f.words ? '<div class="feed-words">' + escapeHtml(f.words) + '</div>' : '') +
+      '</div>' +
+      '<div class="fc-arrow" style="align-self:center">›</div>' +
+    '</div>';
+  }).join('');
+  end.style.display = 'block';
+}
+
+function openFeedSheet(i) {
+  const f = FEED[i];
+  if (!f) return;
+  const t = FEED_TYPE[f.type] || FEED_TYPE.seed;
+
+  const leadText = f.type === 'harvest'
+    ? 'どこかの誰かの楽しみが、ひとつ叶いました🌾'
+    : (f.type === 'growth'
+      ? 'どこかで、この種が少しずつ育っています🌿'
+      : 'どこかで、こんな種が芽吹きました🌱');
+
+  const wordsHtml = f.words
+    ? '<div class="bs-soyeba">' +
+        '<div class="bs-soyeba-lead">こんな言葉から生まれた種です</div>' +
+        '<div class="bs-soyeba-wish">' + escapeHtml(f.words) + '</div>' +
+      '</div>'
+    : '';
+
+  document.getElementById('bs-body').innerHTML =
+    '<div class="bs-hero">' +
+      '<div class="bs-emoji">' + escapeHtml(f.emoji || t.ico) + '</div>' +
+      '<div class="bs-title">' + escapeHtml(f.title) + '</div>' +
+      '<div class="bs-tags"><span class="bs-tag-status">' + t.ico + ' ' + t.verb + '・' + escapeHtml(feedAgo(f)) + '</span></div>' +
+    '</div>' +
+    '<div style="font-size:14px;color:var(--muted);line-height:2;margin-bottom:16px">' + leadText + '</div>' +
+    wordsHtml +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;padding:0 2px">ちょっと気になったら、あなたの種にしてもいいんだよ😊</div>' +
+    '<div class="bs-divider"></div>' +
+    '<button class="bs-talk-btn" onclick="adoptFeedSeed(' + i + ')">🌱&nbsp;&nbsp;わたしも育てたい</button>';
+
+  showSheet();
+}
+
+function adoptFeedSeed(i) {
+  const f = FEED[i];
+  if (!f) { openLine(); return; }
+  copyToClipboardThenLine('「' + f.title + '」、わたしも気になる。育ててみたい🌱');
+}
+
+/* ===== PWA: Service Worker登録 + ホーム画面追加導線 =====
+   方針: 押しつけない。1回見せて「あとで」を押されたら14日は出さない。
+   すでにホーム画面から起動している場合(standalone)は一切出さない。 */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  maybeShowInstallBanner();
+});
+
+function installDismissedRecently() {
+  const t = localStorage.getItem('astome_install_dismissed_at');
+  if (!t) return false;
+  return (Date.now() - parseInt(t, 10)) < 14 * 24 * 3600 * 1000;
+}
+
+function maybeShowInstallBanner() {
+  if (isStandalone() || installDismissedRecently()) return;
+  const slot = document.getElementById('install-banner-slot');
+  if (!slot || slot.childElementCount) return;
+
+  // Android/Chrome: ネイティブのインストールプロンプトが使える場合のみ表示
+  // iOS: 常に(手順案内として)表示
+  if (!isIOS() && !deferredInstallPrompt) return;
+
+  slot.innerHTML =
+    '<div class="install-banner reveal" style="animation-delay:.1s">' +
+      '<div class="install-banner-ico">🫍</div>' +
+      '<div class="install-banner-body">' +
+        '<div class="install-banner-title">ホーム画面に置いておく？</div>' +
+        '<div class="install-banner-sub">アイコンから、いつでもすぐ開けるようになるよ</div>' +
+      '</div>' +
+      '<div class="install-banner-actions">' +
+        '<button class="install-banner-btn" onclick="handleInstallClick()">追加する</button>' +
+        '<button class="install-banner-close" onclick="dismissInstallBanner()">あとで</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function dismissInstallBanner() {
+  localStorage.setItem('astome_install_dismissed_at', String(Date.now()));
+  const slot = document.getElementById('install-banner-slot');
+  if (slot) slot.innerHTML = '';
+}
+
+async function handleInstallClick() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    try { await deferredInstallPrompt.userChoice; } catch(e) {}
+    deferredInstallPrompt = null;
+    dismissInstallBanner();
+    return;
+  }
+  if (isIOS()) {
+    openIosInstallSheet();
+  }
+}
+
+function openIosInstallSheet() {
+  document.getElementById('bs-body').innerHTML =
+    '<div class="bs-hero"><div class="bs-emoji">🫍</div>' +
+    '<div class="bs-title">ホーム画面に追加</div>' +
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">3ステップで、アイコンからすぐ開けるようになります</div></div>' +
+    '<div class="ios-steps">' +
+      '<div class="ios-step"><div class="ios-step-num">1</div><div class="ios-step-text"><span class="ios-step-ico">⬆️</span>&nbsp; 画面下の「共有」ボタンをタップ</div></div>' +
+      '<div class="ios-step"><div class="ios-step-num">2</div><div class="ios-step-text"><span class="ios-step-ico">➕</span>&nbsp; 「ホーム画面に追加」を選ぶ</div></div>' +
+      '<div class="ios-step"><div class="ios-step-num">3</div><div class="ios-step-text"><span class="ios-step-ico">✅</span>&nbsp; 右上の「追加」をタップ</div></div>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin:16px 0 4px;padding:0 2px">これで、ASTOmeがホーム画面のアイコンから開けるようになるよ😊</div>' +
+    '<button class="bs-talk-btn" onclick="closeSheet();dismissInstallBanner()">わかった🌱</button>';
+  showSheet();
+}
+
+/* ===== 起動 ===== */
+(async () => {
+  DATA = await loadData();
+  document.getElementById('skeleton').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderMirai();
+  renderSodate();
+  renderKoukaizu();
+  renderJinsei();
+  // iOSはbeforeinstallpromptが発火しないため、画面が落ち着いてから案内を出す
+  if (isIOS()) setTimeout(maybeShowInstallBanner, 1200);
+  // うみタブは後追いで読み込み(ホーム表示をブロックしない)
+  FEED = await loadFeed();
+  renderUmi();
+})();
 </script>
 </body>
 </html>
