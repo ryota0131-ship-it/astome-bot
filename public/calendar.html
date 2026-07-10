@@ -480,6 +480,30 @@ button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outli
 .ios-step-text{font-size:13.5px;line-height:1.6}
 .ios-step-ico{font-size:16px}
 
+/* ===== 応援(そっと届く匿名の後押し) =====
+   方針: 数字を出さない。誰が応援したかも、何人応援したかも出さない。
+   ASTOが本人にだけ「誰かが応援してくれてたよ」と橋渡しする。 */
+.bs-cheer-btn{
+  width:100%;background:none;border:1.5px solid var(--sage);color:var(--sage-d);
+  border-radius:999px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;
+  margin-bottom:10px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.bs-cheer-btn:active{transform:scale(.98)}
+.bs-cheer-btn.done{
+  background:rgba(126,157,136,.14);color:var(--sage-d);border-color:transparent;cursor:default;
+}
+.seed-cheer-note{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(126,157,136,.12);border:1px solid rgba(126,157,136,.3);
+  border-radius:12px;padding:11px 14px;margin-top:14px;
+  font-size:12.5px;color:var(--sage-d);font-weight:700;cursor:pointer;
+  animation:cheerIn .5s var(--ease-out);
+}
+@keyframes cheerIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.seed-cheer-note-wave{font-size:15px;animation:cheerWave 2.4s ease-in-out infinite}
+@keyframes cheerWave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(12deg)}}
+
 /* ===== タブバー ===== */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;
@@ -750,7 +774,7 @@ const DEMO = {
         {id:'p1', text:'空いてる週末を決める', done:true},
         {id:'p2', text:'プール付きのホテルを探す', done:false},
       ] },
-    { name:'グルメ探し', emoji:'🍣', stage:'interested', category:'旅行・暮らし', roughTiming:'今月中', originalWish:'美味しいもの食べたい', astoMessage:'どんな味に出会えるか楽しみだね🍣' },
+    { name:'グルメ探し', emoji:'🍣', stage:'interested', category:'旅行・暮らし', roughTiming:'今月中', originalWish:'美味しいもの食べたい', astoMessage:'どんな味に出会えるか楽しみだね🍣', cheered:true },
     { name:'ペペロンチーノ自作', emoji:'🍝', stage:'discovered', category:'創作', roughTiming:'いつか', originalWish:'ペペロンチーノってどう作るの' },
   ],
   harvestedSeeds: [
@@ -974,6 +998,9 @@ function renderSodate() {
         '<div class="seed-prep-bar"><div class="seed-prep-bar-fill" style="width:' + prepPct + '%"></div></div>'
       : '';
     const timingTag = s.roughTiming ? '<span class="seed-timing-tag">' + s.roughTiming + '</span>' : '';
+    const cheerNote = s.cheered
+      ? '<div class="seed-cheer-note" onclick="event.stopPropagation();ackCheer(' + si + ')" role="button" tabindex="0"><span class="seed-cheer-note-wave">🌊</span>誰かが、この種を応援してくれてたよ</div>'
+      : '';
     const revealCls = sodateRevealed ? '' : ' reveal';
     const revealDelay = sodateRevealed ? '' : 'animation-delay:' + (si*0.07+0.05).toFixed(2) + 's';
     return '<div class="seed-card' + revealCls + '" style="' + revealDelay + '">' +
@@ -988,6 +1015,7 @@ function renderSodate() {
         (s.originalWish ? '<div class="seed-wish">' + s.originalWish + '</div>' : '') +
         '<div class="seed-asto-msg">' + msg + '</div>' +
         prepLine +
+        cheerNote +
       '</div>' +
       '<div style="padding:0 20px 18px">' +
         '<button class="seed-talk-btn" data-seed-idx="' + si + '" onclick="handleSeedTalk(this)">🌱&nbsp;&nbsp;この続きを育てる</button>' +
@@ -1001,6 +1029,32 @@ function growthIcon(done, total) {
   if (total === 0 || done === 0) return '🌱';
   if (done === total) return '🌳';
   return '🌿';
+}
+
+function ackCheer(si) {
+  const seeds = (DATA.seeds||[]).filter(s => s.stage !== 'harvested');
+  const seed = seeds[si];
+  if (!seed) return;
+  ackCheerForSeed(seed);
+}
+
+function ackCheerByName() {
+  const s = findSeedByName(CURRENT_SEED_NAME);
+  if (!s) return;
+  ackCheerForSeed(s);
+  renderSeedSheet();
+}
+
+function ackCheerForSeed(seed) {
+  seed.cheered = false;
+  const uid = new URLSearchParams(location.search).get('userId');
+  fetch('/api/cheer/ack', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: uid, seedName: seed.name }),
+  }).catch(() => {});
+  toastMini('うん、ひとりじゃないよ🌊');
+  renderSodate();
 }
 
 function handleSeedTalk(btn) {
@@ -1289,13 +1343,17 @@ function renderSeedSheet() {
       '<div style="font-size:13px;color:var(--muted);margin-top:6px">って話してたよね😊</div></div>'
     : '';
 
+  const cheerHtml = s.cheered
+    ? '<div class="seed-cheer-note" onclick="ackCheerByName()" role="button" tabindex="0"><span class="seed-cheer-note-wave">🌊</span>誰かが、この種を応援してくれてたよ</div>'
+    : '';
+
   const preps = s.preparations || [];
   const allDone = preps.length > 0 && preps.every(p => p.done);
   const achieveBtn = '<button class="bs-achieve-btn' + (allDone ? ' ready' : '') + '" onclick="achieveSeed()">' +
     '🌾&nbsp;&nbsp;叶った！収穫する</button>';
 
   document.getElementById('bs-body').innerHTML =
-    heroHtml + wishHtml +
+    heroHtml + wishHtml + cheerHtml +
     '<div id="shitaku-section">' + shitakuHtml(s) + '</div>' +
     '<div class="bs-divider"></div>' +
     achieveBtn +
@@ -1483,18 +1541,18 @@ const FEED_TYPE = {
 };
 
 const DEMO_FEED = [
-  { type:'harvest', emoji:'🏔', title:'高尾山で朝日を見る',       words:'一度でいいから山の上で朝日が見たかった', ago:'さっき' },
-  { type:'seed',    emoji:'🍞', title:'パン屋めぐり',             words:'近所においしいパン屋があるらしい', ago:'今日' },
-  { type:'growth',  emoji:'🎸', title:'ギターで1曲弾けるように',   words:'昔ちょっとだけ触ってたんだよね', ago:'今日' },
-  { type:'seed',    emoji:'♨️', title:'ひとり温泉',               words:'誰にも気をつかわない休日がほしい', ago:'今日' },
-  { type:'harvest', emoji:'🍜', title:'行列のラーメン屋',          words:'ずっと気になってた店にやっと行けた', ago:'昨日' },
-  { type:'growth',  emoji:'🏃', title:'10km走れるようになる',      words:'まずは5kmから始めてみようかな', ago:'昨日' },
-  { type:'seed',    emoji:'📷', title:'フィルムカメラを始める',    words:'現像を待つ時間っていいなと思って', ago:'昨日' },
-  { type:'seed',    emoji:'🌺', title:'ベランダで花を育てる',      words:'朝起きる楽しみがひとつ増えそう', ago:'2日前' },
-  { type:'harvest', emoji:'🎬', title:'ひとり映画館',             words:'平日の昼間に観る映画は特別だった', ago:'2日前' },
-  { type:'growth',  emoji:'✈️', title:'台湾で朝ごはん',           words:'豆乳のスープ、いつか現地で食べたい', ago:'3日前' },
-  { type:'seed',    emoji:'📚', title:'読書の秋をやる',           words:'積んだままの本、今年こそ読みたい', ago:'3日前' },
-  { type:'harvest', emoji:'🍰', title:'ケーキを一台まるごと焼く',  words:'誕生日は自分で焼くって決めてた', ago:'3日前' },
+  { id:'f01', type:'harvest', emoji:'🏔', title:'高尾山で朝日を見る',       words:'一度でいいから山の上で朝日が見たかった', ago:'さっき' },
+  { id:'f02', type:'seed',    emoji:'🍞', title:'パン屋めぐり',             words:'近所においしいパン屋があるらしい', ago:'今日' },
+  { id:'f03', type:'growth',  emoji:'🎸', title:'ギターで1曲弾けるように',   words:'昔ちょっとだけ触ってたんだよね', ago:'今日' },
+  { id:'f04', type:'seed',    emoji:'♨️', title:'ひとり温泉',               words:'誰にも気をつかわない休日がほしい', ago:'今日' },
+  { id:'f05', type:'harvest', emoji:'🍜', title:'行列のラーメン屋',          words:'ずっと気になってた店にやっと行けた', ago:'昨日' },
+  { id:'f06', type:'growth',  emoji:'🏃', title:'10km走れるようになる',      words:'まずは5kmから始めてみようかな', ago:'昨日' },
+  { id:'f07', type:'seed',    emoji:'📷', title:'フィルムカメラを始める',    words:'現像を待つ時間っていいなと思って', ago:'昨日' },
+  { id:'f08', type:'seed',    emoji:'🌺', title:'ベランダで花を育てる',      words:'朝起きる楽しみがひとつ増えそう', ago:'2日前' },
+  { id:'f09', type:'harvest', emoji:'🎬', title:'ひとり映画館',             words:'平日の昼間に観る映画は特別だった', ago:'2日前' },
+  { id:'f10', type:'growth',  emoji:'✈️', title:'台湾で朝ごはん',           words:'豆乳のスープ、いつか現地で食べたい', ago:'3日前' },
+  { id:'f11', type:'seed',    emoji:'📚', title:'読書の秋をやる',           words:'積んだままの本、今年こそ読みたい', ago:'3日前' },
+  { id:'f12', type:'harvest', emoji:'🍰', title:'ケーキを一台まるごと焼く',  words:'誕生日は自分で焼くって決めてた', ago:'3日前' },
 ];
 
 let FEED = [];
@@ -1565,6 +1623,12 @@ function openFeedSheet(i) {
       '</div>'
     : '';
 
+  const fid = f.id || feedFallbackId(f);
+  const cheered = isFeedCheered(fid);
+  const cheerBtnHtml = cheered
+    ? '<button class="bs-cheer-btn done" disabled>🌊&nbsp;&nbsp;そっと応援を届けたよ</button>'
+    : '<button class="bs-cheer-btn" onclick="sendCheer(\'' + fid + '\',' + i + ')">🌊&nbsp;&nbsp;そっと応援する</button>';
+
   document.getElementById('bs-body').innerHTML =
     '<div class="bs-hero">' +
       '<div class="bs-emoji">' + escapeHtml(f.emoji || t.ico) + '</div>' +
@@ -1573,11 +1637,47 @@ function openFeedSheet(i) {
     '</div>' +
     '<div style="font-size:14px;color:var(--muted);line-height:2;margin-bottom:16px">' + leadText + '</div>' +
     wordsHtml +
-    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;padding:0 2px">ちょっと気になったら、あなたの種にしてもいいんだよ😊</div>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;padding:0 2px">気になったら育ててみるもよし、そっと応援を届けるもよし😊</div>' +
     '<div class="bs-divider"></div>' +
+    cheerBtnHtml +
     '<button class="bs-talk-btn" onclick="adoptFeedSeed(' + i + ')">🌱&nbsp;&nbsp;わたしも育てたい</button>';
 
   showSheet();
+}
+
+function feedFallbackId(f) {
+  return 'auto-' + f.title.length + '-' + (f.title.charCodeAt(0)||0) + '-' + (f.ago||'');
+}
+
+function isFeedCheered(id) {
+  try {
+    const list = JSON.parse(localStorage.getItem('astome_cheered_feed_ids') || '[]');
+    return list.includes(id);
+  } catch(e) { return false; }
+}
+
+function markFeedCheered(id) {
+  try {
+    const list = JSON.parse(localStorage.getItem('astome_cheered_feed_ids') || '[]');
+    if (!list.includes(id)) list.push(id);
+    localStorage.setItem('astome_cheered_feed_ids', JSON.stringify(list));
+  } catch(e) {}
+}
+
+async function sendCheer(fid, i) {
+  if (isFeedCheered(fid)) return;
+  markFeedCheered(fid);
+  // 数字は返さない・見せない。届けた事実だけ本人にそっと伝える。
+  const uid = new URLSearchParams(location.search).get('userId');
+  try {
+    await fetch('/api/cheer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: uid, feedItemId: fid }),
+    });
+  } catch(e) {}
+  toastMini('そっと応援を届けたよ🌊');
+  openFeedSheet(i); // ボタンを「届けたよ」表示に更新
 }
 
 function adoptFeedSeed(i) {
