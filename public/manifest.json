@@ -1,0 +1,17 @@
+{
+  "name": "ASTOme（アストミー）",
+  "short_name": "ASTOme",
+  "description": "人生に、次の楽しみを。ASTOと一緒に未来の種を見つけて育てるアプリ",
+  "start_url": "/calendar.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFAF7",
+  "theme_color": "#0E1D2B",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
