@@ -1601,6 +1601,14 @@ function isStandalone() {
 function isIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
+function isAndroid() {
+  return /android/i.test(navigator.userAgent);
+}
+function isInLineApp() {
+  // LINEの内蔵ブラウザ(IAB)を検知。ここではbeforeinstallpromptが発火せず、
+  // Safari/Chromeの共有シートも出せないため、まず外のブラウザに出てもらう必要がある。
+  return /\bLine\//i.test(navigator.userAgent);
+}
 
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -1620,19 +1628,28 @@ function maybeShowInstallBanner() {
   const slot = document.getElementById('install-banner-slot');
   if (!slot || slot.childElementCount) return;
 
-  // Android/Chrome: ネイティブのインストールプロンプトが使える場合のみ表示
-  // iOS: 常に(手順案内として)表示
-  if (!isIOS() && !deferredInstallPrompt) return;
+  const inLine = isInLineApp();
+
+  // 表示条件:
+  // - LINEの中にいる場合は常に(まずブラウザに出る案内として)表示
+  // - iOSのSafari等では常に(手順案内として)表示
+  // - Android Chrome等ではネイティブのインストールプロンプトが使える場合のみ表示
+  if (!inLine && !isIOS() && !deferredInstallPrompt) return;
+
+  const sub = inLine
+    ? 'まずはブラウザで開くところから始めるよ'
+    : 'アイコンから、いつでもすぐ開けるようになるよ';
+  const btnLabel = (!inLine && deferredInstallPrompt) ? '追加する' : 'やり方を見る';
 
   slot.innerHTML =
     '<div class="install-banner reveal" style="animation-delay:.1s">' +
       '<div class="install-banner-ico">🫍</div>' +
       '<div class="install-banner-body">' +
         '<div class="install-banner-title">ホーム画面に置いておく？</div>' +
-        '<div class="install-banner-sub">アイコンから、いつでもすぐ開けるようになるよ</div>' +
+        '<div class="install-banner-sub">' + sub + '</div>' +
       '</div>' +
       '<div class="install-banner-actions">' +
-        '<button class="install-banner-btn" onclick="handleInstallClick()">追加する</button>' +
+        '<button class="install-banner-btn" onclick="handleInstallClick()">' + btnLabel + '</button>' +
         '<button class="install-banner-close" onclick="dismissInstallBanner()">あとで</button>' +
       '</div>' +
     '</div>';
@@ -1645,6 +1662,10 @@ function dismissInstallBanner() {
 }
 
 async function handleInstallClick() {
+  if (isInLineApp()) {
+    openInstallGuideSheet();
+    return;
+  }
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
     try { await deferredInstallPrompt.userChoice; } catch(e) {}
@@ -1653,22 +1674,59 @@ async function handleInstallClick() {
     return;
   }
   if (isIOS()) {
-    openIosInstallSheet();
+    openInstallGuideSheet();
   }
 }
 
-function openIosInstallSheet() {
+function installSteps() {
+  const inLine = isInLineApp();
+  if (inLine && isIOS()) {
+    return [
+      ['\ud83d\udcac', '画面下の「…」をタップ'],
+      ['\ud83c\udf10', '「ブラウザで開く」を選ぶ'],
+      ['\u2b06\ufe0f', 'Safariが開いたら、下の「共有」ボタンをタップ'],
+      ['\u2795', '「ホーム画面に追加」を選ぶ'],
+      ['\u2705', '右上の「追加」をタップ'],
+    ];
+  }
+  if (inLine && isAndroid()) {
+    return [
+      ['\ud83d\udcac', '画面右上の「⋮」をタップ'],
+      ['\ud83c\udf10', '「ブラウザで開く」を選ぶ'],
+      ['⋮', 'Chromeが開いたら、右上の「⋮」をタップ'],
+      ['\u2795', '「アプリをインストール」を選ぶ'],
+    ];
+  }
+  if (inLine) {
+    return [
+      ['\ud83d\udcac', '画面の「…」または「⋮」をタップ'],
+      ['\ud83c\udf10', '「ブラウザで開く」を選ぶ'],
+      ['\u2795', '開いたブラウザのメニューから「ホーム画面に追加」を選ぶ'],
+    ];
+  }
+  return [
+    ['\u2b06\ufe0f', '画面下の「共有」ボタンをタップ'],
+    ['\u2795', '「ホーム画面に追加」を選ぶ'],
+    ['\u2705', '右上の「追加」をタップ'],
+  ];
+}
+
+function openInstallGuideSheet() {
+  const steps = installSteps();
+  const stepsHtml = steps.map((s, i) =>
+    '<div class="ios-step"><div class="ios-step-num">' + (i+1) + '</div><div class="ios-step-text"><span class="ios-step-ico">' + s[0] + '</span>&nbsp; ' + s[1] + '</div></div>'
+  ).join('');
+  const lead = isInLineApp()
+    ? 'LINEのアプリ内ブラウザからは直接置けないので、一度外のブラウザに出てから追加します'
+    : steps.length + 'ステップで、アイコンからすぐ開けるようになります';
+
   document.getElementById('bs-body').innerHTML =
-    '<div class="bs-hero"><div class="bs-emoji">🫍</div>' +
+    '<div class="bs-hero"><div class="bs-emoji">\ud83e\udecd</div>' +
     '<div class="bs-title">ホーム画面に追加</div>' +
-    '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">3ステップで、アイコンからすぐ開けるようになります</div></div>' +
-    '<div class="ios-steps">' +
-      '<div class="ios-step"><div class="ios-step-num">1</div><div class="ios-step-text"><span class="ios-step-ico">⬆️</span>&nbsp; 画面下の「共有」ボタンをタップ</div></div>' +
-      '<div class="ios-step"><div class="ios-step-num">2</div><div class="ios-step-text"><span class="ios-step-ico">➕</span>&nbsp; 「ホーム画面に追加」を選ぶ</div></div>' +
-      '<div class="ios-step"><div class="ios-step-num">3</div><div class="ios-step-text"><span class="ios-step-ico">✅</span>&nbsp; 右上の「追加」をタップ</div></div>' +
-    '</div>' +
-    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin:16px 0 4px;padding:0 2px">これで、ASTOmeがホーム画面のアイコンから開けるようになるよ😊</div>' +
-    '<button class="bs-talk-btn" onclick="closeSheet();dismissInstallBanner()">わかった🌱</button>';
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">' + lead + '</div></div>' +
+    '<div class="ios-steps">' + stepsHtml + '</div>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.9;margin:16px 0 4px;padding:0 2px">これで、ASTOmeがホーム画面のアイコンから開けるようになるよ\ud83d\ude0a</div>' +
+    '<button class="bs-talk-btn" onclick="closeSheet();dismissInstallBanner()">わかった\ud83c\udf31</button>';
   showSheet();
 }
 
@@ -1681,8 +1739,9 @@ function openIosInstallSheet() {
   renderSodate();
   renderKoukaizu();
   renderJinsei();
-  // iOSはbeforeinstallpromptが発火しないため、画面が落ち着いてから案内を出す
-  if (isIOS()) setTimeout(maybeShowInstallBanner, 1200);
+  // iOSはbeforeinstallpromptが発火しない。LINE内ブラウザも同様に発火しないため、
+  // どちらの場合も画面が落ち着いてから案内を出す
+  if (isIOS() || isInLineApp()) setTimeout(maybeShowInstallBanner, 1200);
   // うみタブは後追いで読み込み(ホーム表示をブロックしない)
   FEED = await loadFeed();
   renderUmi();
