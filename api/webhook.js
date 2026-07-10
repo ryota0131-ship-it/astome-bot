@@ -234,7 +234,9 @@ originalWishがない場合は種の名前を使う。
 必ず1つのJSONにつき1つの<ASTO_JSON>タグで出力する。複数のJSONを1つのタグにまとめない。
 
 ### userFacts（永続的事実）
-仕事・家族・趣味・身体情報など変わらない事実。一度入れたら次回以降は出さなくていい。
+仕事・家族・趣味・身体情報など変わらない事実。
+【重要】上記の「このユーザーについて（永続的事実）」に、意味が同じ内容がすでに載っている場合は、
+言い回しを変えて再度出力してはいけない。本当に新しい事実の時だけ出力する。
 
 出力形式（内容は必ずユーザーが実際に話した事実のみ。以下は形式を示すためのダミー例であり、実在の情報ではない）：
 <ASTO_JSON>{"userFacts":["（例）〇〇が好き","（例）週末は〇〇をする習慣がある"]}</ASTO_JSON>
@@ -254,6 +256,12 @@ originalWishがない場合は種の名前を使う。
 
 「〇〇さんに送ってみますか？」YES → 他のテキストなしで
 <ASTO_JSON>{"share":true,"text":"..."}</ASTO_JSON>
+
+会話の中で具体的な店名・施設名・スポット名（Web検索で見つけたものも含む）が出た時、
+「地図出せる？」「場所どこ？」のような要望が来たら、
+"地図が苦手"などと言わず、必ずリンクで返す。他のテキストなしで：
+<ASTO_JSON>{"map":true,"query":"店名や施設名（地名も添えると精度が上がる。例：レストラン泉屋 釧路）"}</ASTO_JSON>
+複数の候補がある場合は代表的な1件を選ぶか、ユーザーに聞いて絞ってから出す。
 
 ## アフィリエイト
 同じテーマが繰り返し出て、ユーザーが具体的な候補（宿・店・体験など）を求めている、または行動に移そうとしているとわかったら、本人の言葉を引用して自然に提示する。
@@ -699,6 +707,13 @@ export default async function handler(req, res) {
       function buildUserContext(data) {
         const parts = [];
 
+        // ユーザーに見える形で引用される可能性がある値は、内部コードのまま出さず日本語ラベルに変換する。
+        // （calendar.htmlのSTATUS_LABEL/SEED_STATUSと表現を揃えている。Redis上の生データ自体は変更しない）
+        const EVENT_STATUS_LABEL = { dream: "いつか", interest: "気になってる", plan: "計画中", scheduled: "予定あり" };
+        const SEED_STAGE_LABEL = { discovered: "芽吹いたばかり", interested: "育ってきた", planning: "もうすぐ形になる", booked: "もうすぐ叶う" };
+        const eventStatusJa = (s) => EVENT_STATUS_LABEL[s] || s;
+        const seedStageJa = (s) => SEED_STAGE_LABEL[s] || s;
+
         // 長期ファクト（永続的な事実）
         if (Array.isArray(data.userFacts) && data.userFacts.length > 0) {
           parts.push("このユーザーについて（永続的事実）:\n" + data.userFacts.map(s => "・" + s).join("\n"));
@@ -715,7 +730,7 @@ export default async function handler(req, res) {
           if (active.length > 0) {
             const eventList = active.map(e => {
               const dateStr = e.date ? e.date : "いつか";
-              return "・" + dateStr + " " + e.title + "（" + e.status + "）";
+              return "・" + dateStr + " " + e.title + "（" + eventStatusJa(e.status) + "）";
             }).join("\n");
             parts.push("ユーザーの未来カレンダー:\n" + eventList);
           }
@@ -726,7 +741,7 @@ export default async function handler(req, res) {
           const active = data.seeds.filter(s => s.stage !== "harvested");
           if (active.length > 0) {
             const seedList = active.map(s =>
-              "・" + s.name + "（" + (s.stage || "discovered") + "）"
+              "・" + s.name + "（" + seedStageJa(s.stage || "discovered") + "）"
             ).join("\n");
             parts.push("現在の種:\n" + seedList);
           }
@@ -904,7 +919,8 @@ const systemPrompt = userData.isFirstTime
 
 const response = await anthropic.messages.create({
   model: "claude-haiku-4-5-20251001",
-  max_tokens: 800, // 検索結果を含むため少し増やす
+  max_tokens: 1300, // 会話文+複数のASTO_JSONタグ(userFacts/conversationSummary/seed/futureEvent等)が
+                     // 同じターンに重なると800では閉じタグの前に打ち切られることがあったため引き上げ
   system: systemPrompt,
   messages: recentMessages,
   tools: [
@@ -926,6 +942,7 @@ const rawReply = response.content
       let replyText = rawReply;
       let calendarUrl = null;
       let shareUrl = null;
+      let mapUrl = null;
       let searchRequestQuery = null;
 
       // === 変化追跡（種・未来イベント新規追加、残高変化のサマリを返信末尾に付ける） ===
@@ -962,6 +979,14 @@ const rawReply = response.content
             shareUrl = `https://social-plugins.line.me/lineit/share?text=${text}`;
             replyText = replyText.replace(match[0], "").trim();
             if (!replyText) replyText = "シェア用のメッセージを作りました😊 タップして送ってみてください🌱";
+          }
+
+          // 地図（会話に出た店・施設・スポットをワンタップで地図へ）
+          if (data.map && data.query) {
+            const q = encodeURIComponent(data.query);
+            mapUrl = `https://www.google.com/maps/search/?api=1&query=${q}`;
+            replyText = replyText.replace(match[0], "").trim();
+            if (!replyText) replyText = "地図を用意しました😊 タップして見てみてください🌱";
           }
 
           // おすすめ検索リクエスト（非同期）
@@ -1056,26 +1081,57 @@ const rawReply = response.content
             replyText = replyText.replace(match[0], "").trim();
           }
 
-          // 会話要約の蓄積（重複除去・最新20件）
+          // 文字2-gramの「包含率」で「言い回し違いの同じ内容」を検出する簡易関数。
+          // userFacts/conversationSummaryは自由記述文なので完全一致(旧ロジック)では
+          // 「11月アクアラインマラソンエントリー済み」と「アクアラインマラソン2026年11月エントリー済み」
+          // のような表現ゆれを別内容として扱ってしまい、無限に重複蓄積するバグがあった。
+          // Jaccard(和集合基準)ではなく短い方基準の包含率にすることで、
+          // 「要約が徐々に詳しくなっていく」パターンもより拾えるようにしている。
+          function textSimilarity(a, b) {
+            const norm = (s) => (s || "").replace(/[\s、。・！？!?,.]/g, "");
+            const bigrams = (s) => {
+              const set = new Set();
+              for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
+              return set;
+            };
+            const na = norm(a), nb = norm(b);
+            if (!na || !nb) return 0;
+            const sa = bigrams(na), sb = bigrams(nb);
+            let overlap = 0;
+            sa.forEach(g => { if (sb.has(g)) overlap++; });
+            const minSize = Math.min(sa.size, sb.size);
+            return minSize > 0 ? overlap / minSize : 0;
+          }
+          const SIMILARITY_THRESHOLD = 0.6;
+          // 類似項目があれば新しい表現で上書き、なければ追加する（配列は上限件数を超えたら古い方から削除）
+          function upsertSimilar(list, item, maxLen) {
+            const idx = list.findIndex(existing => textSimilarity(existing, item) >= SIMILARITY_THRESHOLD);
+            if (idx >= 0) {
+              list[idx] = item; // 新しい表現に更新（重複追加はしない）
+            } else {
+              list.push(item);
+            }
+            while (list.length > maxLen) list.shift();
+          }
+
+          // 会話要約の蓄積（類似重複はマージ・最新20件まで）
           if (data.conversationSummary) {
             if (!Array.isArray(userData.conversationSummary)) userData.conversationSummary = [];
             const items = Array.isArray(data.conversationSummary)
               ? data.conversationSummary
               : [data.conversationSummary];
             items.forEach(item => {
-              if (item && !userData.conversationSummary.includes(item))
-                userData.conversationSummary.push(item);
+              if (item) upsertSimilar(userData.conversationSummary, item, 20);
             });
             replyText = replyText.replace(match[0], "").trim();
           }
 
-          // 長期ファクトの蓄積（永続・重複除去）
+          // 長期ファクトの蓄積（永続・類似重複はマージ・最新25件まで）
           if (data.userFacts) {
             if (!Array.isArray(userData.userFacts)) userData.userFacts = [];
             const facts = Array.isArray(data.userFacts) ? data.userFacts : [data.userFacts];
             facts.forEach(item => {
-              if (item && !userData.userFacts.includes(item))
-                userData.userFacts.push(item);
+              if (item) upsertSimilar(userData.userFacts, item, 25);
             });
             replyText = replyText.replace(match[0], "").trim();
           }
@@ -1117,9 +1173,12 @@ const rawReply = response.content
               history: [{ status: initialStatus, at: now }],
             };
             if (!Array.isArray(userData.futureEvents)) userData.futureEvents = [];
-            // id優先、なければtitle+sourceSeedで検索
+            // id優先、なければtitleのみで検索（sourceSeedはモデルが毎回表現を変えるため
+            // 同一性の判定に使わない。以前はtitle+sourceSeed一致を要求しており、
+            // sourceSeedの言い回しが微妙に違うだけで別イベントとして二重保存されるバグがあった）
+            const normTitle = (s) => (s || "").trim();
             const existingEvent = userData.futureEvents.findIndex(e =>
-              data.id ? e.id === data.id : (e.title === data.title && e.sourceSeed === (data.sourceSeed || null))
+              data.id ? e.id === data.id : normTitle(e.title) === normTitle(data.title)
             );
             const isNew = existingEvent < 0;
             if (existingEvent >= 0) {
@@ -1438,6 +1497,15 @@ const rawReply = response.content
       // 最終安全網：パース・処理の成否にかかわらず残留タグを除去
       replyText = replyText.replace(/<ASTO_JSON>.*?<\/ASTO_JSON>/gs, "").trim();
 
+      // 追加の安全網：max_tokens打ち切り等で</ASTO_JSON>が生成される前に応答が切れた場合、
+      // 上の正規表現（開始・終了タグの両方が必要）はマッチせずJSON片が生テキストとして
+      // ユーザーに送られてしまうバグがあった。閉じタグの有無に関わらず、
+      // <ASTO_JSON>が出現した時点から先は表示すべきでない内部データとして丸ごと切り捨てる。
+      const unclosedTagIndex = replyText.indexOf("<ASTO_JSON>");
+      if (unclosedTagIndex >= 0) {
+        replyText = replyText.slice(0, unclosedTagIndex).trim();
+      }
+
       // === 種のステージ自動昇格 ===
       // データの状態から自動算出（AIに任せず確実に動かす）
       if (Array.isArray(userData.seeds)) {
@@ -1533,12 +1601,15 @@ const isFirstCheckinMessage = !userData.isFirstTime;
 
       const activeQuickReply = onboardingQuickReply || quickReply;
 
-      // カレンダー・シェアボタンの組み立て
+      // カレンダー・シェア・地図ボタンの組み立て
       let replyMessages;
-      if (calendarUrl || shareUrl) {
+      if (calendarUrl || shareUrl || mapUrl) {
         const actions = [];
         if (calendarUrl) {
           actions.push({ type: "uri", label: "📅 カレンダーに追加", uri: calendarUrl });
+        }
+        if (mapUrl) {
+          actions.push({ type: "uri", label: "📍 地図で見る", uri: mapUrl });
         }
         if (shareUrl) {
           actions.push({ type: "uri", label: "📤 LINEでシェア", uri: shareUrl });
