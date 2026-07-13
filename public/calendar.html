@@ -130,6 +130,7 @@ button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outli
 .hf-count-num{font-size:24px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
 .hf-count-unit{font-size:10px;font-weight:700;color:var(--gold);opacity:.85}
 .hf-count-pre{font-size:10px;font-weight:700;color:var(--gold);opacity:.85;display:block;margin-bottom:1px}
+.hf-count-date{font-size:9.5px;font-weight:700;color:var(--gold);opacity:.7;display:block;margin-top:2px}
 .hf-emoji{position:relative;font-size:40px;line-height:1;margin-bottom:12px}
 .hf-name{position:relative;font-size:29px;font-weight:800;line-height:1.25;margin-bottom:18px}
 .hf-scene{
@@ -171,6 +172,7 @@ button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outli
 .fc-badge-plan     {background:rgba(126,157,136,.18);color:var(--sage-d)}
 .fc-badge-interest {background:rgba(180,160,100,.12);color:#7a6a30}
 .fc-badge-dream    {background:rgba(100,100,120,.1);color:var(--muted)}
+.fc-date{font-size:10px;font-weight:700;color:var(--muted);margin-top:1px}
 .fc-days{font-size:10.5px;font-weight:700;color:var(--gold-d);font-variant-numeric:tabular-nums}
 .fc-arrow{font-size:14px;color:var(--muted);opacity:.4}
 
@@ -504,8 +506,60 @@ button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outli
 .seed-cheer-note-wave{font-size:15px;animation:cheerWave 2.4s ease-in-out infinite}
 @keyframes cheerWave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(12deg)}}
 
+/* ===== 人生のカード ===== */
+.lifecard-wrap{margin:0 16px 28px}
+.lifecard-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.lifecard-title{font-size:15px;font-weight:800;color:var(--ink)}
+.lifecard-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.lifecard-trail{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;padding:14px 16px;
+  background:var(--navy);border-radius:16px;
+}
+.lifecard-trail-word{
+  font-size:11.5px;color:rgba(244,238,220,.85);
+  background:rgba(243,194,91,.12);border:1px solid rgba(243,194,91,.25);
+  border-radius:999px;padding:4px 11px;
+}
+.lifecard-threads{display:flex;flex-direction:column;gap:12px}
+.lifecard-thread{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:20px 20px 16px;box-shadow:0 4px 16px -10px rgba(40,53,48,.22);
+}
+.lifecard-thread-label{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.lifecard-thread-label-ico{width:26px;height:26px;border-radius:50%;background:rgba(126,157,136,.16);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.lifecard-thread-row{display:flex;gap:10px;margin-bottom:8px;font-size:13.5px;line-height:1.85}
+.lifecard-thread-tag{flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--sage-d);background:rgba(126,157,136,.12);border-radius:8px;padding:2px 8px;height:fit-content;margin-top:2px}
+.lifecard-thread-text{color:#4a5650;flex:1}
+.lifecard-thread-edited{font-size:10px;color:var(--muted);margin-top:2px}
+.lifecard-thread-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.lifecard-thread-btn{
+  flex:1;font-size:12px;font-weight:700;padding:9px 0;border-radius:999px;cursor:pointer;text-align:center;
+  transition:transform .18s var(--ease-spring);
+}
+.lifecard-thread-btn:active{transform:scale(.96)}
+.lifecard-thread-btn-edit{background:none;border:1.3px solid var(--sage);color:var(--sage-d)}
+.lifecard-thread-btn-talk{background:var(--navy);border:none;color:var(--cream)}
+.lifecard-empty{padding:20px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.9}
+.lifecard-find-more{
+  margin-top:14px;background:none;border:1.5px dashed var(--sage);color:var(--sage-d);
+  border-radius:14px;padding:13px;width:100%;font-size:13px;font-weight:700;cursor:pointer;
+  transition:transform .18s var(--ease-spring);
+}
+.lifecard-find-more:active{transform:scale(.97)}
+
+/* 編集シート */
+.lifecard-edit-field{margin-bottom:14px}
+.lifecard-edit-label{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.lifecard-edit-textarea{
+  width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;
+  font-size:14px;font-family:inherit;color:var(--ink);line-height:1.7;resize:vertical;min-height:64px;
+  background:var(--card);
+}
+.lifecard-edit-textarea:focus{outline:none;border-color:var(--sage)}
+
 /* ===== タブバー ===== */
 .tabbar{
+
   position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;
   background:rgba(250,250,247,.95);backdrop-filter:blur(14px);
   border-top:1px solid var(--line);display:flex;
@@ -667,6 +721,17 @@ button:focus-visible,[onclick]:focus-visible{outline:2px solid var(--sage);outli
     </div>
     <div class="find-arrow">›</div>
   </div>
+
+  <div class="lifecard-wrap">
+    <div class="lifecard-header">
+      <div>
+        <div class="lifecard-title">🃏 人生のカード</div>
+        <div class="lifecard-sub">これまでの断片から見つけた、糸</div>
+      </div>
+    </div>
+    <div id="lifecard-body"></div>
+  </div>
+
   <div class="timeline" id="jinsei-wrap"></div>
 </section>
 
@@ -786,6 +851,21 @@ const DEMO = {
       nextSeedWish:'屋久島に行きたい',
     },
   ],
+  lifeCard: {
+    keywords: ['北海道','ギター','上京','日雇い','ケータイショップ','弾き語り','ウイスキー','音楽','コールセンター','社員','マーケティング','マネージャー','タビロー','アストミー'],
+    threads: [
+      { id:'thread_1', label:'誰かに、渡し続けている', ico:'🎸',
+        past:'ギターを抱えて、上京した。弾き語りをしていた頃も。今、マーケティングをしている時も、アストミーを作っている時も。',
+        future:'何かを抱えて、誰かに渡す。楽器が、言葉や仕組みに変わっただけで。' },
+      { id:'thread_2', label:'足場を、自分で作ってきた', ico:'🧭',
+        past:'日雇い、ケータイショップ、コールセンター。決まった場所がなかった時期から、社員になり、マネージャーになり。',
+        future:'タビローを作り、今アストミーを作っている。少しずつ、自分の手で。' },
+      { id:'thread_3', label:'止まっても、消えていない', ico:'🌊',
+        past:'タビローは、一度止まった。',
+        future:'それが今、アストミーという形で、また動いている。止まっても、消えてはいなかった。' },
+    ],
+    lastGeneratedAt: Date.now(),
+  },
 };
 
 async function loadData() {
@@ -835,6 +915,16 @@ function countdownChip(e) {
   if (d === null) return '';
   if (d <= 60) return '<span class="fc-days">あと' + d + '日</span>';
   return '<span class="fc-days">あと約' + Math.round(d/30) + 'ヶ月</span>';
+}
+
+// e.dateに具体的な日付(YYYY-MM-DD)まで分かっていれば「7月26日」、
+// 月までしか分かっていなければ「10月ごろ」を返す。日付情報が無ければ空文字。
+function targetDateLabel(e) {
+  if (!e.date) return '';
+  const parts = e.date.split('-').map(Number);
+  if (!parts[0] || !parts[1]) return '';
+  if (parts[2]) return parts[1] + '月' + parts[2] + '日';
+  return parts[1] + '月ごろ';
 }
 
 function sceneSnippet(scene) {
@@ -891,8 +981,9 @@ function renderMirai() {
   if (lead) {
     const sceneHtml = lead.scene ? lead.scene.replace(/\n/g,'<br>') : '';
     const d = daysUntil(lead);
+    const heroDateLabel = targetDateLabel(lead);
     const countHtml = d !== null
-      ? '<div class="hf-count"><span class="hf-count-pre">あと</span><span class="hf-count-num">' + (d <= 99 ? d : Math.round(d/30)) + '</span><span class="hf-count-unit">' + (d <= 99 ? '日' : 'ヶ月') + '</span></div>'
+      ? '<div class="hf-count"><span class="hf-count-pre">あと</span><span class="hf-count-num">' + (d <= 99 ? d : Math.round(d/30)) + '</span><span class="hf-count-unit">' + (d <= 99 ? '日' : 'ヶ月') + '</span>' + (heroDateLabel ? '<span class="hf-count-date">' + heroDateLabel + '</span>' : '') + '</div>'
       : '';
     hf.innerHTML =
       '<div class="hf-bg">' +
@@ -936,6 +1027,7 @@ function futureCardHtml(e) {
   const st = e.status;
   const dailyMsg = DATA.daily && DATA.daily.futureCardMessages && DATA.daily.futureCardMessages[e.title];
   const snippet = dailyMsg || sceneSnippet(e.scene);
+  const dateLabel = targetDateLabel(e);
   return '<div class="future-card" onclick="openSheet(' + idx + ')" role="button" tabindex="0">' +
     '<div class="fc-emoji fc-emoji-' + st + '">' + (e.emoji||'✨') + '</div>' +
     '<div class="fc-body">' +
@@ -944,6 +1036,7 @@ function futureCardHtml(e) {
     '</div>' +
     '<div class="fc-right">' +
       '<div class="fc-badge fc-badge-' + st + '">' + (STATUS_LABEL[st]||st) + '</div>' +
+      (dateLabel ? '<div class="fc-date">' + dateLabel + '</div>' : '') +
       countdownChip(e) +
       '<div class="fc-arrow">›</div>' +
     '</div>' +
@@ -1066,6 +1159,99 @@ function handleSeedTalk(btn) {
 }
 
 /* ===== あゆみタブ ===== */
+/* ===== 人生のカード ===== */
+function escapeAttr(s){ return String(s).replace(/'/g, "&#39;"); }
+
+function renderLifeCard() {
+  const el = document.getElementById('lifecard-body');
+  if (!el) return;
+  const lc = DATA.lifeCard || { keywords: [], threads: [] };
+  const threads = Array.isArray(lc.threads) ? lc.threads : [];
+
+  if (!threads.length) {
+    el.innerHTML = '<div class="lifecard-empty">まだ糸は見つかっていません🌱<br>ASTOと話すうちに、少しずつ見えてきます</div>' +
+      '<button class="lifecard-find-more" onclick="findNewThread()">🌱 糸を探してみる</button>';
+    return;
+  }
+
+  const trailHtml = (lc.keywords || []).length
+    ? '<div class="lifecard-trail">' + lc.keywords.map(k => '<span class="lifecard-trail-word">' + escapeHtml(k) + '</span>').join('') + '</div>'
+    : '';
+
+  const threadsHtml = threads.map((t, i) => {
+    const ico = t.ico || '🧵';
+    const editedNote = t.editedByUser ? '<div class="lifecard-thread-edited">✏️ 自分で直した内容</div>' : '';
+    return '<div class="lifecard-thread">' +
+      '<div class="lifecard-thread-label"><span class="lifecard-thread-label-ico">' + ico + '</span>' + escapeHtml(t.label) + '</div>' +
+      (t.past ? '<div class="lifecard-thread-row"><span class="lifecard-thread-tag">これまで</span><span class="lifecard-thread-text">' + escapeHtml(t.past) + '</span></div>' : '') +
+      (t.future ? '<div class="lifecard-thread-row"><span class="lifecard-thread-tag">これから</span><span class="lifecard-thread-text">' + escapeHtml(t.future) + '</span></div>' : '') +
+      editedNote +
+      '<div class="lifecard-thread-actions">' +
+        '<button class="lifecard-thread-btn lifecard-thread-btn-edit" onclick="openThreadEditSheet(' + i + ')">✏️ さっと直す</button>' +
+        '<button class="lifecard-thread-btn lifecard-thread-btn-talk" onclick="talkAboutThread(' + i + ')">💬 話して直す</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  el.innerHTML = trailHtml + '<div class="lifecard-threads">' + threadsHtml + '</div>' +
+    '<button class="lifecard-find-more" onclick="findNewThread()">🌱 新しい糸を探す</button>';
+}
+
+function findNewThread() {
+  copyToClipboardThenLine('これまでの人生から、新しい種を見つけたい');
+}
+
+function talkAboutThread(i) {
+  const t = (DATA.lifeCard.threads || [])[i];
+  if (!t) return;
+  copyToClipboardThenLine('人生のカードの「' + t.label + '」、なんか違う気がする');
+}
+
+function openThreadEditSheet(i) {
+  const t = (DATA.lifeCard.threads || [])[i];
+  if (!t) return;
+  document.getElementById('bs-body').innerHTML =
+    '<div class="bs-hero"><div class="bs-emoji">✏️</div>' +
+    '<div class="bs-title">糸を直す</div>' +
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">気になるところだけ、書き換えてください</div></div>' +
+    '<div class="lifecard-edit-field"><div class="lifecard-edit-label">糸の名前</div>' +
+      '<textarea class="lifecard-edit-textarea" id="edit-label" style="min-height:auto">' + escapeHtml(t.label) + '</textarea></div>' +
+    '<div class="lifecard-edit-field"><div class="lifecard-edit-label">これまで</div>' +
+      '<textarea class="lifecard-edit-textarea" id="edit-past">' + escapeHtml(t.past || '') + '</textarea></div>' +
+    '<div class="lifecard-edit-field"><div class="lifecard-edit-label">これから</div>' +
+      '<textarea class="lifecard-edit-textarea" id="edit-future">' + escapeHtml(t.future || '') + '</textarea></div>' +
+    '<button class="bs-talk-btn" onclick="saveThreadEdit(' + i + ')">🌱 これで直す</button>';
+  showSheet();
+}
+
+async function saveThreadEdit(i) {
+  const t = (DATA.lifeCard.threads || [])[i];
+  if (!t) return;
+  const label = document.getElementById('edit-label').value.trim();
+  const past = document.getElementById('edit-past').value.trim();
+  const future = document.getElementById('edit-future').value.trim();
+  if (!label) { toastMini('糸の名前は空にできません'); return; }
+
+  // 楽観的に画面を先に更新
+  t.label = label; t.past = past; t.future = future; t.editedByUser = true;
+  closeSheet();
+  renderLifeCard();
+  toastMini('直しました🌱');
+
+  const uid = new URLSearchParams(location.search).get('userId');
+  if (!uid) return; // デモ表示時はサーバー保存しない
+  try {
+    const res = await fetch('/api/lifecard-edit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: uid, threadId: t.id, label, past, future }),
+    });
+    if (!res.ok) throw new Error('save failed');
+  } catch (e) {
+    toastMini('保存に失敗したかも。もう一度試してみてください');
+  }
+}
+
 function renderJinsei() {
   const chapters = [];
 
@@ -1490,7 +1676,7 @@ function openFindSheet() {
     '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">気になる方法を選んでください</div></div>' +
     '<div class="option-card" onclick="openLine()" role="button" tabindex="0"><div class="option-ico">🫍</div><div><div class="option-title">アストと話す</div><div class="option-sub">会話しながら一緒に見つける</div></div></div>' +
     '<div class="option-card" onclick="closeSheet();switchTab(\'umi\')" role="button" tabindex="0"><div class="option-ico">🌊</div><div><div class="option-title">誰かの種を見る</div><div class="option-sub">うみに流れ着いた、誰かの種のたよりから</div></div></div>' +
-    '<div class="option-card" onclick="openLine()" role="button" tabindex="0"><div class="option-ico">📖</div><div><div class="option-title">これまでの人生から見つける</div><div class="option-sub">これまでの断片を見直してみる</div></div></div>';
+    '<div class="option-card" onclick="closeSheet();switchTab(\'jinsei\');setTimeout(()=>document.querySelector(\'.lifecard-wrap\')?.scrollIntoView({behavior:\'smooth\',block:\'start\'}),350)" role="button" tabindex="0"><div class="option-ico">📖</div><div><div class="option-title">これまでの人生から見つける</div><div class="option-sub">これまでの断片を見直してみる</div></div></div>';
   showSheet();
 }
 
@@ -1831,6 +2017,14 @@ function openInstallGuideSheet() {
 }
 
 /* ===== 起動 ===== */
+// リッチメニュー等からの #calendar / #seeds / #story / #umi ハッシュ付きリンクに対応
+// （以前はwebhook.js側がこの形式でURLを送っていたが、読み取る側の実装がなく死んだ導線だった）
+const HASH_TAB_MAP = { calendar: 'mirai', seeds: 'sodate', story: 'jinsei', umi: 'umi' };
+function initialTabFromHash() {
+  const h = (location.hash || '').replace('#', '');
+  return HASH_TAB_MAP[h] || 'mirai';
+}
+
 (async () => {
   DATA = await loadData();
   document.getElementById('skeleton').style.display = 'none';
@@ -1839,12 +2033,16 @@ function openInstallGuideSheet() {
   renderSodate();
   renderKoukaizu();
   renderJinsei();
+  renderLifeCard();
+  const initialTab = initialTabFromHash();
+  if (initialTab !== 'mirai') switchTab(initialTab);
   // iOSはbeforeinstallpromptが発火しない。LINE内ブラウザも同様に発火しないため、
   // どちらの場合も画面が落ち着いてから案内を出す
   if (isIOS() || isInLineApp()) setTimeout(maybeShowInstallBanner, 1200);
   // うみタブは後追いで読み込み(ホーム表示をブロックしない)
   FEED = await loadFeed();
   renderUmi();
+  if (initialTab === 'umi') renderUmi();
 })();
 </script>
 </body>
