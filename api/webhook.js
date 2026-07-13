@@ -1813,6 +1813,14 @@ const isFirstCheckinMessage = !userData.isFirstTime;
 
       const activeQuickReply = onboardingQuickReply || quickReply;
 
+      // 安全網：検索のみで終わるターン等でreplyTextが空文字列になることがある。
+      // LINEの送信APIは空のtextメッセージを受け付けずエラーになり、
+      // それが原因で「ちょっとうまく聞き取れなかった」という無関係なエラー文言が
+      // 出てしまうバグがあった。空の場合はここで必ず何か入れる。
+      if (!replyText || !replyText.trim()) {
+        replyText = "うんうん、そうなんですね😊";
+      }
+
       // カレンダー・シェア・地図ボタンの組み立て
       let replyMessages;
       if (calendarUrl || shareUrl || mapUrl) {
@@ -1885,7 +1893,7 @@ await client.replyMessage({
     } catch (error) {
       console.error("Error:", error);
 
-      let errorMessage = "ごめんね、ちょっとうまく聞き取れなかった😅 もう一度話しかけてみて！";
+      let errorMessage = "ごめんね、うまく処理できませんでした😅 もう一度送ってみてください！";
 
       const errorStr = error?.message || error?.toString() || "";
       const status = error?.status || error?.statusCode || 0;
