@@ -783,11 +783,17 @@ export default async function handler(req, res) {
     const replyToken = event.replyToken;
 
     // リッチメニューキーワードの処理（tryの外でcontinueを使うため）
+    // astome_v2リッチメニュー：A(話そう！)は通常の会話に任せる（ここではハンドリングしない）。
+    // B・Cはユーザー専用データが要るためテキスト経由でuserId付きURLを組み立てる。
+    // D（使い方）はLINE側で直接リンクに設定済みなので、ここには届かない。
+    // 旧リッチメニューの文言も互換のため残す。
     const richMenuActions = {
-      "カレンダーを見る": "calendar",
-      "種を見る": "seeds",
-      "記録を見る": "story",
-      "使い方を見る": null,
+      "育てるを見る": "seeds",
+      "うみを見る": "umi",
+      "カレンダーを見る": "calendar", // 旧メニュー互換
+      "種を見る": "seeds",            // 旧メニュー互換
+      "記録を見る": "story",          // 旧メニュー互換
+      "使い方を見る": null,           // 旧メニュー互換（新メニューでは直リンクのため通常は来ない）
     };
     const richMenuTab = richMenuActions[userMessage];
     if (richMenuTab !== undefined) {
@@ -795,6 +801,8 @@ export default async function handler(req, res) {
         ? `https://astome-bot.vercel.app/calendar.html?userId=${userId}#${richMenuTab}`
         : `https://astome-bot.vercel.app/howto.html`;
       const labels = {
+        "育てるを見る": "🌱 育てている種を見る",
+        "うみを見る": "🌊 うみを見る",
         "カレンダーを見る": "📅 未来カレンダーを開く",
         "種を見る": "🌱 育てている種を見る",
         "記録を見る": "📖 これまでの記録を見る",
