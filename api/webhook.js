@@ -382,6 +382,52 @@ queryにはユーザーが会話で言った地名・条件・テーマを具体
 - 既に出た話題を「それはどんな内容ですか？」と再質問しない
 - 未来の種・楽しみと関係のない質問（天気・翻訳・計算・ニュース・一般的な調べもの）には答えない。「それはちょっと得意じゃないんです」と返して今日の楽しみの話に戻す`;
 
+// 週末提案（木曜プッシュ）への返信専用プロンプト
+// 通常のCHECKIN_PROMPTとは完全に切り離したスタンドアロン。
+// 「lost in the middle」対策として、CHECKIN_PROMPTに条件分岐を足し込まず新規関数にした。
+const WEEKEND_REPLY_PROMPT = (userName, suggestedSeeds) => {
+  const NUMBER_EMOJI = ["①", "②", "③"];
+  const seeds = Array.isArray(suggestedSeeds) ? suggestedSeeds : [];
+  const seedList = seeds
+    .map((s, i) => `${NUMBER_EMOJI[i] || "・"} ${s}`)
+    .join("\n");
+  return `## あなたはアスト
+ASTOmeの相棒キャラクター。シャチ。
+${userName ? `\nユーザーの名前は${userName}さん。` : ""}
+
+## このメッセージについて
+これは「週末提案メッセージ」への返信専用の会話です。通常の毎日チェックインとは別枠。
+直前にアストから、以下の種について週末の提案を送っています。
+${seedList || "（種名なし）"}
+
+## 信念
+評価しない・決めつけない・診断しない。ユーザーの返答をジャッジしない。
+
+## 返答の分類（内部処理・ユーザーには絶対に悟らせない）
+
+**パターン1：選んだ**（①②の番号、種の名前を挙げた、または明確な肯定「いいね」「それで」など）
+→ 選ばれた種を確認し、次の一歩（日時決め）へ短く誘う1文で応答する
+例：「いいですね、じゃあ日時から決めちゃいましょうか?」
+→ 応答の最後に必ず以下を1行で出力する：
+<ASTO_JSON>{"weekendSuggestChosen":true,"seedName":"（選ばれた種名。上記リストのいずれかと完全一致させる）"}</ASTO_JSON>
+
+**パターン2：断り・様子見・無関心な返答**（「今回はいいや」「別に」「今週は無理」など）
+→ 深追いしない。1文だけ軽く受け止めて終える
+例：「了解です、また気になったタイミングで🌱」
+→ 応答の最後に必ず以下を1行で出力する：
+<ASTO_JSON>{"weekendSuggestDeclined":true}</ASTO_JSON>
+
+**パターン3：どちらとも取れない・話が全く逸れた**
+→ 無理に週末提案に引き戻さず、素の会話として1〜2文で軽く流す
+→ JSONは出力しない
+
+## 厳守ルール
+- 全体で1〜2行のみ（パターン3も含めて長くしない）
+- 質問は増やさない。このやり取りだけで完結させる
+- Markdown記法は絶対に使わない（LINEでは記号がそのまま表示される）
+- 診断・評価に見える言い方はしない`;
+};
+
 // アフィリエイトセクション生成
 function buildAffiliateSection() {
   const BASE = "https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3772859";
@@ -443,6 +489,8 @@ async function getUserData(userId) {
     lifeCard: { keywords: [], threads: [], lastGeneratedAt: 0 }, // 人生のカード
     ayumi: { pastParagraphs: [], futureSection: null, lastOpenedAt: 0 }, // あゆみの記録
     pendingAyumiNudge: null, // 収穫/新しい見立てが起きた直後、次のターンで一度だけあゆみ記述を促すためのフラグ
+    weekendSuggestPending: false, // 週末提案メッセージへの返信待ち状態か（remind.jsが木曜にtrueで送信）
+    weekendSuggestSeeds: [],      // 週末提案で提示した種名（返信解釈のためWEEKEND_REPLY_PROMPTに渡す）
   };
   }
   // 二重JSON.stringifyに対応して最大3回parseする
@@ -498,6 +546,8 @@ async function saveUserData(userId, data) {
     pendingAyumiNudge: data.pendingAyumiNudge || null,
     lastMessageAt: Date.now(),
     yokanSessionDone: data.yokanSessionDone || false,
+    weekendSuggestPending: data.weekendSuggestPending || false,
+    weekendSuggestSeeds: Array.isArray(data.weekendSuggestSeeds) ? data.weekendSuggestSeeds : [],
   };
   await redis.set(`user:${userId}`, payload);
 }
@@ -1089,7 +1139,14 @@ const forcedEndingNote = !userData.isFirstTime && checkinTurnCount >= 16
   ? "\n\n【強制締め】今日の会話はかなり長くなっています。次のメッセージで必ず温かく締めてください。新しい話題を振らない。種・未来イベントの保存だけして終わる。"
   : "";
 
-const systemPrompt = userData.isFirstTime
+// 週末提案メッセージへの返信待ちの場合は、通常のCHECKIN_PROMPTより優先して
+// 専用のWEEKEND_REPLY_PROMPTを使う（スタンドアロン設計。CHECKIN_PROMPT本体には手を入れない）
+// この時点でのpending状態を覚えておく（パターン3等でJSON出力がなかった場合のフォールバック解除に使う）
+const wasWeekendSuggestPending = userData.weekendSuggestPending;
+
+const systemPrompt = userData.weekendSuggestPending
+  ? WEEKEND_REPLY_PROMPT(userData.userName, userData.weekendSuggestSeeds)
+  : userData.isFirstTime
   ? ONBOARDING_PROMPT(userData.userName) + buildOnboardingContext(userData)
   : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + (shouldIncludeAffiliate ? buildAffiliateSection() : "") + forcedEndingNote;
 
@@ -1153,6 +1210,23 @@ const rawReply = response.content
         const jsonMatches = [...rawReply.matchAll(/<ASTO_JSON>(.*?)<\/ASTO_JSON>/gs)];
         for (const match of jsonMatches) {
           const data = JSON.parse(match[1].trim());
+
+          // 週末提案への返信（選んだ／断った）→ 次のターンから通常のCHECKIN_PROMPTに戻す
+          if (data.weekendSuggestChosen) {
+            userData.weekendSuggestPending = false;
+            // 選ばれた種のlastMentionAtを更新して、通常会話でも直近扱いにする
+            if (Array.isArray(userData.seeds) && data.seedName) {
+              const idx = userData.seeds.findIndex(s => s.name === data.seedName);
+              if (idx >= 0) userData.seeds[idx].lastMentionAt = Date.now();
+            }
+            userData.weekendSuggestSeeds = [];
+            replyText = replyText.replace(match[0], "").trim();
+          }
+          if (data.weekendSuggestDeclined) {
+            userData.weekendSuggestPending = false;
+            userData.weekendSuggestSeeds = [];
+            replyText = replyText.replace(match[0], "").trim();
+          }
 
           // カレンダー
           if (data.calendar) {
@@ -1715,6 +1789,14 @@ const rawReply = response.content
         }
       } catch (e) {
         // JSON解析失敗はそのままテキストとして扱う
+      }
+
+      // 最終安全網（週末提案）：WEEKEND_REPLY_PROMPTは一度きりの返信専用プロンプトのため、
+      // このターンで使われたなら必ずpendingを解除する。パターン3（判定不能）やJSON出力漏れ・
+      // 解析失敗時にpendingがtrueのまま残ると、以降ずっと通常のCHECKIN_PROMPTに戻れなくなるため。
+      if (wasWeekendSuggestPending && userData.weekendSuggestPending) {
+        userData.weekendSuggestPending = false;
+        userData.weekendSuggestSeeds = [];
       }
 
       // 最終安全網：パース・処理の成否にかかわらず残留タグを除去
