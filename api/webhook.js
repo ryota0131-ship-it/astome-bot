@@ -382,52 +382,6 @@ queryにはユーザーが会話で言った地名・条件・テーマを具体
 - 既に出た話題を「それはどんな内容ですか？」と再質問しない
 - 未来の種・楽しみと関係のない質問（天気・翻訳・計算・ニュース・一般的な調べもの）には答えない。「それはちょっと得意じゃないんです」と返して今日の楽しみの話に戻す`;
 
-// 週末提案（木曜プッシュ）への返信専用プロンプト
-// 通常のCHECKIN_PROMPTとは完全に切り離したスタンドアロン。
-// 「lost in the middle」対策として、CHECKIN_PROMPTに条件分岐を足し込まず新規関数にした。
-const WEEKEND_REPLY_PROMPT = (userName, suggestedSeeds) => {
-  const NUMBER_EMOJI = ["①", "②", "③"];
-  const seeds = Array.isArray(suggestedSeeds) ? suggestedSeeds : [];
-  const seedList = seeds
-    .map((s, i) => `${NUMBER_EMOJI[i] || "・"} ${s}`)
-    .join("\n");
-  return `## あなたはアスト
-ASTOmeの相棒キャラクター。シャチ。
-${userName ? `\nユーザーの名前は${userName}さん。` : ""}
-
-## このメッセージについて
-これは「週末提案メッセージ」への返信専用の会話です。通常の毎日チェックインとは別枠。
-直前にアストから、以下の種について週末の提案を送っています。
-${seedList || "（種名なし）"}
-
-## 信念
-評価しない・決めつけない・診断しない。ユーザーの返答をジャッジしない。
-
-## 返答の分類（内部処理・ユーザーには絶対に悟らせない）
-
-**パターン1：選んだ**（①②の番号、種の名前を挙げた、または明確な肯定「いいね」「それで」など）
-→ 選ばれた種を確認し、次の一歩（日時決め）へ短く誘う1文で応答する
-例：「いいですね、じゃあ日時から決めちゃいましょうか?」
-→ 応答の最後に必ず以下を1行で出力する：
-<ASTO_JSON>{"weekendSuggestChosen":true,"seedName":"（選ばれた種名。上記リストのいずれかと完全一致させる）"}</ASTO_JSON>
-
-**パターン2：断り・様子見・無関心な返答**（「今回はいいや」「別に」「今週は無理」など）
-→ 深追いしない。1文だけ軽く受け止めて終える
-例：「了解です、また気になったタイミングで🌱」
-→ 応答の最後に必ず以下を1行で出力する：
-<ASTO_JSON>{"weekendSuggestDeclined":true}</ASTO_JSON>
-
-**パターン3：どちらとも取れない・話が全く逸れた**
-→ 無理に週末提案に引き戻さず、素の会話として1〜2文で軽く流す
-→ JSONは出力しない
-
-## 厳守ルール
-- 全体で1〜2行のみ（パターン3も含めて長くしない）
-- 質問は増やさない。このやり取りだけで完結させる
-- Markdown記法は絶対に使わない（LINEでは記号がそのまま表示される）
-- 診断・評価に見える言い方はしない`;
-};
-
 // アフィリエイトセクション生成
 function buildAffiliateSection() {
   const BASE = "https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3772859";
@@ -489,8 +443,6 @@ async function getUserData(userId) {
     lifeCard: { keywords: [], threads: [], lastGeneratedAt: 0 }, // 人生のカード
     ayumi: { pastParagraphs: [], futureSection: null, lastOpenedAt: 0 }, // あゆみの記録
     pendingAyumiNudge: null, // 収穫/新しい見立てが起きた直後、次のターンで一度だけあゆみ記述を促すためのフラグ
-    weekendSuggestPending: false, // 週末提案メッセージへの返信待ち状態か（remind.jsが木曜にtrueで送信）
-    weekendSuggestSeeds: [],      // 週末提案で提示した種名（返信解釈のためWEEKEND_REPLY_PROMPTに渡す）
   };
   }
   // 二重JSON.stringifyに対応して最大3回parseする
@@ -546,8 +498,6 @@ async function saveUserData(userId, data) {
     pendingAyumiNudge: data.pendingAyumiNudge || null,
     lastMessageAt: Date.now(),
     yokanSessionDone: data.yokanSessionDone || false,
-    weekendSuggestPending: data.weekendSuggestPending || false,
-    weekendSuggestSeeds: Array.isArray(data.weekendSuggestSeeds) ? data.weekendSuggestSeeds : [],
   };
   await redis.set(`user:${userId}`, payload);
 }
@@ -876,6 +826,11 @@ export default async function handler(req, res) {
     try {
       // Redisからユーザーデータ取得
       const userData = await getUserData(userId);
+      // このターンの処理開始時点でオンボーディング中だったかを記録しておく。
+      // 「オンボーディングが今のターンでちょうど完了したか」の判定に使う
+      // （後で isFirstTime が false になった、というだけでは
+      //   「元から false だった通常のリターンユーザー」と区別できないバグがあった）
+      const wasFirstTimeAtStart = userData.isFirstTime;
 
       // 名前がまだ未設定なら抽出を試みる
       if (!userData.userName) {
@@ -921,12 +876,24 @@ export default async function handler(req, res) {
         }
 
         // 1. 未来カレンダー（最優先）
+        // 日付が近いイベントほど会話で自然に触れてほしいので、残り日数を明記する
+        // （バラバラの日付文字列だけだと、直近のイベントが埋もれて話題に出てこなかったため）
+        function daysUntilForContext(dateStr) {
+          if (!dateStr) return null;
+          const parts = dateStr.split("-").map(Number);
+          if (!parts[0] || !parts[1]) return null;
+          const target = new Date(parts[0], parts[1] - 1, parts[2] || 15);
+          const diff = Math.ceil((target - new Date()) / 86400000);
+          return diff;
+        }
         if (Array.isArray(data.futureEvents) && data.futureEvents.length > 0) {
           const active = data.futureEvents.filter(e => e.status !== "harvest");
           if (active.length > 0) {
             const eventList = active.map(e => {
               const dateStr = e.date ? e.date : "いつか";
-              return "・" + dateStr + " " + e.title + "（" + eventStatusJa(e.status) + "）";
+              const d = daysUntilForContext(e.date);
+              const urgency = (d !== null && d >= 0 && d <= 10) ? `　⚠️あと${d}日` : "";
+              return "・" + dateStr + " " + e.title + "（" + eventStatusJa(e.status) + "）" + urgency;
             }).join("\n");
             parts.push("ユーザーの未来カレンダー:\n" + eventList);
           }
@@ -1061,6 +1028,12 @@ export default async function handler(req, res) {
           "",
           "関連する記憶が全くない時だけ、新しい話題を振っていい。",
           "",
+          "【⚠️あと〇日、が付いているイベントは特に積極的に触れる】",
+          "未来カレンダーに「⚠️あと〇日」と付いているものは、10日以内に迫っている予定。",
+          "ユーザーの発言と直接関係なくても、会話の自然な流れがあれば積極的に触れていい",
+          "（無理にこじつけない。今日の会話に馴染む形であれば、という条件）。",
+          "近づいてきていることに気づいてもらえるのは、ASTOらしい振る舞い。",
+          "",
           "【⚠️ 最重要・捏造禁止】",
           "上記のリスト（未来カレンダー・種・会話まとめ・永続的事実）に存在しない、",
           "具体的な大会名・目標タイム・日付・エントリー状況などを、絶対に自分で作り出してはいけない。",
@@ -1139,14 +1112,7 @@ const forcedEndingNote = !userData.isFirstTime && checkinTurnCount >= 16
   ? "\n\n【強制締め】今日の会話はかなり長くなっています。次のメッセージで必ず温かく締めてください。新しい話題を振らない。種・未来イベントの保存だけして終わる。"
   : "";
 
-// 週末提案メッセージへの返信待ちの場合は、通常のCHECKIN_PROMPTより優先して
-// 専用のWEEKEND_REPLY_PROMPTを使う（スタンドアロン設計。CHECKIN_PROMPT本体には手を入れない）
-// この時点でのpending状態を覚えておく（パターン3等でJSON出力がなかった場合のフォールバック解除に使う）
-const wasWeekendSuggestPending = userData.weekendSuggestPending;
-
-const systemPrompt = userData.weekendSuggestPending
-  ? WEEKEND_REPLY_PROMPT(userData.userName, userData.weekendSuggestSeeds)
-  : userData.isFirstTime
+const systemPrompt = userData.isFirstTime
   ? ONBOARDING_PROMPT(userData.userName) + buildOnboardingContext(userData)
   : CHECKIN_PROMPT(userData.userName) + buildUserContext(userData) + (shouldIncludeAffiliate ? buildAffiliateSection() : "") + forcedEndingNote;
 
@@ -1210,23 +1176,6 @@ const rawReply = response.content
         const jsonMatches = [...rawReply.matchAll(/<ASTO_JSON>(.*?)<\/ASTO_JSON>/gs)];
         for (const match of jsonMatches) {
           const data = JSON.parse(match[1].trim());
-
-          // 週末提案への返信（選んだ／断った）→ 次のターンから通常のCHECKIN_PROMPTに戻す
-          if (data.weekendSuggestChosen) {
-            userData.weekendSuggestPending = false;
-            // 選ばれた種のlastMentionAtを更新して、通常会話でも直近扱いにする
-            if (Array.isArray(userData.seeds) && data.seedName) {
-              const idx = userData.seeds.findIndex(s => s.name === data.seedName);
-              if (idx >= 0) userData.seeds[idx].lastMentionAt = Date.now();
-            }
-            userData.weekendSuggestSeeds = [];
-            replyText = replyText.replace(match[0], "").trim();
-          }
-          if (data.weekendSuggestDeclined) {
-            userData.weekendSuggestPending = false;
-            userData.weekendSuggestSeeds = [];
-            replyText = replyText.replace(match[0], "").trim();
-          }
 
           // カレンダー
           if (data.calendar) {
@@ -1791,14 +1740,6 @@ const rawReply = response.content
         // JSON解析失敗はそのままテキストとして扱う
       }
 
-      // 最終安全網（週末提案）：WEEKEND_REPLY_PROMPTは一度きりの返信専用プロンプトのため、
-      // このターンで使われたなら必ずpendingを解除する。パターン3（判定不能）やJSON出力漏れ・
-      // 解析失敗時にpendingがtrueのまま残ると、以降ずっと通常のCHECKIN_PROMPTに戻れなくなるため。
-      if (wasWeekendSuggestPending && userData.weekendSuggestPending) {
-        userData.weekendSuggestPending = false;
-        userData.weekendSuggestSeeds = [];
-      }
-
       // 最終安全網：パース・処理の成否にかかわらず残留タグを除去
       replyText = replyText.replace(/<ASTO_JSON>.*?<\/ASTO_JSON>/gs, "").trim();
 
@@ -1865,8 +1806,11 @@ const rawReply = response.content
       }
 
       // Redisに保存
-      // クイックリプライの判定
-const isFirstCheckinMessage = !userData.isFirstTime;
+      // クイックリプライの判定：オンボーディング中だった状態から、
+      // このターンでちょうど false に切り替わった時だけ true にする
+      // （旧: !userData.isFirstTime だけを見ていたため、オンボーディング完了後は
+      //   ずっとtrueのままになり、通常のチェックインでも毎回発火するバグがあった）
+      const isFirstCheckinMessage = wasFirstTimeAtStart && !userData.isFirstTime;
 
       // オンボーディングで名前を受け取った直後：messages.length === 4（名前の往復）
       const isAfterNameInOnboarding =
@@ -1893,8 +1837,9 @@ const isFirstCheckinMessage = !userData.isFirstTime;
       // オンボーディング選択肢は廃止（5問は自由記述で答えてもらう）
       const onboardingQuickReply = undefined;
 
-      // チェックイン選択肢
-      const quickReply = isFirstCheckinMessage
+      // チェックイン選択肢（従来通り、オンボーディング中でなければ毎回表示。
+      // ※あゆみ・使い方の案内ボタンとは別の条件にした。詳細はisFirstCheckinMessageのコメント参照）
+      const quickReply = !userData.isFirstTime
         ? {
             items: [
               { type: "action", action: { type: "message", label: "前の続きを育てる", text: "前回の続きを育てたい" } },
