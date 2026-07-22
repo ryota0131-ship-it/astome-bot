@@ -3,6 +3,7 @@
 
 import * as line from "@line/bot-sdk";
 import { generateDaily } from '../lib/generate-daily.js';
+import { generateWeekendSuggest } from '../lib/generate-weekend-suggest.js';
 
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -17,6 +18,17 @@ const redis = {
     const data = await res.json();
     return data.result ?? null;
   },
+  async set(key, value) {
+    const res = await fetch(process.env.KV_REST_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(["SET", key, typeof value === "string" ? value : JSON.stringify(value)]),
+    });
+    await res.json();
+  },
   async keys(pattern) {
     const res = await fetch(
       `${process.env.KV_REST_API_URL}/keys/${encodeURIComponent(pattern)}`,
@@ -26,6 +38,45 @@ const redis = {
     return data.result ?? [];
   },
 };
+
+// 木曜20時JSTかどうか（Vercel Cronは21時JSTに毎日走るため、本来は20時台の別枠が理想だが
+// Phase 0では既存の21時枠に相乗りする形で実装。時間を分けたくなったらcron側に新しいエントリを足す）
+function isThursdayJST() {
+  const jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return jst.getUTCDay() === 4; // 0=日, 4=木（UTC変換後のJST時刻として扱う）
+}
+
+// 次の土日（JST基準）にscheduled/planの予定が既にあるか
+function hasWeekendPlan(futureEvents) {
+  const events = Array.isArray(futureEvents) ? futureEvents : [];
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const dow = jstNow.getUTCDay(); // 0=日〜6=土
+  const daysUntilSat = (6 - dow + 7) % 7;
+  const sat = new Date(jstNow);
+  sat.setUTCDate(jstNow.getUTCDate() + daysUntilSat);
+  const sun = new Date(sat);
+  sun.setUTCDate(sat.getUTCDate() + 1);
+  const satStr = sat.toISOString().slice(0, 10);
+  const sunStr = sun.toISOString().slice(0, 10);
+
+  return events.some(e => {
+    if (!["plan", "scheduled"].includes(e.status)) return false;
+    if (!e.date) return false;
+    // dateは"YYYY-MM"または"YYYY-MM-DD"の場合がある。日付まで指定がある時だけ厳密比較。
+    return e.date === satStr || e.date === sunStr;
+  });
+}
+
+// discovered種のうち直近のものを最大2件取得
+function getWeekendSuggestCandidates(userData) {
+  const seeds = Array.isArray(userData.seeds) ? userData.seeds : [];
+  return seeds
+    .filter(s => s.stage === "discovered")
+    .sort((a, b) => (b.lastMentionAt || b.createdAt || 0) - (a.lastMentionAt || a.createdAt || 0))
+    .slice(0, 2);
+  // TODO: フラグメントバンクをRedisにアップロード後、種が0件の場合の呼び水候補ロジックをここに追加する。
+  // Phase 0では種がないユーザーはスキップする（無理に絞り出させない）。
+}
 
 export default async function handler(req, res) {
   // Cron Jobからのリクエストのみ許可
@@ -43,6 +94,8 @@ if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     const now = Date.now();
     const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
     let sentCount = 0;
+    let weekendSuggestCount = 0;
+    const isThursday = isThursdayJST();
 
     for (const key of keys) {
       const raw = await redis.get(key);
@@ -53,14 +106,36 @@ if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       // オンボーディング未完了のユーザーはスキップ
       if (userData.isFirstTime) continue;
 
-      // 最後の会話から24時間以上経っているか確認
-      const lastMessageAt = userData.lastMessageAt || 0;
-      if (now - lastMessageAt < TWENTY_FOUR_HOURS) continue;
-
       // LINEユーザーIDをキーから取得（user:{userId}）
       const userId = key.replace("user:", "");
 
-      // プッシュ通知送信
+      // === 木曜のみ：週末提案フローを優先判定 ===
+      // 対象者には通常のリマインダーと二重送信しないよう、ここでcontinueする
+      if (isThursday && !hasWeekendPlan(userData.futureEvents)) {
+        const candidates = getWeekendSuggestCandidates(userData);
+        if (candidates.length > 0) {
+          const message = await generateWeekendSuggest(userData, candidates);
+          if (message) {
+            await client.pushMessage({
+              to: userId,
+              messages: [{ type: "text", text: message }],
+            });
+
+            userData.weekendSuggestPending = true;
+            userData.weekendSuggestSeeds = candidates.map(s => s.name);
+            await redis.set(key, userData);
+
+            weekendSuggestCount++;
+            console.log(`週末提案送信: ${userId}`);
+            continue; // 同じユーザーへの通常リマインダーはスキップ
+          }
+        }
+      }
+
+      // === 通常の毎晩リマインダー（24時間以上会話なし） ===
+      const lastMessageAt = userData.lastMessageAt || 0;
+      if (now - lastMessageAt < TWENTY_FOUR_HOURS) continue;
+
       const name = userData.userName ? `${userData.userName}さん、` : "";
       await client.pushMessage({
         to: userId,
@@ -76,7 +151,7 @@ if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       console.log(`送信: ${userId}`);
     }
 
-    res.status(200).json({ status: "ok", sent: sentCount });
+    res.status(200).json({ status: "ok", sent: sentCount, weekendSuggestSent: weekendSuggestCount });
   } catch (error) {
     console.error("リマインダーエラー:", error);
     res.status(500).json({ error: error.message });
